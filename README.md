@@ -20,3 +20,19 @@ Additional options
 ### `AllwaysRecover` - lost mech allways return t0 player
 ### `NeverRecover` - lost mech allways lost
 
+## PartCountType
+
+How to calculate number of Parts you get from mech
+
+### Vanila - base 1 for destroyed ct, 2 for legs, 3 for head/eject
+### VanilaAdjusted - same, but proportional to needed parts for assembly option
+- `float VACTDestroyedMod = 0.35f` - num of parts you get when ct destroyed
+- `float VABLDestroyedMod = 0.68f` - num of parts you get when legs destroyed
+
+## LostMechActionType 
+Defines what to do with your lost mech
+###ReturnItemsToPlayer,
+        ReturnItemsAndPartsToPlayer,
+
+        MoveItemsToSalvage,
+        MoveItemsAndPartsToSalvage,
