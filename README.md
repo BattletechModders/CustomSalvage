@@ -121,7 +121,7 @@ force repair location
 
 @Morphyum for broke mech code from https://github.com/Morphyum/AdjustedMechAssembly
 
-@Mpstart for dialog relaed stuff from https://github.com/BattletechModders/SalvageOperations
+@Mpstark for dialog relaed stuff from https://github.com/BattletechModders/SalvageOperations
 
 
 
