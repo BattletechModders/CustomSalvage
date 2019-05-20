@@ -143,8 +143,6 @@ namespace CustomSalvage
             color_stored = ColorUtility.TryParseHtmlString(StoredMechColor, out c) ? c : UnityEngine.Color.white;
             color_notready = ColorUtility.TryParseHtmlString(NotReadyColor, out c) ? c : UnityEngine.Color.grey;
             color_exclude = ColorUtility.TryParseHtmlString(ExcludedColor, out c) ? c : new Color(127, 255, 212);
-
-
         }
     }
 }

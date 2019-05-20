@@ -47,7 +47,7 @@ namespace CustomSalvage
                 var harmony = HarmonyInstance.Create("io.github.denadan.CustomSalvage");
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-                Logger.Log("Loaded CustomSalvage v0.1 for bt 1.5.1");
+                Logger.Log("Loaded CustomSalvage v0.1.1 for bt 1.5.1");
 
                 switch (Settings.RecoveryType)
                 {
@@ -101,10 +101,6 @@ namespace CustomSalvage
             {
                 Logger.LogError(e);
             }
-        }
-
-        public static void FinishedLoading(Dictionary<string, Dictionary<string, VersionManifestEntry>> customResources)
-        {
         }
 
         #region LOGGING
