@@ -47,7 +47,7 @@ namespace CustomSalvage
                 var harmony = HarmonyInstance.Create("io.github.denadan.CustomSalvage");
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-                Logger.Log("Loaded CustomSalvage v0.1.1 for bt 1.5.1");
+                Logger.Log("Loaded CustomSalvage v0.1.2 for bt 1.5.1");
 
                 switch (Settings.RecoveryType)
                 {
@@ -93,6 +93,8 @@ namespace CustomSalvage
                         GetNumParts = PartsNumCalculations.Vanila;
                         break;
                 }
+
+                CustomComponents.Registry.RegisterSimpleCustomComponents();
 
                 Logger.LogDebug("done");
                 Logger.LogDebug(JSONSerializationUtility.ToJSON(Settings));

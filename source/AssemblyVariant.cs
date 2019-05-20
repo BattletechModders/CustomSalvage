@@ -8,5 +8,6 @@ namespace CustomSalvage
     {
         public string PrefabID = "";
         public bool Exclude = false;
+        public bool Include = false;
     }
 }

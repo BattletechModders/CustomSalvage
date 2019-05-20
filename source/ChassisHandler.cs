@@ -35,17 +35,17 @@ namespace CustomSalvage
             {
                 var assembly = mech.Chassis.GetComponent<AssemblyVariant>();
                 bool excluded = false;
+
+
                 if (assembly != null && assembly.Exclude)
                     excluded = true;
+                else if (assembly != null && assembly.Include)
+                    excluded = false;
                 else if (Control.Settings.ExclideVariants.Contains(id))
                     excluded = true;
                 else
-                    foreach (var extag in Control.Settings.ExcludeTags)
-                        if (mech.MechTags.Contains(extag))
-                        {
-                            excluded = true;
-                            break;
-                        }
+                    if (Control.Settings.ExcludeTags.Any(extag => mech.MechTags.Contains(extag)))
+                        excluded = true;
 
                 if (excluded || !Control.Settings.AssemblyVariants)
                     Excluded.Add(id);

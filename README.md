@@ -115,6 +115,23 @@ force repair location
 - `float RepairComponentsFunctionalThreshold = 0.25f` - chance to get fully repaired component
 - `float RepairComponentsNonFunctionalThreshold = 0.5f` - chance to get broken, but repairable component.
 
+# Customs
+
+## AssemblyVariant
+
+```
+"AssemblyVariant" : {
+	"PrefabID" : "string",
+	"Exclude" : false,
+	"Inclide" : false,
+}
+```
+
+Allow override assembly settings by chassis
+- PrefabID - replace ChassisDef.PrefabIdentifier
+- Exclude - force exclude mech from variants regardless tags
+- Include - forse include mech to variants regardless tags
+
 ----------------
 ## Thanks:
 
