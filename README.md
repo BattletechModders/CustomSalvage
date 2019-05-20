@@ -2,7 +2,7 @@
 
 CustomSalvage - mod that allow customize salvage and assembly operations
 
-# Options
+## Salvage Options
 
 ### RecoveryType
 
@@ -34,6 +34,17 @@ How to calculate number of Parts you get from mech
 - `float VACTDestroyedMod = 0.35f` - num of parts you get when ct destroyed
 - `float VABLDestroyedMod = 0.68f` - num of parts you get when legs destroyed
 
+**PartDestroyed** - CC method, less parts for each destroyed location
+
+Additional options
+- `int CenterTorsoDestroyedParts = 1` - parts get if CT destroyed
+- `public float SalvageArmWeight = 0.75f`
+- `public float SalvageLegWeight = 0.75f`
+- `public float SalvageTorsoWeight = 1f`
+- `public float SalvageHeadWeight = 0.5f`
+
+Formula is `NumParts = MaxParts * survived_part_weight / total_part_weight`
+
 ### LostMechActionType 
 Defines what to do with your lost mech
 
@@ -47,8 +58,65 @@ Defines what to do with your lost mech
 
 ### other salvage options
 
-**`bool SalvageTurrets = true`** - add turrets to salvage
+- `bool SalvageTurrets = true` - add turrets to salvage
+- `bool UpgradeSalvage = false` - salavaged items have chance to upgrade to "+" variants(not span into player lost mech items if they go to salvage)
 
-**`bool UpgradeSalvage = false'** - salavaged items have chance to upgrade to "+" variants(not span into player lost mech items if they go to salvage)
+## Assembly options
+
+### recoloring mech icons in storage
+- `string StoredMechColor = "#7FFFD4` - Completed mech chassis
+- `public string ReadyColor = "#32CD32"` - Mechhave enough parts to assamble
+- `public string VariantsColor = "yellow"` - Mech can be assembled using parts of other mechs
+- `public string NotReadyColor = "white"` - Mech dont have enough parts to assemble
+- `public string ExcludedColor = "magenta"` - Mech excluded from assembly variants
+
+*NOTE: Use beight colors, or they lost on background*
+
+```
+"BGColors" : [
+  { "Tag" : "unit_assault", "Color" : "#b2babb10" },
+  { "Tag" : "unit_heavy", "Color" : "#f0b27a10" },
+  { "Tag" : "unit_medium", "Color" : "#82e0aa10" },
+  { "Tag" : "unit_light", "Color" : "#85c1e910" }
+]
+```
+Color Background according to mech tags. higher tag in list have prioirty. *NOTE: use low alpha(10 in example) or bg will be too bright*
+
+- `bool AssemblyVariants = true` - Assemble variants. Variants defined by Chassis.PrefabIdentifier(can be overrided by ChassisCustom) and tonnage
+- `int MinPartsToAssembly = 2` - minimum parts need to start assembly
+- `string[] ExcludeTags = { "BLACKLISTED" }` - list of tags that exclude mech from variants assembly
+- `string[] ExclideVariants = { }` - list of mech variants excluded variants assembly
+- `int MaxVariantsInDescription = 5` - max number of lines added to description. more then this will be rolled up to " and X variants more"
+
+- `int RefitLight = 10000` - base cost of adjust light mech part
+- `public int RefitMedium = 15000` - base cost of adjust medium mech part
+- `public int RefitHeavy = 20000` - base cost of adjust heavy mech part
+- `public int RefitAssault = 30000`- base cost of adjust assault mech part
+
+
+- `bool UnEquipedMech = false` - unequip assembled mech 
+- `bool BrokenMech = true` - destroy location and equipment of assembled mech
+
+- `public bool RepairMechLimbs = true` - need to try repair locations
+
+- `bool HeadRepaired = false`
+- `bool LeftArmRepaired = false`
+- `bool RightArmRepaired = false`
+- `bool CentralTorsoRepaired = false`
+- `bool LeftTorsoRepaired = false`
+- `bool RightTorsoRepaired = false`
+- `bool LeftLegRepaired = false`
+- `bool RightLegRepaired = false`
+force repair location
+
+- `float RepairMechLimbsChance = 0.75f` - chance for repair location
+- `public bool RandomStructureOnRepairedLimbs = true` - repaired location have randoimized structure
+- `public float MinStructure = 0.25f` - minimum structure of repaired location
+- `bool RepairMechComponents = true` - need to repair components(components on destroyed location will be destroyed anyway)
+- `float RepairComponentsFunctionalThreshold = 0.25f` - chance to get fully repaired component
+- `float RepairComponentsNonFunctionalThreshold = 0.5f` - chance to get broken, but repairable component.
+
+
+
 
 
