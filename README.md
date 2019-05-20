@@ -117,8 +117,10 @@ force repair location
 - `float RepairComponentsNonFunctionalThreshold = 0.5f` - chance to get broken, but repairable component.
 
 ----------------
-Thanks:
+## Thanks:
+
 @Morphyum for broke mech code from https://github.com/Morphyum/AdjustedMechAssembly
+
 @Mpstart for dialog relaed stuff from https://github.com/BattletechModders/SalvageOperations
 
 
