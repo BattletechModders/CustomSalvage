@@ -342,21 +342,17 @@ namespace CustomSalvage
 
 
                 if (id == mech.Description.Id)
-                   continue;
+                    continue;
                 else
                 {
-                    int cb = Control.Settings.RefitMedium;
+                    float cb = Control.Settings.AdaptPartBaseCost * mech.Description.Cost / chassis.MechPartMax;
 
-
-                    if (mech.MechTags.Contains("unit_light"))
-                        cb = Control.Settings.RefitLight;
-                    else if (mech.MechTags.Contains("unit_heavy"))
-                        cb = Control.Settings.RefitHeavy;
-                    else if (mech.MechTags.Contains("unit_assault"))
-                        cb = Control.Settings.RefitAssault;
-
-
-                    used_parts.Add(new parts_info(num, 0, cb, mechDef.Description.UIName, mechDef.Description.Id));
+                    float mod = 1 + Mathf.Abs(mech.Description.Cost - mechDef.Description.Cost) /
+                                (float)mech.Description.Cost * Control.Settings.AdaptModWeight;
+                    if (mod > Control.Settings.MaxAdaptMod)
+                        mod = Control.Settings.MaxAdaptMod;
+                    Control.LogDebug($"Part price for {mechDef.Description.UIName} base:{cb} mod:{mod:0.000} total:{cb*mod:C0}");
+                    used_parts.Add(new parts_info(num, 0, (int)(cb * mod), mechDef.Description.UIName, mechDef.Description.Id));
                 }
             }
 
@@ -402,7 +398,6 @@ namespace CustomSalvage
         public static string GetCurrentDescription()
         {
             var result = "Assembling <b><color=#20ff20>" + mech.Description.UIName + "</color></b> Using `Mech Parts:\n";
-            int cbills = 0;
 
             foreach (var info in used_parts)
             {
@@ -413,13 +408,18 @@ namespace CustomSalvage
                     if (info.cbills > 0)
                     {
                         result += $", <color=#ffff00>{info.cbills * info.used}</color> C-Bills";
-                        cbills += info.cbills * info.used;
                     }
                 }
             }
 
+            int cbills = used_parts.Sum(i => i.used * i.cbills);
             result += $"\n\n  <b>Total:</b> <color=#ffff00>{cbills}</color> C-Bills";
+            int left = chassis.MechPartMax - used_parts.Sum(i => i.used);
 
+            if (left > 0)
+                result += $"\n\nNeed <color=#ff2020>{left}</color> more {(left == 1 ? "part" : "parts")}";
+            else
+                result += $"\n\nPreparations complete. Proceed?";
             return result;
         }
 
@@ -439,7 +439,7 @@ namespace CustomSalvage
                     var info = used_parts[num];
                     if (info.used < info.count)
                     {
-                        set_info(option, $"Add <color=#20ff20>{info.mechname}</color> for <color=#ffff00>{info.cbills}</color> C-Bills, {info.count - info.used} parts left",
+                        set_info(option, $"Add <color=#20ff20>{info.mechname}</color> for <color=#ffff00>{info.cbills}</color> C-Bills, {info.count - info.used} {(info.count - info.used == 1 ? "part" : "parts") } parts left",
                             arg =>
                             {
                                 info.used += 1;
@@ -459,7 +459,7 @@ namespace CustomSalvage
 
             int count = used_parts.Sum(i => i.used);
 
-            eventDescription.SetText(GetCurrentDescription() + $"\n\n{count}/{chassis.MechPartMax}({mechBay.Sim.Constants.Story.DefaultMechPartMax})");
+            eventDescription.SetText(GetCurrentDescription());
 
 
             if (count < mechBay.Sim.Constants.Story.DefaultMechPartMax)
@@ -486,7 +486,12 @@ namespace CustomSalvage
             }
             else
             {
-                set_info(optionsList[0], "Confirm", arg => { CompeteMech(); sgEventPanel.Dismiss(); });
+                int funds = mechBay.Sim.Funds;
+                int total = used_parts.Sum(i => i.cbills * i.used);
+                if (funds >= total) 
+                    set_info(optionsList[0], "Confirm", arg => { CompeteMech(); sgEventPanel.Dismiss(); });
+                else
+                    set_info(optionsList[0], "<color=#ff2020><i>Not enough C-Bills</i></color>", arg => { sgEventPanel.Dismiss(); });
                 set_info(optionsList[1], "Cancel", arg => { sgEventPanel.Dismiss(); });
                 set_info(optionsList[2], "---", arg => { });
                 set_info(optionsList[3], "---", arg => { });
@@ -499,9 +504,11 @@ namespace CustomSalvage
             infoWidget.SetData(mechBay, null);
             foreach (var info in used_parts)
             {
-                if(info.used > 0)
+                if (info.used > 0)
                     RemoveMechPart(info.mechid, info.used);
             }
+            int total = used_parts.Sum(i => i.cbills * i.used);
+            mechBay.Sim.AddFunds(-total);
             RemoveMechPart(mech.Description.Id, chassis.MechPartMax);
             used_parts.Clear();
             mechBay.RefreshData(false);

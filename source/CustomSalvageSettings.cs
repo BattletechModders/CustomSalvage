@@ -128,11 +128,9 @@ namespace CustomSalvage
         public float RepairComponentsFunctionalThreshold = 0.25f;
         public float RepairComponentsNonFunctionalThreshold = 0.5f;
 
-        public int RefitLight = 10000;
-        public int RefitMedium = 15000;
-        public int RefitHeavy = 20000;
-        public int RefitAssault = 30000;
-
+        public float AdaptPartBaseCost = 0.015f;
+        public float MaxAdaptMod = 5f;
+        public float AdaptModWeight = 2f;
 
         public void Complete()
         {

@@ -88,10 +88,9 @@ Color Background according to mech tags. higher tag in list have prioirty. *NOTE
 - `string[] ExclideVariants = { }` - list of mech variants excluded variants assembly
 - `int MaxVariantsInDescription = 5` - max number of lines added to description. more then this will be rolled up to " and X variants more"
 
-- `int RefitLight = 10000` - base cost of adjust light mech part
-- `public int RefitMedium = 15000` - base cost of adjust medium mech part
-- `public int RefitHeavy = 20000` - base cost of adjust heavy mech part
-- `public int RefitAssault = 30000`- base cost of adjust assault mech part
+- `float AdaptPartBaseCost = 0.02f` - base price for adapt other variant part. mechcost * this / partsmax. recomended value = 0.02 for vanila, 0.15 for RT
+- `float MaxAdaptMod = 5f` - maximum multiplier for part cost(mod based on mech cost difference. x5 very big value)
+- `float AdaptModWeight = 2f` - affect of price difference to part adaptation cost. ( 1 + abs(basepartcost - otherpartcost)/basepartcost*this)
 
 
 - `bool UnEquipedMech = false` - unequip assembled mech 
