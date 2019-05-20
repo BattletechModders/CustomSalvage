@@ -1,0 +1,36 @@
+{
+	"Name": "CustomSalvage",
+	"Author": "Denadan",
+	"Website": "https://github.com/Denadan/CustomSalvage",
+
+	"Enabled": true,
+	"DependsOn": [],
+	"DLL": "CustomSalvage.dll",
+	"DLLEntryPoint": "CustomSalvage.Control.Init",
+	
+	"Settings" : {
+		"LogLevel": "Debug",
+	
+		"OverrideSalvageGeneration" : true,
+		"NoLootCTDestroyed" : false,
+
+		"OverrideRecoveryChance" : true,
+		"SalvageUnrecoveredMech" : true,
+		"BaseRecoveryChance" : 0.6,
+	    "LimbRecoveryPenalty" : 0.05,
+		"TorsoRecoveryPenalty" : 0.1,
+		"HeadRecoveryPenaly" : 0,
+		"EjectRecoveryBonus" : 0.25,
+
+		"OverrideMechPartCalculation" : true,
+		"CenterTorsoDestroyedParts" : 1,
+		"SalvageArmWeight" : 0.75,
+		"SalvageLegWeight" : 0.75,
+		"SalvageTorsoWeight" : 1,
+		"SalvageHeadWeight" : 0.5,
+	},	
+		
+	"Manifest": [
+
+    ]
+}
