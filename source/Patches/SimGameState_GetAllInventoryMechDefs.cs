@@ -44,17 +44,19 @@ namespace CustomSalvage
                                 Control.LogError($"ERROR: {cdef}/{mdef} not found");
                         }
                     }
-                    else if (showMechParts)
+                    else
                     {
                         if (__instance.DataManager.Exists(BattleTechResourceType.MechDef, array[2]))
                         {
                             var mdef = __instance.DataManager.MechDefs.Get(array[2]);
-                            var chassisDef = new ChassisDef(mdef.Chassis) { DataManager = __instance.DataManager };
-                            chassisDef.Refresh();
-                            chassisDef.MechPartCount = count;
-                            chassisDef.MechPartMax = __instance.Constants.Story.DefaultMechPartMax;
-                            __result.Add(chassisDef);
-
+                            if (showMechParts)
+                            {
+                                var chassisDef = new ChassisDef(mdef.Chassis) { DataManager = __instance.DataManager };
+                                chassisDef.Refresh();
+                                chassisDef.MechPartCount = count;
+                                chassisDef.MechPartMax = __instance.Constants.Story.DefaultMechPartMax;
+                                __result.Add(chassisDef);
+                            }
                             ChassisHandler.RegisterMechDef(mdef, count);
                         }
                         else

@@ -150,7 +150,7 @@ namespace CustomSalvage
         {
             foreach (var component in vechicle.Inventory)
             {
-                if (component.DamageLevel != ComponentDamageLevel.Destroyed)
+                if (component.DamageLevel != ComponentDamageLevel.Destroyed && simgame.NetworkRandom.Float() < Control.Settings.SalvageTurretsComponentChance)
                 {
                     contract.AddComponentToPotentialSalvage(component.Def, component.DamageLevel, true);
                 }

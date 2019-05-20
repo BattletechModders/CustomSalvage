@@ -30,10 +30,11 @@ namespace CustomSalvage
                     ___mechImage.color = Control.Settings.color_ready;
                 else
                 {
+                    int min = Mathf.CeilToInt(Control.Settings.MinPartsToAssembly * chassisDef.MechPartMax);
                     var list = ChassisHandler.GetCompatible(chassisDef.Description.Id);
                     if (list == null)
                         ___mechImage.color = Control.Settings.color_exclude;
-                    else if(list.Sum(i => ChassisHandler.GetCount(i.Description.Id))>= partsMax)
+                    else if(list.Sum(i => ChassisHandler.GetCount(i.Description.Id))>= partsMax && chassisDef.MechPartCount >= min)
                         ___mechImage.color = Control.Settings.color_variant;
                     else
                         ___mechImage.color = Control.Settings.color_notready;

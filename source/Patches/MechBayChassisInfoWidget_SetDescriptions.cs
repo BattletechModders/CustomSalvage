@@ -29,6 +29,8 @@ namespace CustomSalvage
 
             if (___selectedChassis.MechPartCount != 0)
             {
+                int min = Mathf.CeilToInt(___selectedChassis.MechPartMax * Control.Settings.MinPartsToAssembly);
+
                 if (___selectedChassis.MechPartCount >= ___selectedChassis.MechPartMax)
                 {
                     ___readyBtnObj.SetActive(true);
@@ -37,7 +39,7 @@ namespace CustomSalvage
                 }
                 else
                 {
-                    if (list == null || list.Sum(i => ChassisHandler.GetCount(i.Description.Id)) < ___selectedChassis.MechPartMax)
+                    if (list == null || ___selectedChassis.MechPartCount < min ||  list.Sum(i => ChassisHandler.GetCount(i.Description.Id)) < ___selectedChassis.MechPartMax)
                     {
                         ___readyBtnObj.SetActive(false);
                         ___partsCountObj.SetActive(true);
@@ -46,7 +48,7 @@ namespace CustomSalvage
                             ___selectedChassis.MechPartCount,
                             ___selectedChassis.MechPartMax
                         });
-                        ___chassisStorageTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject("Chassis still needs parts to be completed"));
+                        ___chassisStorageTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject($"Chassis still needs at least {min} base and total {___selectedChassis.MechPartMax} compatible parts to be completed"));
                     }
                     else
                     {

@@ -423,8 +423,6 @@ namespace CustomSalvage
             return result;
         }
 
-
-
         public static void MakeOptions(TextMeshProUGUI eventDescription, SGEventPanel sgEventPanel, DataManager dataManager, RectTransform optionParent, List<SGEventOption> optionsList)
         {
             void set_info(SGEventOption option, string text, UnityAction<SimGameEventOption> action)
@@ -498,6 +496,16 @@ namespace CustomSalvage
 
         private static void CompeteMech()
         {
+            infoWidget.SetData(mechBay, null);
+            foreach (var info in used_parts)
+            {
+                if(info.used > 0)
+                    RemoveMechPart(info.mechid, info.used);
+            }
+            RemoveMechPart(mech.Description.Id, chassis.MechPartMax);
+            used_parts.Clear();
+            mechBay.RefreshData(false);
+            MakeMech();
         }
     }
 }

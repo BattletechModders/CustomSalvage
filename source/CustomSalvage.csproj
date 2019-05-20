@@ -91,7 +91,6 @@
     <Compile Include="Patches\MechBayChassisInfoWidget_OnReadyClicked.cs" />
     <Compile Include="Patches\MechBayChassisInfoWidget_SetDescriptions.cs" />
     <Compile Include="Patches\MechBayChassisUnitElement_SetData.cs" />
-    <Compile Include="Patches\MechBayMechStorageWidget_InitInventory.cs" />
     <Compile Include="Patches\SGEventPanel_SetEvent.cs" />
     <Compile Include="Patches\SimGameState_AddMechPart.cs" />
     <Compile Include="Patches\SimGameState_GetAllInventoryMechDefs.cs" />

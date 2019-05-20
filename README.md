@@ -60,7 +60,7 @@ Defines what to do with your lost mech
 
 - `bool SalvageTurrets = true` - add turrets to salvage
 - `bool UpgradeSalvage = false` - salavaged items have chance to upgrade to "+" variants(not span into player lost mech items if they go to salvage)
-
+- `float SalvageTurretsComponentChance = 0.33f` - in vanila game turret components dont broke, and usually turret have a lot of weapon. so this modifier give less salvage for balance
 ## Assembly options
 
 ### recoloring mech icons in storage
@@ -83,7 +83,7 @@ Defines what to do with your lost mech
 Color Background according to mech tags. higher tag in list have prioirty. *NOTE: use low alpha(10 in example) or bg will be too bright*
 
 - `bool AssemblyVariants = true` - Assemble variants. Variants defined by Chassis.PrefabIdentifier(can be overrided by ChassisCustom) and tonnage
-- `int MinPartsToAssembly = 2` - minimum parts need to start assembly
+- `float MinPartsToAssembly = 0.5` - minimum parts equere to asembly = MaxParts * MinPartsToAssembly rounded up
 - `string[] ExcludeTags = { "BLACKLISTED" }` - list of tags that exclude mech from variants assembly
 - `string[] ExclideVariants = { }` - list of mech variants excluded variants assembly
 - `int MaxVariantsInDescription = 5` - max number of lines added to description. more then this will be rolled up to " and X variants more"

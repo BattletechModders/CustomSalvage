@@ -74,9 +74,9 @@ namespace CustomSalvage
         public float VACTDestroyedMod = 0.35f;
         public float VABLDestroyedMod = 0.68f;
 
-        public string VitalComponentTag = "";
 
         public bool SalvageTurrets = true;
+        public float SalvageTurretsComponentChance = 0.33f;
         public bool UpgradeSalvage = false;
 
         public colordef[] BGColors =
@@ -101,7 +101,7 @@ namespace CustomSalvage
         [JsonIgnore] public Color color_exclude;
 
         public bool AssemblyVariants = true;
-        public int MinPartsToAssembly = 2;
+        public float MinPartsToAssembly = 0.5f;
         public string[] ExcludeTags = { "BLACKLISTED" };
         public string[] ExclideVariants = { };
         public int MaxVariantsInDescription = 5;
