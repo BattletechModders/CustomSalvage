@@ -31,8 +31,13 @@ How to calculate number of Parts you get from mech
 
 ## LostMechActionType 
 Defines what to do with your lost mech
-###ReturnItemsToPlayer,
-        ReturnItemsAndPartsToPlayer,
 
-        MoveItemsToSalvage,
-        MoveItemsAndPartsToSalvage,
+### ReturnItemsToPlayer - undestroyed items will return to player(Vanila way)
+### ReturnItemsAndPartsToPlayer - MechParts and items will return to player
+### MoveItemsToSalvage - items put on salvage list and can be looted
+### MoveItemsAndPartsToSalvage - items and mechparts put on salvage list
+
+## `bool SalvageTurrets = true` - add turrets to salvage
+## `bool UpgradeSalvage = false' - salavaged items have chance to upgrade to "+" variants(not span into player lost mech items if they go to salvage)
+
+
