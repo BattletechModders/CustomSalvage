@@ -18,38 +18,81 @@ namespace CustomSalvage
 {
     public static class ChassisHandler
     {
+        private static int min_parts = 0;
+        private static int min_parts_special = 0;
+        
+        public class mech_info
+        {
+            public int MinParts;
+            public float PriceMult;
+            public bool Excluded;
+
+            public mech_info()
+            {
+                MinParts = min_parts;
+                PriceMult = 1f;
+                Excluded = false;
+            }
+        }
+
+
         private static Dictionary<string, MechDef> ChassisToMech = new Dictionary<string, MechDef>();
         private static Dictionary<string, int> PartCount = new Dictionary<string, int>();
         private static Dictionary<string, List<MechDef>> Compatible = new Dictionary<string, List<MechDef>>();
-        private static List<string> Excluded = new List<string>();
-        private static List<string> Proccesed = new List<string>();
+
+        private static Dictionary<string, mech_info> Proccesed = new Dictionary<string, mech_info>();
 
         public static void RegisterMechDef(MechDef mech, int part_count = 0)
         {
+            int max_parts = UnityGameInstance.BattleTechGame.Simulation.Constants.Story.DefaultMechPartMax;
+            min_parts = Mathf.CeilToInt(max_parts * Control.Settings.MinPartsToAssembly);
+            min_parts_special = Mathf.CeilToInt(max_parts * Control.Settings.MinPartsToAssemblySpecial);
+
             ChassisToMech[mech.ChassisID] = mech;
             if (part_count > 0)
                 PartCount[mech.Description.Id] = part_count;
             string id = mech.Description.Id;
 
-            if (!Proccesed.Contains(id))
+            if (!Proccesed.ContainsKey(id))
             {
                 var assembly = mech.Chassis.GetComponent<AssemblyVariant>();
-                bool excluded = false;
 
+                var info = new mech_info();
 
                 if (assembly != null && assembly.Exclude)
-                    excluded = true;
+                    info.Excluded = true;
                 else if (assembly != null && assembly.Include)
-                    excluded = false;
+                    info.Excluded = false;
                 else if (Control.Settings.ExclideVariants.Contains(id))
-                    excluded = true;
+                    info.Excluded = true;
                 else
                     if (Control.Settings.ExcludeTags.Any(extag => mech.MechTags.Contains(extag)))
-                        excluded = true;
+                        info.Excluded = true;
 
-                if (excluded || !Control.Settings.AssemblyVariants)
-                    Excluded.Add(id);
-                else
+                if(Control.Settings.SpecialTags != null && Control.Settings.SpecialTags.Length > 0)
+
+
+                foreach (var tag_info in Control.Settings.SpecialTags)
+                {
+                    if (mech.MechTags.Contains(tag_info.Tag))
+                    {
+                        info.MinParts = min_parts_special;
+                        info.PriceMult *= tag_info.Mod;
+                    }
+                }
+
+                if (assembly != null)
+                {
+                    if (assembly.ReplacePriceMult)
+                        info.PriceMult = assembly.PriceMult;
+                    else
+                        info.PriceMult *= assembly.PriceMult;
+
+                    if (assembly.PartsMin >= 0)
+                        info.MinParts = Mathf.CeilToInt(max_parts * assembly.PartsMin);
+                }
+
+                if (!info.Excluded && Control.Settings.AssemblyVariants)
                 {
                     string prefabid = GetPrefabId(mech);
 
@@ -63,18 +106,20 @@ namespace CustomSalvage
                         list.Add(mech);
                 }
 
-                Proccesed.Add(id);
+                Control.LogDebug($"Registring {mech.Description.Id}({mech.Description.UIName}) => {mech.ChassisID}");
+                Control.LogDebug($"-- Exclude:{info.Excluded} MinParts:{info.MinParts} PriceMult:{info.PriceMult}");
+                if (assembly != null)
+                    Control.LogDebug($"-- PrefabID:{assembly.PrefabID} Exclude:{assembly.Exclude} include:{assembly.Include} Mult:{assembly.PriceMult} Parts:{assembly.PartsMin}");
+
+                Proccesed[id] = info;
             }
         }
 
         private static string GetPrefabId(MechDef mech)
         {
-            var assembly = mech.Chassis.GetComponent<AssemblyVariant>();
-            var prefabid = mech.Chassis.PrefabIdentifier;
-            if (!string.IsNullOrEmpty(assembly?.PrefabID))
-                prefabid = assembly.PrefabID;
-            prefabid += mech.Chassis.Tonnage.ToString();
-            return prefabid;
+            if (mech.Chassis.Is<AssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
+                return a.PrefabID;
+            return mech.Chassis.PrefabIdentifier;
         }
 
         public static MechDef GetMech(string chassisid)
@@ -84,8 +129,12 @@ namespace CustomSalvage
 
         public static bool IfExcluded(string chassisid)
         {
+            return Proccesed[ChassisToMech[chassisid].Description.Id].Excluded;
+        }
 
-            return Excluded.Contains(ChassisToMech[chassisid].Description.Id);
+        public static mech_info GetInfo(string chassisid)
+        {
+            return Proccesed[ChassisToMech[chassisid].Description.Id];
         }
 
         public static void ClearParts()
@@ -97,7 +146,7 @@ namespace CustomSalvage
         {
 
             var mech = ChassisToMech[chassisid];
-            if (Excluded.Contains(mech.Description.Id))
+            if (Proccesed[mech.Description.Id].Excluded)
                 return null;
 
             var prefabid = GetPrefabId(mech);
@@ -116,8 +165,8 @@ namespace CustomSalvage
                 Control.LogDebug($"{mechDef.Key} => {mechDef.Value.Description.Id}");
 
             Control.LogDebug("================= EXCLUDED ===================");
-            foreach (var mechDef in Excluded)
-                Control.LogDebug($"{mechDef}");
+            foreach (var info in Proccesed.Where(i => i.Value.Excluded))
+                Control.LogDebug($"{info.Key}");
 
             Control.LogDebug("================= GROUPS ===================");
             foreach (var list in Compatible)
@@ -324,14 +373,19 @@ namespace CustomSalvage
             }
         }
 
-
-
         public static void StartDialog()
         {
+            ShowInfo();
+
             var list = GetCompatible(chassis.Description.Id);
             used_parts = new List<parts_info>();
             used_parts.Add(new parts_info(GetCount(mech.Description.Id), GetCount(mech.Description.Id), 0,
                 mech.Description.UIName, mech.Description.Id));
+            var info = Proccesed[mech.Description.Id];
+
+            float cb = Control.Settings.AdaptPartBaseCost * mech.Description.Cost / chassis.MechPartMax;
+            Control.LogDebug($"base part price for {mech.Description.UIName}({mech.Description.Id}): {cb}. mechcost: {mech.Description.Cost} ");
+            Control.LogDebug($"-- setting:{Control.Settings.AdaptPartBaseCost}, maxparts:{chassis.MechPartMax}, minparts:{info.MinParts}, pricemult: {info.PriceMult}");
 
             foreach (var mechDef in list)
             {
@@ -345,14 +399,16 @@ namespace CustomSalvage
                     continue;
                 else
                 {
-                    float cb = Control.Settings.AdaptPartBaseCost * mech.Description.Cost / chassis.MechPartMax;
-
                     float mod = 1 + Mathf.Abs(mech.Description.Cost - mechDef.Description.Cost) /
                                 (float)mech.Description.Cost * Control.Settings.AdaptModWeight;
                     if (mod > Control.Settings.MaxAdaptMod)
                         mod = Control.Settings.MaxAdaptMod;
-                    Control.LogDebug($"Part price for {mechDef.Description.UIName} base:{cb} mod:{mod:0.000} total:{cb*mod:C0}");
-                    used_parts.Add(new parts_info(num, 0, (int)(cb * mod), mechDef.Description.UIName, mechDef.Description.Id));
+
+                    var info2 = Proccesed[mechDef.Description.Id];
+                    var price = (int) (cb * mod * info.PriceMult * (Control.Settings.ApplyPartPriceMod ? info2.PriceMult : 1));
+
+                    Control.LogDebug($"-- price for {mechDef.Description.UIName}({mechDef.Description.Id}) mechcost: {mechDef.Description.Cost}. price mod: {mod:0.000}, tag mod:{info2.PriceMult:0.000}  adopt price: {price}");
+                    used_parts.Add(new parts_info(num, 0, price, mechDef.Description.UIName, mechDef.Description.Id));
                 }
             }
 
@@ -407,13 +463,13 @@ namespace CustomSalvage
                         $"\n  <b>{info.mechname}</b>: <color=#20ff20>{info.used}</color> {(info.used == 1 ? "part" : "parts")}";
                     if (info.cbills > 0)
                     {
-                        result += $", <color=#ffff00>{info.cbills * info.used}</color> C-Bills";
+                        result += $", <color=#ffff00>{SimGameState.GetCBillString(info.cbills * info.used)}</color>";
                     }
                 }
             }
 
             int cbills = used_parts.Sum(i => i.used * i.cbills);
-            result += $"\n\n  <b>Total:</b> <color=#ffff00>{cbills}</color> C-Bills";
+            result += $"\n\n  <b>Total:</b> <color=#ffff00>{SimGameState.GetCBillString(cbills)}</color>";
             int left = chassis.MechPartMax - used_parts.Sum(i => i.used);
 
             if (left > 0)
@@ -439,7 +495,7 @@ namespace CustomSalvage
                     var info = used_parts[num];
                     if (info.used < info.count)
                     {
-                        set_info(option, $"Add <color=#20ff20>{info.mechname}</color> for <color=#ffff00>{info.cbills}</color> C-Bills, {info.count - info.used} {(info.count - info.used == 1 ? "part" : "parts") } parts left",
+                        set_info(option, $"Add <color=#20ff20>{info.mechname}</color> for <color=#ffff00>{SimGameState.GetCBillString(info.cbills)}</color> C-Bills, {info.count - info.used} {(info.count - info.used == 1 ? "part" : "parts") } parts left",
                             arg =>
                             {
                                 info.used += 1;
@@ -471,7 +527,7 @@ namespace CustomSalvage
                     set_add_part(optionsList[2], 3 + page * 3);
                     set_info(optionsList[3], "Next Page >>", arg =>
                     {
-                        page = (page + 1) % ((used_parts.Count - 1) / 3);
+                        page = (page + 1) % ((used_parts.Count - 1) / 3 + 1);
                         MakeOptions(eventDescription, sgEventPanel, dataManager, optionParent, optionsList);
                     });
 

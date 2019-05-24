@@ -29,7 +29,7 @@ namespace CustomSalvage
 
             if (___selectedChassis.MechPartCount != 0)
             {
-                int min = Mathf.CeilToInt(___selectedChassis.MechPartMax * Control.Settings.MinPartsToAssembly);
+                int min = ChassisHandler.GetInfo(___selectedChassis.Description.Id).MinParts;
 
                 if (___selectedChassis.MechPartCount >= ___selectedChassis.MechPartMax)
                 {

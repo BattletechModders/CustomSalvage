@@ -88,6 +88,7 @@
     <Compile Include="Patches\Contract_GenerateSalvage.cs" />
     <Compile Include="Control.cs" />
     <Compile Include="CustomSalvageSettings.cs" />
+    <Compile Include="Patches\MechBayChassisInfoWidget_OnScrapClicked.cs" />
     <Compile Include="Patches\MechBayChassisInfoWidget_OnReadyClicked.cs" />
     <Compile Include="Patches\MechBayChassisInfoWidget_SetDescriptions.cs" />
     <Compile Include="Patches\MechBayChassisUnitElement_SetData.cs" />

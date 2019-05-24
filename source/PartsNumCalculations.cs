@@ -23,6 +23,10 @@ namespace CustomSalvage
 
         internal static int PartDestroyed(MechDef mech)
         {
+            if (mech.IsLocationDestroyed(ChassisLocations.CenterTorso))
+                return Control.Settings.CenterTorsoDestroyedParts;
+
+
             float total = Control.Settings.SalvageArmWeight * 2 + Control.Settings.SalvageHeadWeight +
                           Control.Settings.SalvageLegWeight * 2 + Control.Settings.SalvageTorsoWeight * 2 + 1;
 

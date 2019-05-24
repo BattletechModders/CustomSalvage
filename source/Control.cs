@@ -20,6 +20,7 @@ namespace CustomSalvage
         private static ILog Logger;
         private static FileLogAppender logAppender;
 
+
         internal static RecoveryDelegate NeedRecovery;
         internal static LostUnitActionDelegate LostUnitAction;
         internal static PartsNumDelegeate GetNumParts;
@@ -47,7 +48,7 @@ namespace CustomSalvage
                 var harmony = HarmonyInstance.Create("io.github.denadan.CustomSalvage");
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-                Logger.Log("Loaded CustomSalvage v0.1.2 for bt 1.5.1");
+                Logger.Log("Loaded CustomSalvage v0.1.3 for bt 1.5.1");
 
                 switch (Settings.RecoveryType)
                 {
@@ -94,7 +95,7 @@ namespace CustomSalvage
                         break;
                 }
 
-                CustomComponents.Registry.RegisterSimpleCustomComponents();
+                CustomComponents.Registry.RegisterSimpleCustomComponents(Assembly.GetExecutingAssembly());
 
                 Logger.LogDebug("done");
                 Logger.LogDebug(JSONSerializationUtility.ToJSON(Settings));

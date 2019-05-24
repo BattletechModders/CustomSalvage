@@ -61,7 +61,7 @@
 			
 		],
 		"MaxVariantsInDescription" : 5,
-		"UnEquipedMech" : false,
+		"UnEquipedMech" : true,
 		"BrokenMech" : true,
 		"HeadRepaired" : false,
 		"LeftArmRepaired" : false,

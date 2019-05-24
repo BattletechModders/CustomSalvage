@@ -83,15 +83,22 @@ Defines what to do with your lost mech
 Color Background according to mech tags. higher tag in list have prioirty. *NOTE: use low alpha(10 in example) or bg will be too bright*
 
 - `bool AssemblyVariants = true` - Assemble variants. Variants defined by Chassis.PrefabIdentifier(can be overrided by ChassisCustom) and tonnage
-- `float MinPartsToAssembly = 0.5` - minimum parts equere to asembly = MaxParts * MinPartsToAssembly rounded up
+- `float MinPartsToAssembly = 0.33` - minimum parts equere to asembly = MaxParts * MinPartsToAssembly rounded up
+- `float MinPartsToAssemblySpecial = 0.5` - minimum parts equere to asembly special = MaxParts * MinPartsToAssembly rounded up
 - `string[] ExcludeTags = { "BLACKLISTED" }` - list of tags that exclude mech from variants assembly
 - `string[] ExclideVariants = { }` - list of mech variants excluded variants assembly
+- `special[] SpecialTags = null` - list of tags that mark mech as special and increase price to adapt parts on it
+```
+"SpecialTags" : [ 
+    { "Tag" : "elite_mech", "Mod" : 1.5 }
+]
+```
 - `int MaxVariantsInDescription = 5` - max number of lines added to description. more then this will be rolled up to " and X variants more"
 
 - `float AdaptPartBaseCost = 0.02f` - base price for adapt other variant part. mechcost * this / partsmax. recomended value = 0.02 for vanila, 0.15 for RT
 - `float MaxAdaptMod = 5f` - maximum multiplier for part cost(mod based on mech cost difference. x5 very big value)
 - `float AdaptModWeight = 2f` - affect of price difference to part adaptation cost. ( 1 + abs(basepartcost - otherpartcost)/basepartcost*this)
-
+- `bool ApplyPartPriceMod = false` - if set to true increase cost of adapting parts from special mech
 
 - `bool UnEquipedMech = false` - unequip assembled mech 
 - `bool BrokenMech = true` - destroy location and equipment of assembled mech
@@ -124,6 +131,11 @@ force repair location
 	"PrefabID" : "string",
 	"Exclude" : false,
 	"Inclide" : false,
+	
+	"ReplacePriceMult" false,
+    "PriceMult" : 1,
+    "PartsMin" : -1  if >=0 how many parts to start assemble(0-1 float)
+
 }
 ```
 
@@ -131,6 +143,9 @@ Allow override assembly settings by chassis
 - PrefabID - replace ChassisDef.PrefabIdentifier
 - Exclude - force exclude mech from variants regardless tags
 - Include - forse include mech to variants regardless tags
+- ReplacePriceMult - if true discard tags mult and use value from custom only, if false - value multiplicative
+- PriceMult - price multiplier for aseembly this mech
+- PartsMin - if greater or equal 0 - replace min parts multiplier( = maxparts * this rounded up)
 
 ----------------
 ## Thanks:

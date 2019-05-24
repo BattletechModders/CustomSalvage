@@ -66,7 +66,7 @@ namespace CustomSalvage
                 }
             }
 
-            ChassisHandler.ShowInfo();
+            //ChassisHandler.ShowInfo();
             return false;
         }
     }

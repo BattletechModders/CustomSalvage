@@ -50,6 +50,12 @@ namespace CustomSalvage
             }
         }
 
+        public class special
+        {
+            public string Tag;
+            public float Mod = 1f;
+        }
+
         public LogLevel LogLevel = LogLevel.Debug;
 
 
@@ -101,9 +107,12 @@ namespace CustomSalvage
         [JsonIgnore] public Color color_exclude;
 
         public bool AssemblyVariants = true;
-        public float MinPartsToAssembly = 0.5f;
+        public float MinPartsToAssembly = 0.33f;
+        public float MinPartsToAssemblySpecial = 0.5f;
         public string[] ExcludeTags = { "BLACKLISTED" };
         public string[] ExclideVariants = { };
+        public special[] SpecialTags = null;
+
         public int MaxVariantsInDescription = 5;
 
         public bool UnEquipedMech = false;
@@ -131,6 +140,7 @@ namespace CustomSalvage
         public float AdaptPartBaseCost = 0.015f;
         public float MaxAdaptMod = 5f;
         public float AdaptModWeight = 2f;
+        public bool ApplyPartPriceMod = false;
 
         public void Complete()
         {
