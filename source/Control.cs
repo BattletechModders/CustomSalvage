@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using BattleTech;
 using HBS.Logging;
 using HBS.Util;
@@ -48,7 +49,7 @@ namespace CustomSalvage
                 var harmony = HarmonyInstance.Create("io.github.denadan.CustomSalvage");
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-                Logger.Log("Loaded CustomSalvage v0.1.3 for bt 1.5.1");
+                Logger.Log("Loaded CustomSalvage v0.1.4 for bt 1.5.1");
 
                 switch (Settings.RecoveryType)
                 {
@@ -94,8 +95,9 @@ namespace CustomSalvage
                         GetNumParts = PartsNumCalculations.Vanila;
                         break;
                 }
-
+#if USE_CC
                 CustomComponents.Registry.RegisterSimpleCustomComponents(Assembly.GetExecutingAssembly());
+#endif
 
                 Logger.LogDebug("done");
                 Logger.LogDebug(JSONSerializationUtility.ToJSON(Settings));
@@ -191,7 +193,17 @@ namespace CustomSalvage
 
         public static bool IsDestroyed(UnitResult lostUnit)
         {
+#if USE_CC
             return CustomComponents.Contract_GenerateSalvage.IsDestroyed(lostUnit.mech);
+#else
+            if (lostUnit.mech.IsDestroyed)
+                return true;
+
+            if (lostUnit.mech.Inventory.Any(i =>
+                    i.Def.CriticalComponent && i.DamageLevel == ComponentDamageLevel.Destroyed))
+                return true;
+            return false;
+#endif
         }
     }
 }

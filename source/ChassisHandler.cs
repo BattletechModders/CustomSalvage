@@ -5,7 +5,9 @@ using System.Reflection;
 using BattleTech;
 using BattleTech.Data;
 using BattleTech.UI;
+#if USE_CC
 using CustomComponents;
+#endif
 using Harmony;
 using HBS.Collections.Generic;
 using TMPro;
@@ -55,15 +57,20 @@ namespace CustomSalvage
 
             if (!Proccesed.ContainsKey(id))
             {
+#if USE_CC
                 var assembly = mech.Chassis.GetComponent<AssemblyVariant>();
-
+#endif
                 var info = new mech_info();
 
+
+#if USE_CC
                 if (assembly != null && assembly.Exclude)
                     info.Excluded = true;
                 else if (assembly != null && assembly.Include)
                     info.Excluded = false;
-                else if (Control.Settings.ExclideVariants.Contains(id))
+                else 
+#endif
+                if (Control.Settings.ExclideVariants.Contains(id))
                     info.Excluded = true;
                 else
                     if (Control.Settings.ExcludeTags.Any(extag => mech.MechTags.Contains(extag)))
@@ -81,6 +88,7 @@ namespace CustomSalvage
                     }
                 }
 
+#if USE_CC
                 if (assembly != null)
                 {
                     if (assembly.ReplacePriceMult)
@@ -91,6 +99,7 @@ namespace CustomSalvage
                     if (assembly.PartsMin >= 0)
                         info.MinParts = Mathf.CeilToInt(max_parts * assembly.PartsMin);
                 }
+#endif
 
                 if (!info.Excluded && Control.Settings.AssemblyVariants)
                 {
@@ -108,8 +117,10 @@ namespace CustomSalvage
 
                 Control.LogDebug($"Registring {mech.Description.Id}({mech.Description.UIName}) => {mech.ChassisID}");
                 Control.LogDebug($"-- Exclude:{info.Excluded} MinParts:{info.MinParts} PriceMult:{info.PriceMult}");
+#if USE_CC
                 if (assembly != null)
                     Control.LogDebug($"-- PrefabID:{assembly.PrefabID} Exclude:{assembly.Exclude} include:{assembly.Include} Mult:{assembly.PriceMult} Parts:{assembly.PartsMin}");
+#endif
 
                 Proccesed[id] = info;
             }
@@ -117,9 +128,11 @@ namespace CustomSalvage
 
         private static string GetPrefabId(MechDef mech)
         {
+#if USE_CC
             if (mech.Chassis.Is<AssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
-                return a.PrefabID;
-            return mech.Chassis.PrefabIdentifier;
+                return a.PrefabID + mech.Chassis.Tonnage.ToString();
+#endif
+            return mech.Chassis.PrefabIdentifier + mech.Chassis.Tonnage.ToString();
         }
 
         public static MechDef GetMech(string chassisid)
@@ -227,8 +240,8 @@ namespace CustomSalvage
 
         public static void OnPartsAssembly()
         {
-            infoWidget.SetData(mechBay, null);
             RemoveMechPart(mech.Description.Id, chassis.MechPartMax);
+            infoWidget.SetData(mechBay, null);
             mechBay.RefreshData(false);
             MakeMech();
         }
@@ -241,7 +254,11 @@ namespace CustomSalvage
             if (Control.Settings.UnEquipedMech)
             {
                 Control.LogDebug($"-- Clear Inventory");
+#if USE_CC
                 new_mech.SetInventory(DefaultHelper.ClearInventory(new_mech, mechBay.Sim));
+#else
+                new_mech.SetInventory(new MechComponentRef[0]);
+#endif
             }
 
             if (Control.Settings.BrokenMech)
@@ -504,7 +521,7 @@ namespace CustomSalvage
                     }
                     else
                     {
-                        set_info(option, $"<i><color=#a0a0a0a>{info.mechname} : All parts used</color></i>", arg => { });
+                        set_info(option, $"<color=#a0a0a0a><i>{info.mechname}: All parts used</i></color>", arg => { });
                     }
                 }
                 else
@@ -565,7 +582,6 @@ namespace CustomSalvage
             }
             int total = used_parts.Sum(i => i.cbills * i.used);
             mechBay.Sim.AddFunds(-total);
-            RemoveMechPart(mech.Description.Id, chassis.MechPartMax);
             used_parts.Clear();
             mechBay.RefreshData(false);
             MakeMech();
