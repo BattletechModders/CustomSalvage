@@ -99,6 +99,10 @@ Color Background according to mech tags. higher tag in list have prioirty. *NOTE
 - `float MaxAdaptMod = 5f` - maximum multiplier for part cost(mod based on mech cost difference. x5 very big value)
 - `float AdaptModWeight = 2f` - affect of price difference to part adaptation cost. ( 1 + abs(basepartcost - otherpartcost)/basepartcost*this)
 - `bool ApplyPartPriceMod = false` - if set to true increase cost of adapting parts from special mech
+- `string OmniTechTag = null` - if set, mark mech with this tag as OmniMech. OmniMech can be assembled from one base part and have special multiplier to part cost
+- `float OmniSpecialtoSpecialMod = 0.1f` - both mech are special - default 10% of adapt cost
+- `float OmniSpecialtoNormalMod = 0.25f` - one mech are normal, second is special - default 25% of part adapt cost
+- `float OmniNormalMod = 0f` - both mech are normal, default = free
 
 - `bool UnEquipedMech = false` - unequip assembled mech 
 - `bool BrokenMech = true` - destroy location and equipment of assembled mech

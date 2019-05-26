@@ -142,6 +142,11 @@ namespace CustomSalvage
         public float AdaptModWeight = 2f;
         public bool ApplyPartPriceMod = false;
 
+        public string OmniTechTag = null;
+        public float OmniSpecialtoSpecialMod = 0.1f;
+        public float OmniSpecialtoNormalMod = 0.25f;
+        public float OmniNormalMod = 0f;
+
         public void Complete()
         {
             if (BGColors != null && BGColors.Length > 1)
