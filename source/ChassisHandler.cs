@@ -580,7 +580,7 @@ namespace CustomSalvage
                                     MakeOptions(eventDescription, sgEventPanel, dataManager, optionParent, optionsList);
                                 });
                         else
-                            set_info(option, $"Add <color=#20ff20>{info.mechname}</color> {(info.count - info.used == 1 ? "part" : "parts") } parts left",
+                            set_info(option, $"Add <color=#20ff20>{info.mechname}</color> {info.count - info.used} {(info.count - info.used == 1 ? "part" : "parts") } left",
                                 arg =>
                                 {
                                     info.used += 1;

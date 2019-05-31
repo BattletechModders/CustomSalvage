@@ -49,7 +49,7 @@ namespace CustomSalvage
                 var harmony = HarmonyInstance.Create("io.github.denadan.CustomSalvage");
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-                Logger.Log("Loaded CustomSalvage v0.1.4 for bt 1.5.1");
+                Logger.Log("Loaded CustomSalvage v0.1.4 for bt 1.5.2");
 
                 switch (Settings.RecoveryType)
                 {
