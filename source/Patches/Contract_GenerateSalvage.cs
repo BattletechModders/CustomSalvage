@@ -63,15 +63,7 @@ namespace CustomSalvage
 
                 foreach (var unit in enemyMechs)
                 {
-                    Control.LogDebug($"-- Salvaging {unit.mech.Name}");
-                    if (!Control.IsDestroyed(unit))
-                    {
-                        Control.LogDebug("--- not destroyed - skipped");
-                    }
-                    else
-                    {
                         AddMechToSalvage(unit.mech, Contract, simgame, Constants, true);
-                    }
                 }
 
                 Control.LogDebug($"- Enemy Vechicle {__instance.Name}");

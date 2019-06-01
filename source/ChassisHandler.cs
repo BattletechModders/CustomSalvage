@@ -516,7 +516,7 @@ namespace CustomSalvage
                 new RequirementDef[0],
                 new SimGameEventObject[0],
                 options.ToArray(),
-                1);
+                1, true);
 
             if (!_hasInitEventTracker)
             {
