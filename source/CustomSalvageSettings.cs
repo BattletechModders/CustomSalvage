@@ -63,6 +63,7 @@ namespace CustomSalvage
         public PartCalculationType PartCountType = PartCalculationType.PartDestroyed ;
         public LostMechActionType LostMechAction = LostMechActionType.ReturnItemsToPlayer;
 
+        public bool AllowDropBlackListed = false;
         public float RecoveryMod = 1;
         public float LimbRecoveryPenalty = 0.05f;
         public float TorsoRecoveryPenalty = 0.1f;

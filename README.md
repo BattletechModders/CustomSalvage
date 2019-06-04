@@ -58,6 +58,7 @@ Defines what to do with your lost mech
 
 ### other salvage options
 
+- `public bool AllowDropBlackListed = false` - allow to drop BLACKLISTED tag items
 - `bool SalvageTurrets = true` - add turrets to salvage
 - `bool UpgradeSalvage = false` - salavaged items have chance to upgrade to "+" variants(not span into player lost mech items if they go to salvage)
 - `float SalvageTurretsComponentChance = 0.33f` - in vanila game turret components dont broke, and usually turret have a lot of weapon. so this modifier give less salvage for balance
