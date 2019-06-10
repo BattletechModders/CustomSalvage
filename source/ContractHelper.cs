@@ -120,7 +120,7 @@ namespace CustomSalvage
         {
             if (def != null)
             {
-                if(def.ComponentTags.Contains("BLACKLISTED"))
+                if(!Control.Settings.AllowDropBlackListed && def.ComponentTags.Contains("BLACKLISTED"))
                 {
                     Control.LogDebug($"--- {def.Description.Id} is BLACKLISTED. skipped");
                     return;
@@ -151,7 +151,7 @@ namespace CustomSalvage
         {
             if (def != null)
             {
-                if (def.ComponentTags.Contains("BLACKLISTED"))
+                if (!Control.Settings.AllowDropBlackListed && def.ComponentTags.Contains("BLACKLISTED"))
                 {
                     Control.LogDebug($"--- {def.Description.Id} is BLACKLISTED. skipped");
                     return;
@@ -274,7 +274,7 @@ namespace CustomSalvage
 
         public void AddMechPartsToPotentialSalvage(SimGameConstants constants, MechDef mech, int numparts)
         {
-            if (mech.MechTags.Contains("BLACKLISTED"))
+            if (!Control.Settings.AllowDropBlackListed &&  mech.MechTags.Contains("BLACKLISTED"))
             {
                 Control.LogDebug($"--- {mech.Description.Id} is BLACKLISTED. skipped");
                 return;
@@ -285,7 +285,7 @@ namespace CustomSalvage
 
         public void AddMechPartsToFinalSalvage(SimGameConstants constants, MechDef mech, int numparts)
         {
-            if (mech.MechTags.Contains("BLACKLISTED"))
+            if (!Control.Settings.AllowDropBlackListed &&  mech.MechTags.Contains("BLACKLISTED"))
             {
                 Control.LogDebug($"--- {mech.Description.Id} is BLACKLISTED. skipped");
                 return;
