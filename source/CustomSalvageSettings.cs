@@ -114,6 +114,10 @@ namespace CustomSalvage
         public string[] ExclideVariants = { };
         public special[] SpecialTags = null;
 
+        public bool AllowScrapToParts = true;
+        public float MinScrapParts = 0.51f;
+        public float MaxScrapParts = 0.91f;
+
         public int MaxVariantsInDescription = 5;
 
         public bool UnEquipedMech = false;

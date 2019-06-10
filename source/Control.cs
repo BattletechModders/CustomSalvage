@@ -49,7 +49,7 @@ namespace CustomSalvage
                 var harmony = HarmonyInstance.Create("io.github.denadan.CustomSalvage");
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-                Logger.Log("Loaded CustomSalvage v0.1.4 for bt 1.5.2");
+                Logger.Log("Loaded CustomSalvage v0.2.3 for bt 1.6.1");
 
                 switch (Settings.RecoveryType)
                 {
@@ -196,7 +196,12 @@ namespace CustomSalvage
 #if USE_CC
             return CustomComponents.Contract_GenerateSalvage.IsDestroyed(lostUnit.mech);
 #else
+
+
             if (lostUnit.mech.IsDestroyed)
+                return true;
+
+            if (lostUnit.pilot.HasEjected || lostUnit.pilot.IsIncapacitated)
                 return true;
 
             if (lostUnit.mech.Inventory.Any(i =>

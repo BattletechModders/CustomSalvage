@@ -61,8 +61,8 @@
 			
 		],
 		"MaxVariantsInDescription" : 5,
-		"UnEquipedMech" : false,
-		"BrokenMech" : true,
+		"UnEquipedMech" : true,
+		"BrokenMech" : false,
 		"HeadRepaired" : false,
 		"LeftArmRepaired" : false,
 		"RightArmRepaired" : false,
@@ -80,7 +80,11 @@
 		"RepairComponentsNonFunctionalThreshold" : 0.5,
 		"AdaptPartBaseCost" : 0.015,
 		"MaxAdaptMod" : 5,
-		"AdaptModWeight" : 2
+		"AdaptModWeight" : 2,
+		
+		"AllowScrapToParts" : true,
+        "MinScrapParts" :  0.51f,
+        "MaxScrapParts" : 0.91f
 	},	
 		
 	"Manifest": [

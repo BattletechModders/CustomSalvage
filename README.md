@@ -105,6 +105,11 @@ Color Background according to mech tags. higher tag in list have prioirty. *NOTE
 - `float OmniSpecialtoNormalMod = 0.25f` - one mech are normal, second is special - default 25% of part adapt cost
 - `float OmniNormalMod = 0f` - both mech are normal, default = free
 
+- `bool AllowScrapToParts = true` - if enabled allow to scrap stored mech chassis to parts
+- `float MinScrapParts = 0.51f` - min parts get from scraping mech(MaxParts * this rounded to int. Uses unity rounding so 0.5 give closest odd value)
+- `float MaxScrapParts = 0.91f` - max parts get from scrapping mech
+
+
 - `bool UnEquipedMech = false` - unequip assembled mech 
 - `bool BrokenMech = true` - destroy location and equipment of assembled mech
 
