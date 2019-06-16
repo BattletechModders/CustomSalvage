@@ -57,12 +57,12 @@
 		"ExcludeTags" : [
 			"BLACKLISTED"
 		],
-		"ExclideVariants" : [
+		"ExcludeVariants" : [
 			
 		],
 		"MaxVariantsInDescription" : 5,
-		"UnEquipedMech" : true,
-		"BrokenMech" : false,
+		"UnEquipedMech" : false,
+		"BrokenMech" : true,
 		"HeadRepaired" : false,
 		"LeftArmRepaired" : false,
 		"RightArmRepaired" : false,
@@ -83,8 +83,8 @@
 		"AdaptModWeight" : 2,
 		
 		"AllowScrapToParts" : true,
-        "MinScrapParts" :  0.51f,
-        "MaxScrapParts" : 0.91f
+        "MinScrapParts" :  0.51,
+        "MaxScrapParts" : 0.91
 	},	
 		
 	"Manifest": [

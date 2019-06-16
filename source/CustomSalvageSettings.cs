@@ -111,7 +111,7 @@ namespace CustomSalvage
         public float MinPartsToAssembly = 0.33f;
         public float MinPartsToAssemblySpecial = 0.5f;
         public string[] ExcludeTags = { "BLACKLISTED" };
-        public string[] ExclideVariants = { };
+        public string[] ExcludeVariants = { };
         public special[] SpecialTags = null;
 
         public bool AllowScrapToParts = true;

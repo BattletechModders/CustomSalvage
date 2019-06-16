@@ -76,7 +76,7 @@ namespace CustomSalvage
                     info.Excluded = false;
                 else
 #endif
-                if (Control.Settings.ExclideVariants.Contains(id))
+                if (Control.Settings.ExcludeVariants.Contains(id))
                     info.Excluded = true;
                 else
                     if (Control.Settings.ExcludeTags.Any(extag => mech.MechTags.Contains(extag)))

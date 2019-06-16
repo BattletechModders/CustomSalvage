@@ -137,10 +137,14 @@ namespace CustomSalvage
             if (turret == null || turret.allComponents != null)
                 foreach (var component in turret.allComponents)
                 {
-                    if (component.DamageLevel != ComponentDamageLevel.Destroyed)
+                    var chance = simgame.NetworkRandom.Float();
+                    if (component.DamageLevel != ComponentDamageLevel.Destroyed && chance < Control.Settings.SalvageTurretsComponentChance)
                     {
+                        Control.LogDebug($"--- {chance:0.000} < {Control.Settings.SalvageTurretsComponentChance:0.00}");
                         contract.AddComponentToPotentialSalvage(component.componentDef, component.DamageLevel, true);
                     }
+                    else
+                        Control.LogDebug($"--- {chance:0.000} > {Control.Settings.SalvageTurretsComponentChance:0.00} - {component.defId} skipped");
                 }
         }
 
@@ -148,7 +152,7 @@ namespace CustomSalvage
         {
             foreach (var component in vechicle.Inventory)
             {
-                if (component.DamageLevel != ComponentDamageLevel.Destroyed && simgame.NetworkRandom.Float() < Control.Settings.SalvageTurretsComponentChance)
+                if (component.DamageLevel != ComponentDamageLevel.Destroyed)
                 {
                     contract.AddComponentToPotentialSalvage(component.Def, component.DamageLevel, true);
                 }
