@@ -58,6 +58,42 @@ namespace CustomSalvage
             return numparts;
         }
 
+        internal static int PartDestroyedNoCT(MechDef mech)
+        {
+            float total = Control.Settings.SalvageArmWeight * 2 + Control.Settings.SalvageHeadWeight +
+                          Control.Settings.SalvageLegWeight * 2 + Control.Settings.SalvageTorsoWeight * 2 + 1 + 
+                          Control.Settings.SalvageCTWeight;
+
+            float val = total;
+
+            val -= mech.IsLocationDestroyed(ChassisLocations.Head) ? Control.Settings.SalvageHeadWeight : 0;
+
+            val -= mech.IsLocationDestroyed(ChassisLocations.LeftTorso)
+                ? Control.Settings.SalvageTorsoWeight
+                : 0;
+            val -= mech.IsLocationDestroyed(ChassisLocations.RightTorso)
+                ? Control.Settings.SalvageTorsoWeight
+                : 0;
+
+            val -= mech.IsLocationDestroyed(ChassisLocations.LeftLeg) ? Control.Settings.SalvageLegWeight : 0;
+            val -= mech.IsLocationDestroyed(ChassisLocations.RightLeg) ? Control.Settings.SalvageLegWeight : 0;
+
+            val -= mech.IsLocationDestroyed(ChassisLocations.LeftArm) ? Control.Settings.SalvageArmWeight : 0;
+            val -= mech.IsLocationDestroyed(ChassisLocations.LeftLeg) ? Control.Settings.SalvageArmWeight : 0;
+
+            val -= mech.IsLocationDestroyed(ChassisLocations.CenterTorso) ? Control.Settings.SalvageCTWeight : 0;
+
+            var constants = UnityGameInstance.BattleTechGame.Simulation.Constants;
+
+            int numparts = (int)(constants.Story.DefaultMechPartMax * val / total + 0.5f);
+            if (numparts <= 0)
+                numparts = 1;
+            if (numparts > constants.Story.DefaultMechPartMax)
+                numparts = constants.Story.DefaultMechPartMax;
+
+            return numparts;
+        }
+
         internal static int Vanila(MechDef mech)
         {
             if (mech.IsLocationDestroyed(ChassisLocations.CenterTorso))

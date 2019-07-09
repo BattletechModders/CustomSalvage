@@ -3,7 +3,7 @@
 	"Author": "Denadan",
 	"Website": "https://github.com/Denadan/CustomSalvage",
 
-	"Enabled": true,
+	"Enabled": false,
 	"DependsOn": [],
 	"DLL": "CustomSalvage.dll",
 	"DLLEntryPoint": "CustomSalvage.Control.Init",
@@ -11,7 +11,7 @@
 	"Settings" : {
 		"LogLevel" : "Debug",
 		"RecoveryType" : "PartDestroyed",
-		"PartCountType" : "PartDestroyed",
+		"PartCountType" : "PartDestroyedIgnoreCT",
 		"LostMechAction" : "ReturnItemsToPlayer",
 		"RecoveryMod" : 1,
 		"LimbRecoveryPenalty" : 0.05,
@@ -22,12 +22,14 @@
 		"SalvageArmWeight" : 0.75,
 		"SalvageLegWeight" : 0.75,
 		"SalvageTorsoWeight" : 1,
-		"SalvageHeadWeight" : 0.5,
+		"SalvageHeadWeight" : 0.25,
+		"SalvageCTWeight" : 1.5,
+		
 		"VACTDestroyedMod" : 0.35,
 		"VABLDestroyedMod" : 0.68,
 		"SalvageTurrets" : true,
 		"SalvageTurretsComponentChance" : 0.33,
-		"UpgradeSalvage" : false,
+		"UpgradeSalvage" : true,
 		"BGColors" : [
 			{
 				"Tag" : "unit_assault",

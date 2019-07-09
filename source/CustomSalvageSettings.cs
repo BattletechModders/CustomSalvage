@@ -13,7 +13,7 @@ namespace CustomSalvage
         Vanila,
         Custom,
         PartDestroyed,
-        AllwaysRecover,
+        AlwaysRecover,
         NeverRecover
     }
 
@@ -22,7 +22,8 @@ namespace CustomSalvage
         Vanila,
         VanilaAdjusted,
         Custom,
-        PartDestroyed
+        PartDestroyed,
+        PartDestroyedIgnoreCT
     }
 
     public enum LostMechActionType
@@ -60,7 +61,7 @@ namespace CustomSalvage
 
 
         public RecoveryCalculationType RecoveryType = RecoveryCalculationType.PartDestroyed;
-        public PartCalculationType PartCountType = PartCalculationType.PartDestroyed ;
+        public PartCalculationType PartCountType = PartCalculationType.PartDestroyedIgnoreCT ;
         public LostMechActionType LostMechAction = LostMechActionType.ReturnItemsToPlayer;
 
         public bool AllowDropBlackListed = false;
@@ -75,7 +76,8 @@ namespace CustomSalvage
         public float SalvageArmWeight = 0.75f;
         public float SalvageLegWeight = 0.75f;
         public float SalvageTorsoWeight = 1f;
-        public float SalvageHeadWeight = 0.5f;
+        public float SalvageHeadWeight = 0.25f;
+        public float SalvageCTWeight = 1.5f;
 
 
         public float VACTDestroyedMod = 0.35f;

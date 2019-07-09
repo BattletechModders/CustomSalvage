@@ -19,7 +19,7 @@ Additional options
 - `float HeadRecoveryPenaly = 0` - for lost head
 - `float EjectRecoveryBonus = 0.25f` - additional bonus if pilot ejected
 
-**`AllwaysRecover`** - lost mech allways return to player
+**`AlwaysRecover`** - lost mech allways return to player
 
 **`NeverRecover`** - lost mech allways lost
 
@@ -34,14 +34,20 @@ How to calculate number of Parts you get from mech
 - `float VACTDestroyedMod = 0.35f` - num of parts you get when ct destroyed
 - `float VABLDestroyedMod = 0.68f` - num of parts you get when legs destroyed
 
-**PartDestroyed** - CC method, less parts for each destroyed location
+**PartDestroyed** - CC method, less parts for each destroyed location, CT destroyed always give CenterTorsoDestroyedParts parts.
+
+**PartDestroyedIgnoreCT** - CC method, each destroyed part affect how many parts you get
+
 
 Additional options
-- `int CenterTorsoDestroyedParts = 1` - parts get if CT destroyed
+- `int CenterTorsoDestroyedParts = 1` - parts get if CT destroyed, only for PartDestroyed
+
+Weight of part into total part count
 - `public float SalvageArmWeight = 0.75f`
 - `public float SalvageLegWeight = 0.75f`
 - `public float SalvageTorsoWeight = 1f`
-- `public float SalvageHeadWeight = 0.5f`
+- `public float SalvageHeadWeight = 0.25f`
+- `public float SalvageCTWeight = 1.5f` - only for  PartDestroyedIgnoreCT
 
 Formula is `NumParts = MaxParts * survived_part_weight / total_part_weight`
 

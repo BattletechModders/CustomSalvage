@@ -49,11 +49,11 @@ namespace CustomSalvage
                 var harmony = HarmonyInstance.Create("io.github.denadan.CustomSalvage");
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-                Logger.Log("Loaded CustomSalvage v0.2.4 for bt 1.6.1");
+                Logger.Log("Loaded CustomSalvage v0.2.5 for bt 1.6.1");
 
                 switch (Settings.RecoveryType)
                 {
-                    case RecoveryCalculationType.AllwaysRecover:
+                    case RecoveryCalculationType.AlwaysRecover:
                         NeedRecovery = (result, contract) => true;
                         break;
                     case RecoveryCalculationType.NeverRecover:
@@ -90,6 +90,9 @@ namespace CustomSalvage
                         break;
                     case PartCalculationType.PartDestroyed:
                         GetNumParts = PartsNumCalculations.PartDestroyed;
+                        break;
+                    case PartCalculationType.PartDestroyedIgnoreCT:
+                        GetNumParts = PartsNumCalculations.PartDestroyedNoCT;
                         break;
                     default:
                         GetNumParts = PartsNumCalculations.Vanila;
