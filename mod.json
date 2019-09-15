@@ -3,7 +3,7 @@
 	"Author": "Denadan",
 	"Website": "https://github.com/Denadan/CustomSalvage",
 
-	"Enabled": false,
+	"Enabled": true,
 	"DependsOn": [],
 	"DLL": "CustomSalvage.dll",
 	"DLLEntryPoint": "CustomSalvage.Control.Init",

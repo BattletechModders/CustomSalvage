@@ -12,7 +12,7 @@ namespace CustomSalvage
         [HarmonyPrefix]
         public static bool GetAllChassis(bool showMechParts, ref List<ChassisDef> __result, SimGameState __instance)
         {
-            bool show = false;
+            //bool show = false;
             __result = new List<ChassisDef>();
             ChassisHandler.ClearParts();
             List<string> allInventoryStrings = __instance.GetAllInventoryStrings();

@@ -43,11 +43,7 @@ namespace CustomSalvage
                     {
                         ___readyBtnObj.SetActive(false);
                         ___partsCountObj.SetActive(true);
-                        ___partsCountText.SetText("{0} / {1}", new object[]
-                        {
-                            ___selectedChassis.MechPartCount,
-                            ___selectedChassis.MechPartMax
-                        });
+                        ___partsCountText.SetText($"{___selectedChassis.MechPartCount} / {___selectedChassis.MechPartMax}");
                         ___chassisStorageTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject($"Chassis still needs at least {min} base and total {___selectedChassis.MechPartMax} compatible parts to be completed"));
                     }
                     else

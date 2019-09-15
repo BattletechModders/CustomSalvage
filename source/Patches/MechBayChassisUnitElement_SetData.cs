@@ -19,12 +19,8 @@ namespace CustomSalvage
         {
             if (partsCount != 0)
             {
-                ___partsLabelText.SetText("Parts", new object[0]);
-                ___partsText.SetText("{0} / {1}", new object[]
-                {
-                    partsCount,
-                    partsMax
-                });
+                ___partsLabelText.SetText("Parts");
+                ___partsText.SetText($"{partsCount} / {partsMax}");
 
                 if (partsCount >= partsMax)
                     ___mechImage.color = Control.Settings.color_ready;

@@ -589,7 +589,7 @@ namespace CustomSalvage
                     }
                     else
                     {
-                        set_info(option, $"<color=#a0a0a0a><i>{info.mechname}: All parts used</i></color>", arg => { });
+                        set_info(option, $"<i><color=#a0a0a0>{info.mechname}</color>: <color=#ff4040>All parts used</color></i>", arg => { });
                     }
                 }
                 else
