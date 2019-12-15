@@ -49,7 +49,11 @@ namespace CustomSalvage
                 var harmony = HarmonyInstance.Create("io.github.denadan.CustomSalvage");
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-                Logger.Log("Loaded CustomSalvage v0.3 for bt 1.7");
+#if USE_CC
+                Logger.Log("Loaded CustomSalvageCC v0.4 for bt 1.8");
+#else
+                Logger.Log("Loaded CustomSalvageNonCC v0.4 for bt 1.8");
+#endif
 
                 switch (Settings.RecoveryType)
                 {
@@ -111,7 +115,7 @@ namespace CustomSalvage
             }
         }
 
-        #region LOGGING
+#region LOGGING
         [Conditional("CCDEBUG")]
         public static void LogDebug(string message)
         {
@@ -192,7 +196,7 @@ namespace CustomSalvage
             }
         }
 
-        #endregion
+#endregion
 
         public static bool IsDestroyed(UnitResult lostUnit)
         {

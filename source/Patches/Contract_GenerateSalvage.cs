@@ -54,7 +54,9 @@ namespace CustomSalvage
 
                     lostUnits[i].mechLost = !Control.NeedRecovery(lostUnits[i], Contract);
 
-                    if (lostUnits[i].mechLost)
+                    if (lostUnits[i].mechLost &&
+                        !lostUnits[i].mech.MechTags.Contains(Control.Settings.NoSalvageMechTag) &&
+                        !lostUnits[i].mech.Chassis.ChassisTags.Contains(Control.Settings.NoSalvageMechTag))
                     {
                         Control.LostUnitAction(lostUnits[i], Contract);
                     }
@@ -63,8 +65,15 @@ namespace CustomSalvage
 
                 foreach (var unit in enemyMechs)
                 {
-                    if(Control.IsDestroyed(unit) || unit.pilot.IsIncapacitated || unit.pilot.HasEjected)
-                        AddMechToSalvage(unit.mech, Contract, simgame, Constants, true);
+                    if (Control.IsDestroyed(unit) || unit.pilot.IsIncapacitated || unit.pilot.HasEjected)
+                        if (unit.mech.MechTags.Contains(Control.Settings.NoSalvageMechTag) ||
+                        unit.mech.Chassis.ChassisTags.Contains(Control.Settings.NoSalvageMechTag))
+                        {
+                            Control.LogDebug($"-- Salvaging {unit.mech.Name}");
+                            Control.LogDebug($"--- not salvagable, skipping");
+                        }
+                        else
+                            AddMechToSalvage(unit.mech, Contract, simgame, Constants, true);
                     else
                     {
                         Control.LogDebug($"-- Salvaging {unit.mech.Name}");

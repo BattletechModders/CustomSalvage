@@ -3,6 +3,7 @@ using BattleTech;
 using BattleTech.UI;
 using Harmony;
 using HBS;
+using Localize;
 using UnityEngine;
 
 namespace CustomSalvage
@@ -20,7 +21,7 @@ namespace CustomSalvage
                 return false;
 
             var mech = ChassisHandler.GetMech(___selectedChassis.Description.Id);
-            var name = mech.Description.UIName;
+            var name = new Text(mech.Description.UIName).ToString();
 
             if (___selectedChassis.MechPartMax == 0)
             {
@@ -76,6 +77,7 @@ namespace CustomSalvage
                 else
                 {
                     var popup = LazySingletonBehavior<UIManager>.Instance.GetOrCreatePopupModule<SG_Stores_MultiPurchasePopup>(string.Empty);
+                   
                     var shopdef = new ShopDefItem(mech.Description.Id, ShopItemType.MechPart, 1, num, true, false, value);
                     popup.SetData(___mechBay.Sim, shopdef, name + " parts", num, value, (n) => ScrapParts(n, ___selectedChassis, __instance, ___mechBay));
                 }

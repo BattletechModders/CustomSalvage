@@ -3,6 +3,7 @@ using BattleTech;
 using BattleTech.UI;
 using BattleTech.UI.Tooltips;
 using Harmony;
+using Localize;
 using TMPro;
 using UnityEngine;
 
@@ -78,7 +79,7 @@ namespace CustomSalvage
                     {
                         if (mechDef.ChassisID == ___selectedChassis.Description.Id)
                             continue;
-                        add += "\n" + mechDef.Description.UIName;
+                        add += "\n" + new Text(mechDef.Description.UIName).ToString();
                         showed += 1;
                         if (showed == Control.Settings.MaxVariantsInDescription - 1)
                             break;
@@ -92,7 +93,7 @@ namespace CustomSalvage
                     {
                         if (mechDef.ChassisID == ___selectedChassis.Description.Id) 
                             continue;
-                        add += "\n" + mechDef.Description.UIName;
+                        add += "\n" + new Text(mechDef.Description.UIName).ToString();
                     }
 
                     add += "</color>";

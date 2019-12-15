@@ -38,6 +38,15 @@ namespace CustomSalvage
 
     public class CustomSalvageSettings
     {
+        public class broke_info
+        {
+            public string tag;
+            public int BaseTp = -1;
+            public float Limb = -1;
+            public float Component = -1;
+
+        }
+
         public class colordef
         {
             public string Tag { get; set; }
@@ -65,6 +74,7 @@ namespace CustomSalvage
         public LostMechActionType LostMechAction = LostMechActionType.ReturnItemsToPlayer;
 
         public bool AllowDropBlackListed = false;
+        public string NoSalvageMechTag = "NOSALVAGE";
         public float RecoveryMod = 1;
         public float LimbRecoveryPenalty = 0.05f;
         public float TorsoRecoveryPenalty = 0.1f;
@@ -125,6 +135,16 @@ namespace CustomSalvage
         public bool UnEquipedMech = false;
         public bool BrokenMech = true;
 
+        public bool RepairChanceByTP = false;
+        public int BaseTP = 10;
+        public float LimbChancePerTp = 0.01f;
+        public float ComponentChancePerTp = 0.01f;
+        public float LimbMinChance = 0.1f;
+        public float LimbMaxChance = 0.95f;
+        public float ComponentMinChance = 0.1f;
+        public float ComponentMaxChance = 0.95f;
+
+        public broke_info[] BrokeByTag = null;
 
         public bool HeadRepaired = false;
         public bool LeftArmRepaired = false;
@@ -136,7 +156,7 @@ namespace CustomSalvage
         public bool RightLegRepaired = false;
 
         public bool RepairMechLimbs = true;
-        public float RepairMechLimbsChance = 0.75f;
+        public float RepairMechLimbsChance = 0.33f;
         public bool RandomStructureOnRepairedLimbs = true;
         public float MinStructure = 0.25f;
 

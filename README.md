@@ -131,12 +131,31 @@ Color Background according to mech tags. higher tag in list have prioirty. *NOTE
 - `bool RightLegRepaired = false`
 force repair location
 
-- `float RepairMechLimbsChance = 0.75f` - chance for repair location
+- `float RepairMechLimbsChance = 0.33f` - chance for repair location(biger = better chances) **ATTENTION: Changed in 1.4**
 - `public bool RandomStructureOnRepairedLimbs = true` - repaired location have randoimized structure
 - `public float MinStructure = 0.25f` - minimum structure of repaired location
 - `bool RepairMechComponents = true` - need to repair components(components on destroyed location will be destroyed anyway)
-- `float RepairComponentsFunctionalThreshold = 0.25f` - chance to get fully repaired component
-- `float RepairComponentsNonFunctionalThreshold = 0.5f` - chance to get broken, but repairable component.
+- `float RepairComponentsFunctionalThreshold = 0.25f` - Threshold to get fully repaired component(more - better)
+- `float RepairComponentsNonFunctionalThreshold = 0.5f` - Threshold to get broken, but repairable component(more - better)
+
+- `bool RepairChanceByTP = false;` - increase chance to get undamaget limbs and equipment with more 
+- `int BaseTP = 10;` - base tp value, if you have more tp - chance increses, if less - decreases (using RepairMechLimbsChance, RepairComponentsFunctionalThreshold, RepairComponentsNonFunctionalThreshold as base)
+- `float LimbChancePerTp = 0.01f;` - chance increase for limb per one tp
+- `float ComponentChancePerTp = 0.01f;` - chance increase for component per one tp
+- `float LimbMinChance = 0.1f;` - limits for limb repair chance
+- `float LimbMaxChance = 0.9f;`
+- `float ComponentMinChance = 0.1f;`  - limits for component repair chance( ComponentMinChance <= RepairComponentsFunctionalThreshold <= RepairComponentsNonFunctionalThreshold <= ComponentMaxChance)
+- `float ComponentMaxChance = 0.95f;`
+
+### component broke chances by tag
+
+Can be used to change mech options by mech or repair tag. All values optional and will be ignored during calculation if missed. If mech have few tags - used average. 
+
+```BrokeByTag = [
+	{ "tag" : "hard_to_repair", "BaseTp" : "30", "Limb" : "0.0075" }
+]
+```
+
 
 # Customs
 
