@@ -9,10 +9,12 @@ namespace CustomSalvage
     [HarmonyPatch("GetAllInventoryMechDefs")]
     public static class SimGameState_GetAllInventoryMechDefs
     {
+        private static bool show = false;
+
+
         [HarmonyPrefix]
         public static bool GetAllChassis(bool showMechParts, ref List<ChassisDef> __result, SimGameState __instance)
         {
-            //bool show = false;
             __result = new List<ChassisDef>();
             ChassisHandler.ClearParts();
             List<string> allInventoryStrings = __instance.GetAllInventoryStrings();
@@ -62,18 +64,17 @@ namespace CustomSalvage
                         }
                         else
                         {
-
                             Control.LogError($"ERROR: {array[2]} not found");
-                            //if (!show)
-                            //{
-                            //    Control.LogError($"AllMechDefs:");
-                            //    foreach (var pair in __instance.DataManager.MechDefs)
-                            //    {
-                            //        Control.LogError($"-- {pair.Key}: {(pair.Value == null ? "null" : "exist")}");
-                            //    }
+                            if (show)
+                            {
+                                Control.LogError($"AllMechDefs:");
+                                foreach (var pair in __instance.DataManager.MechDefs)
+                                {
+                                    Control.LogError($"-- {pair.Key}: {(pair.Value == null ? "null" : "exist")}");
+                                }
 
-                            //    show = true;
-                            //}
+                                show = false;
+                            }
                         }
                     }
                 }

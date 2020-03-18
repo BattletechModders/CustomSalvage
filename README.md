@@ -152,7 +152,9 @@ force repair location
 Can be used to change mech options by mech or repair tag. All values optional and will be ignored during calculation if missed. If mech have few tags - used average. 
 
 ```BrokeByTag = [
-	{ "tag" : "hard_to_repair", "BaseTp" : "30", "Limb" : "0.0075" }
+	{ "tag" : "hard_to_repair", "BaseTp" : "30", "Limb" : "0.0075", "Component" : "0.0075" },
+	{ "tag" : "easy_to_repair", "Limb" : "0.015", "Component" : "0.015" },
+	{ "tag" : "poor_maintained", "BaseTp" : "20" }
 ]
 ```
 

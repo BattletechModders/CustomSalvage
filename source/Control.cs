@@ -50,9 +50,9 @@ namespace CustomSalvage
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
 
 #if USE_CC
-                Logger.Log("Loaded CustomSalvageCC v0.4 for bt 1.8");
+                Logger.Log("Loaded CustomSalvageCC v0.4.2 for bt 1.8");
 #else
-                Logger.Log("Loaded CustomSalvageNonCC v0.4 for bt 1.8");
+                Logger.Log("Loaded CustomSalvageNonCC v0.4.2 for bt 1.8");
 #endif
 
                 switch (Settings.RecoveryType)
@@ -70,6 +70,7 @@ namespace CustomSalvage
                         NeedRecovery = RecoveryDelegates.VanilaRecovery;
                         break;
                 }
+
 
                 switch (Settings.LostMechAction)
                 {

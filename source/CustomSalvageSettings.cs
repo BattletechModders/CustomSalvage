@@ -70,7 +70,7 @@ namespace CustomSalvage
 
 
         public RecoveryCalculationType RecoveryType = RecoveryCalculationType.PartDestroyed;
-        public PartCalculationType PartCountType = PartCalculationType.PartDestroyedIgnoreCT ;
+        public PartCalculationType PartCountType = PartCalculationType.PartDestroyedIgnoreCT;
         public LostMechActionType LostMechAction = LostMechActionType.ReturnItemsToPlayer;
 
         public bool AllowDropBlackListed = false;
@@ -139,6 +139,7 @@ namespace CustomSalvage
         public int BaseTP = 10;
         public float LimbChancePerTp = 0.01f;
         public float ComponentChancePerTp = 0.01f;
+        public float RepairTPMaxEffect = 0.33f;
         public float LimbMinChance = 0.1f;
         public float LimbMaxChance = 0.95f;
         public float ComponentMinChance = 0.1f;
