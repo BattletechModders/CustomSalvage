@@ -20,7 +20,7 @@ namespace CustomSalvage
         {
             try
             {
-                Control.LogDebug("Started Event: " + evt.Description.Id);
+                Control.Instance.LogDebug("Started Event: " + evt.Description.Id);
                 if (evt.Description.Id != "CustomSalvageAssemblyEvent")
                     return;
                 ChassisHandler.MakeOptions(___eventDescription, __instance, ___dm, ___optionParent, ___optionsList);
@@ -28,7 +28,7 @@ namespace CustomSalvage
             }
             catch (Exception e)
             {
-                Control.LogError("ModifyOptions error", e);
+                Control.Instance.LogError("ModifyOptions error", e);
                 
             }
         }

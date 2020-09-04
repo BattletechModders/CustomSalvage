@@ -52,8 +52,8 @@ namespace CustomSalvage
         public static void RegisterMechDef(MechDef mech, int part_count = 0)
         {
             int max_parts = UnityGameInstance.BattleTechGame.Simulation.Constants.Story.DefaultMechPartMax;
-            min_parts = Mathf.CeilToInt(max_parts * Control.Settings.MinPartsToAssembly);
-            min_parts_special = Mathf.CeilToInt(max_parts * Control.Settings.MinPartsToAssemblySpecial);
+            min_parts = Mathf.CeilToInt(max_parts * Control.Instance.Settings.MinPartsToAssembly);
+            min_parts_special = Mathf.CeilToInt(max_parts * Control.Instance.Settings.MinPartsToAssemblySpecial);
 
             ChassisToMech[mech.ChassisID] = mech;
             if (part_count > 0)
@@ -66,9 +66,9 @@ namespace CustomSalvage
                 var assembly = mech.Chassis.GetComponent<AssemblyVariant>();
 #endif
                 var info = new mech_info();
-                info.Omni = !string.IsNullOrEmpty(Control.Settings.OmniTechTag) && (
-                            mech.Chassis.ChassisTags.Contains(Control.Settings.OmniTechTag) ||
-                                mech.MechTags.Contains(Control.Settings.OmniTechTag));
+                info.Omni = !string.IsNullOrEmpty(Control.Instance.Settings.OmniTechTag) && (
+                            mech.Chassis.ChassisTags.Contains(Control.Instance.Settings.OmniTechTag) ||
+                                mech.MechTags.Contains(Control.Instance.Settings.OmniTechTag));
 
 #if USE_CC
                 if (assembly != null && assembly.Exclude)
@@ -77,16 +77,16 @@ namespace CustomSalvage
                     info.Excluded = false;
                 else
 #endif
-                if (Control.Settings.ExcludeVariants.Contains(id))
+                if (Control.Instance.Settings.ExcludeVariants.Contains(id))
                     info.Excluded = true;
                 else
-                    if (Control.Settings.ExcludeTags.Any(extag => mech.MechTags.Contains(extag)))
+                    if (Control.Instance.Settings.ExcludeTags.Any(extag => mech.MechTags.Contains(extag)))
                     info.Excluded = true;
 
-                if (Control.Settings.SpecialTags != null && Control.Settings.SpecialTags.Length > 0)
+                if (Control.Instance.Settings.SpecialTags != null && Control.Instance.Settings.SpecialTags.Length > 0)
 
 
-                    foreach (var tag_info in Control.Settings.SpecialTags)
+                    foreach (var tag_info in Control.Instance.Settings.SpecialTags)
                     {
                         if (mech.MechTags.Contains(tag_info.Tag))
                         {
@@ -112,7 +112,7 @@ namespace CustomSalvage
                 }
 #endif
 
-                if (!info.Excluded && Control.Settings.AssemblyVariants)
+                if (!info.Excluded && Control.Instance.Settings.AssemblyVariants)
                 {
                     string prefabid = GetPrefabId(mech);
 
@@ -126,11 +126,11 @@ namespace CustomSalvage
                         list.Add(mech);
                 }
 
-                Control.LogDebug($"Registring {mech.Description.Id}({mech.Description.UIName}) => {mech.ChassisID}");
-                Control.LogDebug($"-- Exclude:{info.Excluded} MinParts:{info.MinParts} PriceMult:{info.PriceMult}");
+                Control.Instance.LogDebug($"Registring {mech.Description.Id}({mech.Description.UIName}) => {mech.ChassisID}");
+                Control.Instance.LogDebug($"-- Exclude:{info.Excluded} MinParts:{info.MinParts} PriceMult:{info.PriceMult}");
 #if USE_CC
                 if (assembly != null)
-                    Control.LogDebug($"-- PrefabID:{assembly.PrefabID} Exclude:{assembly.Exclude} include:{assembly.Include} Mult:{assembly.PriceMult} Parts:{assembly.PartsMin}");
+                    Control.Instance.LogDebug($"-- PrefabID:{assembly.PrefabID} Exclude:{assembly.Exclude} include:{assembly.Include} Mult:{assembly.PriceMult} Parts:{assembly.PartsMin}");
 #endif
 
                 Proccesed[id] = info;
@@ -184,26 +184,26 @@ namespace CustomSalvage
 
         public static void ShowInfo()
         {
-            Control.LogDebug("================= CHASSIS TO MECH ===================");
+            Control.Instance.LogDebug("================= CHASSIS TO MECH ===================");
             foreach (var mechDef in ChassisToMech)
-                Control.LogDebug($"{mechDef.Key} => {mechDef.Value.Description.Id}");
+                Control.Instance.LogDebug($"{mechDef.Key} => {mechDef.Value.Description.Id}");
 
-            Control.LogDebug("================= EXCLUDED ===================");
+            Control.Instance.LogDebug("================= EXCLUDED ===================");
             foreach (var info in Proccesed.Where(i => i.Value.Excluded))
-                Control.LogDebug($"{info.Key}");
+                Control.Instance.LogDebug($"{info.Key}");
 
-            Control.LogDebug("================= GROUPS ===================");
+            Control.Instance.LogDebug("================= GROUPS ===================");
             foreach (var list in Compatible)
             {
-                Control.LogDebug($"{list.Key}");
+                Control.Instance.LogDebug($"{list.Key}");
 
                 foreach (var item in list.Value)
-                    Control.LogDebug($"--- {item.Description.Id}");
+                    Control.Instance.LogDebug($"--- {item.Description.Id}");
             }
-            Control.LogDebug("================= INVENTORY ===================");
+            Control.Instance.LogDebug("================= INVENTORY ===================");
             foreach (var mechDef in PartCount)
-                Control.LogDebug($"{mechDef.Key}: [{mechDef.Value:00}]");
-            Control.LogDebug("============================================");
+                Control.Instance.LogDebug($"{mechDef.Key}: [{mechDef.Value:00}]");
+            Control.Instance.LogDebug("============================================");
         }
 
         public class parts_info
@@ -253,31 +253,31 @@ namespace CustomSalvage
         {
             try
             {
-                Control.LogDebug($"-- remove parts");
+                Control.Instance.LogDebug($"-- remove parts");
                 RemoveMechPart(mech.Description.Id, chassis.MechPartMax);
                 infoWidget.SetData(mechBay, null);
-                Control.LogDebug($"-- making mech");
-                MakeMech(mechBay.Sim);
-                Control.LogDebug($"-- refresh mechlab");
+                Control.Instance.LogDebug($"-- making mech");
+                MakeMech(mechBay.Sim, 0);
+                Control.Instance.LogDebug($"-- refresh mechlab");
                 mechBay.RefreshData(false);
             }
             catch (Exception e)
             {
-                Control.LogError("Error in Complete Mech", e);
+                Control.Instance.LogError("Error in Complete Mech", e);
             }
         }
 
-        private static void MakeMech(SimGameState sim)
+        private static void MakeMech(SimGameState sim, int other_parts)
         {
 
-            Control.LogDebug($"Mech Assembly started for {mech.Description.UIName}");
+            Control.Instance.LogDebug($"Mech Assembly started for {mech.Description.UIName}");
             MechDef new_mech = new MechDef(mech, mechBay.Sim.GenerateSimGameUID(), true);
 
             try
             {
-                if (Control.Settings.UnEquipedMech)
+                if (Control.Instance.Settings.UnEquipedMech)
                 {
-                    Control.LogDebug($"-- Clear Inventory");
+                    Control.Instance.LogDebug($"-- Clear Inventory");
 #if USE_CC
                     new_mech.SetInventory(DefaultHelper.ClearInventory(new_mech, mechBay.Sim));
 #else
@@ -287,50 +287,47 @@ namespace CustomSalvage
             }
             catch (Exception e)
             {
-                Control.LogError($"ERROR in ClearInventory", e);
+                Control.Instance.LogError($"ERROR in ClearInventory", e);
             }
 
-            if (Control.Settings.BrokenMech)
+            if (Control.Instance.Settings.BrokenMech)
             {
-                BrokeMech(new_mech, sim);
+                BrokeMech(new_mech, sim, other_parts);
 
             }
 
             try
             {
-                Control.LogDebug("-- Adding mech");
+                Control.Instance.LogDebug("-- Adding mech");
                 mechBay.Sim.AddMech(0, new_mech, true, false, true, null);
-                Control.LogDebug("-- Posting Message");
+                Control.Instance.LogDebug("-- Posting Message");
                 mechBay.Sim.MessageCenter.PublishMessage(new SimGameMechAddedMessage(new_mech, chassis.MechPartMax, true));
             }
             catch (Exception e)
             {
-                Control.LogError($"ERROR in MakeMach", e);
+                Control.Instance.LogError($"ERROR in MakeMach", e);
             }
 
         }
 
-        private static void BrokeMech(MechDef new_mech, SimGameState sim)
+        public class AssemblyChancesResult
         {
-            try
+            public float LimbChance { get; private set; } = Control.Instance.Settings.RepairMechLimbsChance;
+            public float CompFChance { get; private set; } = Control.Instance.Settings.RepairComponentsFunctionalThreshold;
+            public float CompNFChance { get; private set; } = Control.Instance.Settings.RepairComponentsNonFunctionalThreshold;
+
+            public int BaseTP { get; private set; } = Control.Instance.Settings.BaseTP;
+            public float LimbTP { get; private set; } = Control.Instance.Settings.LimbChancePerTp;
+            public float CompTP { get; private set; } = Control.Instance.Settings.ComponentChancePerTp;
+#if CCDEBUG
+            public string DEBUGText { get; private set; } = "";
+#endif
+            public AssemblyChancesResult(MechDef mech, SimGameState sim, int other_parts)
             {
-
-                Control.LogDebug($"-- broke parts");
-                var rnd = new Random();
-
-
-                float LimbChance = Control.Settings.RepairMechLimbsChance;
-                float CompFChance = Control.Settings.RepairComponentsFunctionalThreshold;
-                float CompNFChance = Control.Settings.RepairComponentsNonFunctionalThreshold;
-
-
-                if (Control.Settings.RepairChanceByTP)
+                var settings = Control.Instance.Settings;
+                if (settings.RepairChanceByTP)
                 {
-                    var basetp = Control.Settings.BaseTP;
-                    var limbtp = Control.Settings.LimbChancePerTp;
-                    var comptp = Control.Settings.ComponentChancePerTp;
-
-                    if (Control.Settings.BrokeByTag != null && Control.Settings.BrokeByTag.Length > 1)
+                    if (settings.BrokeByTag != null && settings.BrokeByTag.Length > 1)
                     {
                         int numb = 0;
                         int numl = 0;
@@ -340,11 +337,9 @@ namespace CustomSalvage
                         float suml = 0;
                         float sumc = 0;
 
-
-
-                        foreach (var info in Control.Settings.BrokeByTag)
+                        foreach (var info in settings.BrokeByTag)
                         {
-                            if (new_mech.MechTags.Contains(info.tag) || new_mech.Chassis.ChassisTags.Contains(info.tag))
+                            if (mech.MechTags.Contains(info.tag) || mech.Chassis.ChassisTags.Contains(info.tag))
                             {
 #if CCDEBUG
                                 string logstr = info.tag;
@@ -375,140 +370,158 @@ namespace CustomSalvage
 #endif
                                 }
 #if CCDEBUG
-                                Control.LogDebug(logstr);
+                                Control.Instance.LogDebug(logstr);
 #endif
 
                             }
                         }
 
                         if (numb > 0)
-                            basetp = sumb / numb;
+                            BaseTP = sumb / numb;
                         if (numl > 0)
-                            limbtp = suml / numl;
+                            LimbTP = suml / numl;
                         if (numc > 0)
-                            comptp = sumc / numc;
+                            CompTP = sumc / numc;
 
-                        Control.LogDebug($"totals: base:{basetp}, limb:{limbtp:0.000}, component:{comptp:0.000}");
+                        Control.Instance.LogDebug($"totals: base:{BaseTP}, limb:{LimbTP:0.000}, component:{CompTP:0.000}");
 
-                        var tp = sim.MechTechSkill - basetp;
-                        var ltp = Mathf.Clamp(tp * limbtp, -Control.Settings.RepairTPMaxEffect, Control.Settings.RepairTPMaxEffect);
-                        var ctp = Mathf.Clamp(tp * comptp, -Control.Settings.RepairTPMaxEffect, Control.Settings.RepairTPMaxEffect);
+                        var tp = sim.MechTechSkill - BaseTP;
+                        var ltp = Mathf.Clamp(tp * LimbTP, -settings.RepairTPMaxEffect, settings.RepairTPMaxEffect);
+                        var ctp = Mathf.Clamp(tp * CompTP, -settings.RepairTPMaxEffect, settings.RepairTPMaxEffect);
 
-                        Control.LogDebug($"LeftTP: {tp} limb_change = {ltp:0.000} comp_change = {ctp * comptp:0.000}");
+                        Control.Instance.LogDebug($"LeftTP: {tp} limb_change = {ltp:0.000} comp_change = {ctp * CompTP:0.000}");
+#if CCDEBUG
+                        var oLimbChance = LimbChance;
+                        var oCompFChance = CompFChance;
+                        var oCompNFChance = CompNFChance;
+#endif
+                        LimbChance = Mathf.Clamp(LimbChance + ltp, settings.LimbMinChance, settings.LimbMaxChance);
+                        CompFChance = Mathf.Clamp(CompFChance + ctp, settings.ComponentMinChance, settings.ComponentMaxChance);
+                        CompNFChance = Mathf.Clamp(CompNFChance + ctp, CompFChance, settings.ComponentMaxChance);
 
-                        LimbChance = Mathf.Clamp(LimbChance + ltp, Control.Settings.LimbMinChance, Control.Settings.LimbMaxChance);
-                        CompFChance = Mathf.Clamp(CompFChance + ctp, Control.Settings.ComponentMinChance, Control.Settings.ComponentMaxChance);
-                        CompNFChance = Mathf.Clamp(CompNFChance + ctp, CompFChance, Control.Settings.ComponentMaxChance);
+#if CCDEBUG
+                        DEBUGText = $"\nLTP : {LimbTP:0.000}/{ltp:0.000}/{(int)(oLimbChance*100)}%";
+                        DEBUGText = $"\nCTP : {CompTP:0.000}/{ctp:0.000}/{(int)(oCompFChance * 100)}%/{(int)(oCompNFChance * 100)}%";
+#endif
                     }
                 }
+            }
+        }
 
+        private static void BrokeMech(MechDef new_mech, SimGameState sim, int other_parts)
+        {
+            try
+            {
 
+                Control.Instance.LogDebug($"-- broke parts");
+                var rnd = new Random();
+                var chances = new AssemblyChancesResult(new_mech, sim, other_parts);
+                var settings = Control.Instance.Settings;
 
-
-                Control.LogDebug($"--- RepairMechLimbsChance: {LimbChance}, RepairMechLimbs: {Control.Settings.RepairMechLimbs} ");
+                Control.Instance.LogDebug($"--- RepairMechLimbsChance: {chances.LimbChance}, RepairMechLimbs: {settings.RepairMechLimbs} ");
                 float roll = 0;
                 //hd
                 roll = (float)rnd.NextDouble();
-                Control.LogDebug($"--- HeadRepaired: {Control.Settings.HeadRepaired}, roll: {roll} ");
-                if (!Control.Settings.HeadRepaired && (!Control.Settings.RepairMechLimbs ||
-                                                      roll > LimbChance))
+                Control.Instance.LogDebug($"--- HeadRepaired: {settings.HeadRepaired}, roll: {roll} ");
+                if (!settings.HeadRepaired && (!settings.RepairMechLimbs ||
+                                                       roll > chances.LimbChance))
                     new_mech.Head.CurrentInternalStructure = 0f;
-                else if (Control.Settings.RandomStructureOnRepairedLimbs)
-                    new_mech.Head.CurrentInternalStructure *= Math.Min(Control.Settings.MinStructure, (float)rnd.NextDouble());
+                else if (settings.RandomStructureOnRepairedLimbs)
+                    new_mech.Head.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
 
                 //ct
                 roll = (float)rnd.NextDouble();
-                Control.LogDebug($"--- CentralTorsoRepaired: {Control.Settings.CentralTorsoRepaired}, roll: {roll} ");
-                if (!Control.Settings.CentralTorsoRepaired && (!Control.Settings.RepairMechLimbs ||
-                                                               roll > LimbChance))
+                Control.Instance.LogDebug($"--- CentralTorsoRepaired: {settings.CentralTorsoRepaired}, roll: {roll} ");
+                if (!settings.CentralTorsoRepaired && (!settings.RepairMechLimbs ||
+                                                               roll > chances.LimbChance))
                     new_mech.CenterTorso.CurrentInternalStructure = 0f;
-                else if (Control.Settings.RandomStructureOnRepairedLimbs)
-                    new_mech.CenterTorso.CurrentInternalStructure *= Math.Min(Control.Settings.MinStructure, (float)rnd.NextDouble());
+                else if (settings.RandomStructureOnRepairedLimbs)
+                    new_mech.CenterTorso.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
 
                 //rt
                 roll = (float)rnd.NextDouble();
-                Control.LogDebug($"--- RightTorsoRepaired: {Control.Settings.RightTorsoRepaired}, roll: {roll} ");
-                if (!Control.Settings.RightTorsoRepaired && (!Control.Settings.RepairMechLimbs ||
-                                                             roll > LimbChance))
+                Control.Instance.LogDebug($"--- RightTorsoRepaired: {settings.RightTorsoRepaired}, roll: {roll} ");
+                if (!settings.RightTorsoRepaired && (!settings.RepairMechLimbs ||
+                                                             roll > chances.LimbChance))
                     new_mech.RightTorso.CurrentInternalStructure = 0f;
-                else if (Control.Settings.RandomStructureOnRepairedLimbs)
-                    new_mech.RightTorso.CurrentInternalStructure *= Math.Min(Control.Settings.MinStructure, (float)rnd.NextDouble());
+                else if (settings.RandomStructureOnRepairedLimbs)
+                    new_mech.RightTorso.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
 
                 //lt
                 roll = (float)rnd.NextDouble();
-                Control.LogDebug($"--- LeftTorsoRepaired: {Control.Settings.LeftTorsoRepaired}, roll: {roll} ");
-                if (!Control.Settings.LeftTorsoRepaired && (!Control.Settings.RepairMechLimbs ||
-                                                            roll > LimbChance))
+                Control.Instance.LogDebug($"--- LeftTorsoRepaired: {settings.LeftTorsoRepaired}, roll: {roll} ");
+                if (!settings.LeftTorsoRepaired && (!settings.RepairMechLimbs ||
+                                                            roll > chances.LimbChance))
                     new_mech.LeftTorso.CurrentInternalStructure = 0f;
-                else if (Control.Settings.RandomStructureOnRepairedLimbs)
-                    new_mech.LeftTorso.CurrentInternalStructure *= Math.Min(Control.Settings.MinStructure, (float)rnd.NextDouble());
+                else if (settings.RandomStructureOnRepairedLimbs)
+                    new_mech.LeftTorso.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
 
                 //ra
                 roll = (float)rnd.NextDouble();
-                Control.LogDebug($"--- RightArmRepaired: {Control.Settings.RightArmRepaired}, roll: {roll} ");
-                if (!Control.Settings.RightArmRepaired && (!Control.Settings.RepairMechLimbs ||
-                                                           roll > LimbChance))
+                Control.Instance.LogDebug($"--- RightArmRepaired: {settings.RightArmRepaired}, roll: {roll} ");
+                if (!settings.RightArmRepaired && (!settings.RepairMechLimbs ||
+                                                           roll > chances.LimbChance))
                     new_mech.RightArm.CurrentInternalStructure = 0f;
-                else if (Control.Settings.RandomStructureOnRepairedLimbs)
-                    new_mech.RightArm.CurrentInternalStructure *= Math.Min(Control.Settings.MinStructure, (float)rnd.NextDouble());
+                else if (settings.RandomStructureOnRepairedLimbs)
+                    new_mech.RightArm.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
 
                 //la
                 roll = (float)rnd.NextDouble();
-                Control.LogDebug($"--- LeftArmRepaired: {Control.Settings.LeftArmRepaired}, roll: {roll} ");
-                if (!Control.Settings.LeftArmRepaired && (!Control.Settings.RepairMechLimbs ||
-                                                          roll > LimbChance))
+                Control.Instance.LogDebug($"--- LeftArmRepaired: {settings.LeftArmRepaired}, roll: {roll} ");
+                if (!settings.LeftArmRepaired && (!settings.RepairMechLimbs ||
+                                                          roll > chances.LimbChance))
                     new_mech.LeftArm.CurrentInternalStructure = 0f;
-                else if (Control.Settings.RandomStructureOnRepairedLimbs)
-                    new_mech.LeftArm.CurrentInternalStructure *= Math.Min(Control.Settings.MinStructure, (float)rnd.NextDouble());
+                else if (settings.RandomStructureOnRepairedLimbs)
+                    new_mech.LeftArm.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
 
                 //rl
 
                 roll = (float)rnd.NextDouble();
-                Control.LogDebug($"--- RightLegRepaired: {Control.Settings.RightLegRepaired}, roll: {roll} ");
-                if (!Control.Settings.RightLegRepaired && (!Control.Settings.RepairMechLimbs ||
-                                                           roll > LimbChance))
+                Control.Instance.LogDebug($"--- RightLegRepaired: {settings.RightLegRepaired}, roll: {roll} ");
+                if (!settings.RightLegRepaired && (!settings.RepairMechLimbs ||
+                                                           roll > chances.LimbChance))
                     new_mech.RightLeg.CurrentInternalStructure = 0f;
-                else if (Control.Settings.RandomStructureOnRepairedLimbs)
-                    new_mech.RightLeg.CurrentInternalStructure *= Math.Min(Control.Settings.MinStructure, (float)rnd.NextDouble());
+                else if (settings.RandomStructureOnRepairedLimbs)
+                    new_mech.RightLeg.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
 
                 //ll
-                Control.LogDebug($"--- LeftLegRepaired: {Control.Settings.LeftLegRepaired}, roll: {roll} ");
+                Control.Instance.LogDebug($"--- LeftLegRepaired: {settings.LeftLegRepaired}, roll: {roll} ");
                 roll = (float)rnd.NextDouble();
-                if (!Control.Settings.LeftLegRepaired && (!Control.Settings.RepairMechLimbs ||
-                                                          roll > LimbChance))
+                if (!settings.LeftLegRepaired && (!settings.RepairMechLimbs ||
+                                                          roll > chances.LimbChance))
                     new_mech.LeftLeg.CurrentInternalStructure = 0f;
-                else if (Control.Settings.RandomStructureOnRepairedLimbs)
-                    new_mech.LeftLeg.CurrentInternalStructure *= Math.Min(Control.Settings.MinStructure, (float)rnd.NextDouble());
+                else if (settings.RandomStructureOnRepairedLimbs)
+                    new_mech.LeftLeg.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
 
-                Control.LogDebug($"-- broke equipment");
+                Control.Instance.LogDebug($"-- broke equipment");
 
                 foreach (var cref in new_mech.Inventory)
                 {
                     if (new_mech.IsLocationDestroyed(cref.MountedLocation))
                     {
-                        Control.LogDebug($"---- {cref.ComponentDefID} - location destroyed");
+                        Control.Instance.LogDebug($"---- {cref.ComponentDefID} - location destroyed");
                         cref.DamageLevel = ComponentDamageLevel.Destroyed;
                     }
-                    else if (Control.Settings.RepairMechComponents)
+                    else if (settings.RepairMechComponents)
                     {
                         roll = (float)rnd.NextDouble();
 
-                        if (roll < CompFChance)
+                        if (roll < chances.CompFChance)
                         {
-                            Control.LogDebug(
-                                $"---- {cref.ComponentDefID} - {roll} vs {CompFChance} - repaired ");
+                            Control.Instance.LogDebug(
+                                $"---- {cref.ComponentDefID} - {roll} vs {chances.CompFChance} - repaired ");
                             cref.DamageLevel = ComponentDamageLevel.Functional;
                         }
-                        else if (roll < CompNFChance)
+                        else if (roll < chances.CompNFChance)
                         {
-                            Control.LogDebug(
-                                $"---- {cref.ComponentDefID} - {roll} vs {CompNFChance} - broken ");
+                            Control.Instance.LogDebug(
+                                $"---- {cref.ComponentDefID} - {roll} vs {chances.CompNFChance} - broken ");
                             cref.DamageLevel = ComponentDamageLevel.NonFunctional;
                         }
                         else
                         {
-                            Control.LogDebug(
-                                $"---- {cref.ComponentDefID} - {roll} vs {CompNFChance} - fubar ");
+                            Control.Instance.LogDebug(
+                                $"---- {cref.ComponentDefID} - {roll} vs {chances.CompNFChance} - fubar ");
                             cref.DamageLevel = ComponentDamageLevel.Destroyed;
                         }
                     }
@@ -516,7 +529,7 @@ namespace CustomSalvage
             }
             catch (Exception e)
             {
-                Control.LogError($"ERROR in BrokeParts", e);
+                Control.Instance.LogError($"ERROR in BrokeParts", e);
                 throw;
             }
         }
@@ -542,9 +555,11 @@ namespace CustomSalvage
                 mech.Description.UIName, mech.Description.Id));
             var info = Proccesed[mech.Description.Id];
 
-            float cb = Control.Settings.AdaptPartBaseCost * mech.Description.Cost / chassis.MechPartMax;
-            Control.LogDebug($"base part price for {mech.Description.UIName}({mech.Description.Id}): {cb}. mechcost: {mech.Description.Cost} ");
-            Control.LogDebug($"-- setting:{Control.Settings.AdaptPartBaseCost}, maxparts:{chassis.MechPartMax}, minparts:{info.MinParts}, pricemult: {info.PriceMult}");
+            var settings = Control.Instance.Settings;
+
+            float cb = settings.AdaptPartBaseCost * mech.Description.Cost / chassis.MechPartMax;
+            Control.Instance.LogDebug($"base part price for {mech.Description.UIName}({mech.Description.Id}): {cb}. mechcost: {mech.Description.Cost} ");
+            Control.Instance.LogDebug($"-- setting:{settings.AdaptPartBaseCost}, maxparts:{chassis.MechPartMax}, minparts:{info.MinParts}, pricemult: {info.PriceMult}");
 
             foreach (var mechDef in list)
             {
@@ -560,25 +575,25 @@ namespace CustomSalvage
                 {
                     float omnimod = 1;
                     float mod = 1 + Mathf.Abs(mech.Description.Cost - mechDef.Description.Cost) /
-                                (float)mech.Description.Cost * Control.Settings.AdaptModWeight;
-                    if (mod > Control.Settings.MaxAdaptMod)
-                        mod = Control.Settings.MaxAdaptMod;
+                                (float)mech.Description.Cost * settings.AdaptModWeight;
+                    if (mod > settings.MaxAdaptMod)
+                        mod = settings.MaxAdaptMod;
 
                     var info2 = Proccesed[mechDef.Description.Id];
 
                     if (info.Omni && info2.Omni)
                         if (info.Special && info2.Special)
-                            omnimod = Control.Settings.OmniSpecialtoSpecialMod;
+                            omnimod = settings.OmniSpecialtoSpecialMod;
                         else if (!info.Special && !info2.Special)
-                            omnimod = Control.Settings.OmniNormalMod;
+                            omnimod = settings.OmniNormalMod;
                         else
-                            omnimod = Control.Settings.OmniSpecialtoNormalMod;
+                            omnimod = settings.OmniSpecialtoNormalMod;
 
 
 
-                    var price = (int)(cb * omnimod * mod * info.PriceMult * (Control.Settings.ApplyPartPriceMod ? info2.PriceMult : 1));
+                    var price = (int)(cb * omnimod * mod * info.PriceMult * (settings.ApplyPartPriceMod ? info2.PriceMult : 1));
 
-                    Control.LogDebug($"-- price for {mechDef.Description.UIName}({mechDef.Description.Id}) mechcost: {mechDef.Description.Cost}. price mod: {mod:0.000}, tag mod:{info2.PriceMult:0.000} omnimod:{omnimod:0.000} adopt price: {price}");
+                    Control.Instance.LogDebug($"-- price for {mechDef.Description.UIName}({mechDef.Description.Id}) mechcost: {mechDef.Description.Cost}. price mod: {mod:0.000}, tag mod:{info2.PriceMult:0.000} omnimod:{omnimod:0.000} adopt price: {price}");
                     used_parts.Add(new parts_info(num, 0, price, mechDef.Description.UIName, mechDef.Description.Id));
                 }
             }
@@ -738,10 +753,10 @@ namespace CustomSalvage
         private static void CompeteMech()
         {
 
-            Control.LogDebug($"Compete mech {mech.Description.UIName}({mech.Description.Id})");
+            Control.Instance.LogDebug($"Compete mech {mech.Description.UIName}({mech.Description.Id})");
             try
             {
-                Control.LogDebug($"-- remove parts");
+                Control.Instance.LogDebug($"-- remove parts");
                 infoWidget.SetData(mechBay, null);
                 foreach (var info in used_parts)
                 {
@@ -750,17 +765,17 @@ namespace CustomSalvage
                 }
 
                 int total = used_parts.Sum(i => i.cbills * i.used);
-                Control.LogDebug($"-- take money {total}");
+                Control.Instance.LogDebug($"-- take money {total}");
                 mechBay.Sim.AddFunds(-total);
+                Control.Instance.LogDebug($"-- making mech");
+                MakeMech(mechBay.Sim, used_parts.Where(i => i.mechid != mech.Description.Id).Sum(i => i.count));
                 used_parts.Clear();
-                Control.LogDebug($"-- making mech");
-                MakeMech(mechBay.Sim);
-                Control.LogDebug($"-- refresh mechlab");
+                Control.Instance.LogDebug($"-- refresh mechlab");
                 mechBay.RefreshData(false);
             }
             catch (Exception e)
             {
-                Control.LogError("Error in Complete Mech", e);
+                Control.Instance.LogError("Error in Complete Mech", e);
             }
         }
     }

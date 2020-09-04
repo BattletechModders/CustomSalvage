@@ -106,7 +106,9 @@
     <Compile Include="AssemblyVariant.cs" />
     <Compile Include="ChassisHandler.cs" />
     <Compile Include="ContractHelper.cs" />
+    <Compile Include="LootableMech.cs" />
     <Compile Include="LostUnitActions.cs" />
+    <Compile Include="MultyBuyWidgetHelper.cs" />
     <Compile Include="PartsNumCalculations.cs" />
     <Compile Include="Patches\Contract_GenerateSalvage.cs" />
     <Compile Include="Control.cs" />

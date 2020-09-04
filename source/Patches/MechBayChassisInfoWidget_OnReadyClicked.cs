@@ -16,7 +16,7 @@ namespace CustomSalvage
         public static bool OnReadyClicked(ChassisDef ___selectedChassis, MechBayPanel ___mechBay
             , MechBayChassisUnitElement ___chassisElement, MechBayChassisInfoWidget __instance)
         {
-            if (!Control.Settings.AssemblyVariants)
+            if (!Control.Instance.Settings.AssemblyVariants)
                 return true;
 
             if (___selectedChassis == null)
@@ -62,7 +62,7 @@ namespace CustomSalvage
                 return false;
             }
 
-            if (!Control.Settings.AssemblyVariants)
+            if (!Control.Instance.Settings.AssemblyVariants)
                 return true;
 
 

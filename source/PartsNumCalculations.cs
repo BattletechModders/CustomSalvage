@@ -13,39 +13,40 @@ namespace CustomSalvage
                 UnityGameInstance.BattleTechGame.Simulation.Constants.Story.DefaultMechPartMax;
             {
                 if (mech.IsLocationDestroyed(ChassisLocations.CenterTorso))
-                    return (int)(n * Control.Settings.VACTDestroyedMod);
+                    return (int)(n * Control.Instance.Settings.VACTDestroyedMod);
                 if (mech.IsLocationDestroyed(ChassisLocations.LeftLeg) &&
                     mech.IsLocationDestroyed(ChassisLocations.RightLeg))
-                    return (int)(n * Control.Settings.VABLDestroyedMod);
+                    return (int)(n * Control.Instance.Settings.VABLDestroyedMod);
                 return n;
             }
         }
 
         internal static int PartDestroyed(MechDef mech)
         {
+            var settings = Control.Instance.Settings;
             if (mech.IsLocationDestroyed(ChassisLocations.CenterTorso))
-                return Control.Settings.CenterTorsoDestroyedParts;
+                return settings.CenterTorsoDestroyedParts;
 
 
-            float total = Control.Settings.SalvageArmWeight * 2 + Control.Settings.SalvageHeadWeight +
-                          Control.Settings.SalvageLegWeight * 2 + Control.Settings.SalvageTorsoWeight * 2 + 1;
+            float total = settings.SalvageArmWeight * 2 + settings.SalvageHeadWeight +
+                          settings.SalvageLegWeight * 2 + settings.SalvageTorsoWeight * 2 + 1;
 
             float val = total;
 
-            val -= mech.IsLocationDestroyed(ChassisLocations.Head) ? Control.Settings.SalvageHeadWeight : 0;
+            val -= mech.IsLocationDestroyed(ChassisLocations.Head) ? settings.SalvageHeadWeight : 0;
 
             val -= mech.IsLocationDestroyed(ChassisLocations.LeftTorso)
-                ? Control.Settings.SalvageTorsoWeight
+                ? settings.SalvageTorsoWeight
                 : 0;
             val -= mech.IsLocationDestroyed(ChassisLocations.RightTorso)
-                ? Control.Settings.SalvageTorsoWeight
+                ? settings.SalvageTorsoWeight
                 : 0;
 
-            val -= mech.IsLocationDestroyed(ChassisLocations.LeftLeg) ? Control.Settings.SalvageLegWeight : 0;
-            val -= mech.IsLocationDestroyed(ChassisLocations.RightLeg) ? Control.Settings.SalvageLegWeight : 0;
+            val -= mech.IsLocationDestroyed(ChassisLocations.LeftLeg) ? settings.SalvageLegWeight : 0;
+            val -= mech.IsLocationDestroyed(ChassisLocations.RightLeg) ? settings.SalvageLegWeight : 0;
 
-            val -= mech.IsLocationDestroyed(ChassisLocations.LeftArm) ? Control.Settings.SalvageArmWeight : 0;
-            val -= mech.IsLocationDestroyed(ChassisLocations.LeftLeg) ? Control.Settings.SalvageArmWeight : 0;
+            val -= mech.IsLocationDestroyed(ChassisLocations.LeftArm) ? settings.SalvageArmWeight : 0;
+            val -= mech.IsLocationDestroyed(ChassisLocations.LeftLeg) ? settings.SalvageArmWeight : 0;
 
             var constants = UnityGameInstance.BattleTechGame.Simulation.Constants;
 
@@ -60,28 +61,29 @@ namespace CustomSalvage
 
         internal static int PartDestroyedNoCT(MechDef mech)
         {
-            float total = Control.Settings.SalvageArmWeight * 2 + Control.Settings.SalvageHeadWeight +
-                          Control.Settings.SalvageLegWeight * 2 + Control.Settings.SalvageTorsoWeight * 2 + 1 + 
-                          Control.Settings.SalvageCTWeight;
+            var settings = Control.Instance.Settings;
+            float total = settings.SalvageArmWeight * 2 + settings.SalvageHeadWeight +
+                          settings.SalvageLegWeight * 2 + settings.SalvageTorsoWeight * 2 + 1 + 
+                          settings.SalvageCTWeight;
 
             float val = total;
 
-            val -= mech.IsLocationDestroyed(ChassisLocations.Head) ? Control.Settings.SalvageHeadWeight : 0;
+            val -= mech.IsLocationDestroyed(ChassisLocations.Head) ? settings.SalvageHeadWeight : 0;
 
             val -= mech.IsLocationDestroyed(ChassisLocations.LeftTorso)
-                ? Control.Settings.SalvageTorsoWeight
+                ? settings.SalvageTorsoWeight
                 : 0;
             val -= mech.IsLocationDestroyed(ChassisLocations.RightTorso)
-                ? Control.Settings.SalvageTorsoWeight
+                ? settings.SalvageTorsoWeight
                 : 0;
 
-            val -= mech.IsLocationDestroyed(ChassisLocations.LeftLeg) ? Control.Settings.SalvageLegWeight : 0;
-            val -= mech.IsLocationDestroyed(ChassisLocations.RightLeg) ? Control.Settings.SalvageLegWeight : 0;
+            val -= mech.IsLocationDestroyed(ChassisLocations.LeftLeg) ? settings.SalvageLegWeight : 0;
+            val -= mech.IsLocationDestroyed(ChassisLocations.RightLeg) ? settings.SalvageLegWeight : 0;
 
-            val -= mech.IsLocationDestroyed(ChassisLocations.LeftArm) ? Control.Settings.SalvageArmWeight : 0;
-            val -= mech.IsLocationDestroyed(ChassisLocations.LeftLeg) ? Control.Settings.SalvageArmWeight : 0;
+            val -= mech.IsLocationDestroyed(ChassisLocations.LeftArm) ? settings.SalvageArmWeight : 0;
+            val -= mech.IsLocationDestroyed(ChassisLocations.LeftLeg) ? settings.SalvageArmWeight : 0;
 
-            val -= mech.IsLocationDestroyed(ChassisLocations.CenterTorso) ? Control.Settings.SalvageCTWeight : 0;
+            val -= mech.IsLocationDestroyed(ChassisLocations.CenterTorso) ? settings.SalvageCTWeight : 0;
 
             var constants = UnityGameInstance.BattleTechGame.Simulation.Constants;
 

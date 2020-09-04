@@ -29,11 +29,11 @@ namespace CustomSalvage
                 int value = Mathf.RoundToInt((float) ___selectedChassis.Description.Cost *
                                              ___mechBay.Sim.Constants.Finances.MechScrapModifier);
 
-                if (Control.Settings.AllowScrapToParts)
+                if (Control.Instance.Settings.AllowScrapToParts)
                 {
                     int max = ___mechBay.Sim.Constants.Story.DefaultMechPartMax;
-                    int n1 = Mathf.Clamp(Mathf.RoundToInt(max * Control.Settings.MinScrapParts), 1, max);
-                    int n2 = Mathf.Clamp(Mathf.RoundToInt(max * Control.Settings.MaxScrapParts), 1, max);
+                    int n1 = Mathf.Clamp(Mathf.RoundToInt(max * Control.Instance.Settings.MinScrapParts), 1, max);
+                    int n2 = Mathf.Clamp(Mathf.RoundToInt(max * Control.Instance.Settings.MaxScrapParts), 1, max);
 
 
                     GenericPopupBuilder.Create($"Scrap {name}?",
@@ -49,7 +49,7 @@ namespace CustomSalvage
                 else
                 {
                     GenericPopupBuilder.Create($"Scrap {name}?",
-                            $"Are you sure you want to scrap this 'Mech Chassis? It will be removed permanently from your inventory.\n\nSCRAP VALUE: < color =#F79B26FF>{SimGameState.GetCBillString(value)}</color>")
+                            $"Are you sure you want to scrap this 'Mech Chassis? It will be removed permanently from your inventory.\n\nSCRAP VALUE: <color=#F79B26FF>{SimGameState.GetCBillString(value)}</color>")
                         .AddButton("Cancel", null, true, null)
                         .AddButton("scrap", () => ScrapChassis(1, ___selectedChassis, __instance, ___mechBay), true,
                             null)
@@ -76,10 +76,15 @@ namespace CustomSalvage
                 }
                 else
                 {
-                    var popup = LazySingletonBehavior<UIManager>.Instance.GetOrCreatePopupModule<SG_Stores_MultiPurchasePopup>(string.Empty);
+ //                   var popup = LazySingletonBehavior<UIManager>.Instance.GetOrCreatePopupModule<SG_Stores_MultiPurchasePopup>(string.Empty);
                    
                     var shopdef = new ShopDefItem(mech.Description.Id, ShopItemType.MechPart, 1, num, true, false, value);
-                    popup.SetData(___mechBay.Sim, shopdef, name + " parts", num, value, (n) => ScrapParts(n, ___selectedChassis, __instance, ___mechBay));
+
+                    SG_Stores_MultiPurchasePopup_Handler.StartDialog("Scrap", shopdef, mech.Description.Name + " Parts", num, value,
+                        (n) => ScrapParts(n, ___selectedChassis, __instance, ___mechBay),
+                        () => { return; }, ___mechBay.Sim);
+
+//                    popup.SetData(___mechBay.Sim, shopdef, name + " parts", num, value, (n) => ScrapParts(n, ___selectedChassis, __instance, ___mechBay));
                 }
             }
 

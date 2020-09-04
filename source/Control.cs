@@ -8,25 +8,39 @@ using System.Linq;
 using BattleTech;
 using HBS.Logging;
 using HBS.Util;
+using HoudiniEngineUnity;
 
 
 namespace CustomSalvage
 {
 
 
-    public static class Control
+    public class Control
     {
-        public static CustomSalvageSettings Settings = new CustomSalvageSettings();
+        private static  Control _instance;
+        public static Control Instance => _instance ?? (_instance = new Control());
 
-        private static ILog Logger;
-        private static FileLogAppender logAppender;
+        public  Settings Settings = new Settings();
+
+        private ILog Logger;
+        private FileLogAppender logAppender;
+        private const string ModName = "CustomSalvage";
+        private string LogPrefix = "[CSalv]";
+
+        internal RecoveryDelegate NeedRecovery;
+        internal LostUnitActionDelegate LostUnitAction;
+        internal PartsNumDelegeate GetNumParts;
 
 
-        internal static RecoveryDelegate NeedRecovery;
-        internal static LostUnitActionDelegate LostUnitAction;
-        internal static PartsNumDelegeate GetNumParts;
 
         public static void Init(string directory, string settingsJSON)
+        {
+            _instance.InitNonStatic(directory, settingsJSON);
+
+
+        }
+
+        private void InitNonStatic(string directory, string settingsJson)
         {
             Logger = HBS.Logging.Logger.GetLogger("CustomSalvage", LogLevel.Debug);
 
@@ -34,14 +48,18 @@ namespace CustomSalvage
             {
                 try
                 {
-                    Settings = new CustomSalvageSettings();
-                    JSONSerializationUtility.FromJSON(Settings, settingsJSON);
+                    Settings = new Settings();
+                    JSONSerializationUtility.FromJSON(Settings, settingsJson);
                     HBS.Logging.Logger.SetLoggerLevel(Logger.Name, Settings.LogLevel);
                 }
                 catch (Exception)
                 {
-                    Settings = new CustomSalvageSettings();
+                    Settings = new Settings();
                 }
+
+                if (!Settings.ShowLogPrefix)
+                    LogPrefix = "";
+
 
                 Settings.Complete();
                 SetupLogging(directory);
@@ -50,9 +68,9 @@ namespace CustomSalvage
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
 
 #if USE_CC
-                Logger.Log("Loaded CustomSalvageCC v0.4.2 for bt 1.8");
+                Logger.Log("Loaded CustomSalvageCC v1.0 for bt 1.9.1");
 #else
-                Logger.Log("Loaded CustomSalvageNonCC v0.4.2 for bt 1.8");
+                Logger.Log("Loaded CustomSalvageNonCC v1.0 for bt 1.9.1");
 #endif
 
                 switch (Settings.RecoveryType)
@@ -116,39 +134,39 @@ namespace CustomSalvage
             }
         }
 
-#region LOGGING
+        #region LOGGING
         [Conditional("CCDEBUG")]
-        public static void LogDebug(string message)
+        public  void LogDebug(string message)
         {
-            Logger.LogDebug(message);
+            Logger.LogDebug(LogPrefix + message);
         }
         [Conditional("CCDEBUG")]
-        public static void LogDebug(string message, Exception e)
+        public  void LogDebug(string message, Exception e)
         {
-            Logger.LogDebug(message, e);
+            Logger.LogDebug(LogPrefix + message, e);
         }
 
-        public static void LogError(string message)
+        public  void LogError(string message)
         {
-            Logger.LogError(message);
+            Logger.LogError(LogPrefix + message);
         }
-        public static void LogError(string message, Exception e)
+        public  void LogError(string message, Exception e)
         {
-            Logger.LogError(message, e);
+            Logger.LogError(LogPrefix + message, e);
         }
-        public static void LogError(Exception e)
+        public  void LogError(Exception e)
         {
             Logger.LogError(e);
         }
 
-        public static void Log(string message)
+        public  void Log(string message)
         {
             Logger.Log(message);
         }
 
 
 
-        internal static void SetupLogging(string Directory)
+        internal  void SetupLogging(string Directory)
         {
             var logFilePath = Path.Combine(Directory, "log.txt");
 
@@ -163,7 +181,7 @@ namespace CustomSalvage
             }
         }
 
-        internal static void ShutdownLogging()
+        internal  void ShutdownLogging()
         {
             if (logAppender == null)
             {
@@ -183,7 +201,7 @@ namespace CustomSalvage
             logAppender = null;
         }
 
-        private static void AddLogFileForLogger(string logFilePath)
+        private  void AddLogFileForLogger(string logFilePath)
         {
             try
             {
@@ -199,7 +217,7 @@ namespace CustomSalvage
 
 #endregion
 
-        public static bool IsDestroyed(UnitResult lostUnit)
+        public bool IsDestroyed(UnitResult lostUnit)
         {
 #if USE_CC
             return CustomComponents.Contract_GenerateSalvage.IsDestroyed(lostUnit.mech);

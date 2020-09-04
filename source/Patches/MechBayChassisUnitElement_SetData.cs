@@ -20,34 +20,35 @@ namespace CustomSalvage
         {
             try
             {
+                var settings = Control.Instance.Settings;
                 if (partsCount != 0)
                 {
                     ___partsLabelText.SetText("Parts");
                     ___partsText.SetText($"{partsCount} / {partsMax}");
 
                     if (partsCount >= partsMax)
-                        ___mechImage.color = Control.Settings.color_ready;
+                        ___mechImage.color = settings.color_ready;
                     else
                     {
                         int min = ChassisHandler.GetInfo(chassisDef.Description.Id).MinParts;
                         var list = ChassisHandler.GetCompatible(chassisDef.Description.Id);
                         if (list == null)
-                            ___mechImage.color = Control.Settings.color_exclude;
+                            ___mechImage.color = settings.color_exclude;
                         else if (list.Sum(i => ChassisHandler.GetCount(i.Description.Id)) >= partsMax && chassisDef.MechPartCount >= min)
-                            ___mechImage.color = Control.Settings.color_variant;
+                            ___mechImage.color = settings.color_variant;
                         else
-                            ___mechImage.color = Control.Settings.color_notready;
+                            ___mechImage.color = settings.color_notready;
                     }
                 }
                 else
-                    ___mechImage.color = Control.Settings.color_stored;
+                    ___mechImage.color = settings.color_stored;
 
                 var go = __instance.transform.Find("Representation/contents/storage_OverlayBars");
 
                 var mech = ChassisHandler.GetMech(chassisDef.Description.Id);
 
-                if (Control.Settings.BGColors != null && Control.Settings.BGColors.Length > 0)
-                    foreach (var color in Control.Settings.BGColors)
+                if (settings.BGColors != null && settings.BGColors.Length > 0)
+                    foreach (var color in settings.BGColors)
                     {
                         if (mech.MechTags.Contains(color.Tag))
                         {
@@ -58,9 +59,9 @@ namespace CustomSalvage
                         }
                     }
             }
-            catch (Exception e)
+            catch 
             {
-                Control.LogDebug("Error while get mechdef for " + chassisDef.Description.Id);
+                Control.Instance.LogDebug("Error while get mechdef for " + chassisDef.Description.Id);
             }
         }
     }

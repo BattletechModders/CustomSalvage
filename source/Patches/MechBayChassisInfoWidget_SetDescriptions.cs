@@ -22,7 +22,9 @@ namespace CustomSalvage
             if (___selectedChassis == null)
                 return;
 
-            if (!Control.Settings.AssemblyVariants)
+
+            var settings = Control.Instance.Settings;
+            if (!settings.AssemblyVariants)
                 return;
 
 
@@ -72,7 +74,7 @@ namespace CustomSalvage
             {
                 add = $"\n<color=#32CD32>Compatible with owned variants:";
 
-                if (list.Count > Control.Settings.MaxVariantsInDescription + 1)
+                if (list.Count > settings.MaxVariantsInDescription + 1)
                 {
                     int showed = 0;
                     foreach (var mechDef in list)
@@ -81,11 +83,11 @@ namespace CustomSalvage
                             continue;
                         add += "\n" + new Text(mechDef.Description.UIName).ToString();
                         showed += 1;
-                        if (showed == Control.Settings.MaxVariantsInDescription - 1)
+                        if (showed == settings.MaxVariantsInDescription - 1)
                             break;
                     }
 
-                    add += $"\n and {Control.Settings.MaxVariantsInDescription - showed} other variants</color>";
+                    add += $"\n and {settings.MaxVariantsInDescription - showed} other variants</color>";
                 }
                 else
                 {
@@ -99,6 +101,23 @@ namespace CustomSalvage
                     add += "</color>";
                 }
 
+            }
+
+            if (settings.BrokenMech && settings.ShowBrokeChances)
+            {
+                var mech = ChassisHandler.GetMech(___selectedChassis.Description.Id);
+                var chances = new ChassisHandler.AssemblyChancesResult(mech, UnityGameInstance.BattleTechGame.Simulation, 0);
+
+                add += $"Base Tech: {chances.BaseTP}";
+                add += $"\nLimb Repair: {(int)(chances.LimbChance * 100)}%";
+                add += $"\nItem Recovered: {(int)(chances.CompNFChance * 100)}%";
+                add += $"\nItem Repair: {(int)(chances.CompFChance * 100)}%";
+#if CCDEBUG
+                if (settings.ShowDEBUGChances)
+                {
+                    add += chances.DEBUGText;
+                }
+#endif
             }
 
             ___mechDetails.SetText(___mechDetails.text + add);

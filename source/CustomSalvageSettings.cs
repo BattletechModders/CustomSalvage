@@ -36,7 +36,7 @@ namespace CustomSalvage
         FullMechSalvage
     }
 
-    public class CustomSalvageSettings
+    public class Settings
     {
         public class broke_info
         {
@@ -134,6 +134,8 @@ namespace CustomSalvage
 
         public bool UnEquipedMech = false;
         public bool BrokenMech = true;
+        public bool ShowBrokeChances = true;
+        public bool ShowDEBUGChances = true;
 
         public bool RepairChanceByTP = false;
         public int BaseTP = 10;
@@ -174,6 +176,7 @@ namespace CustomSalvage
         public float OmniSpecialtoSpecialMod = 0.1f;
         public float OmniSpecialtoNormalMod = 0.25f;
         public float OmniNormalMod = 0f;
+        public bool ShowLogPrefix { get; set; } = true;
 
         public void Complete()
         {
