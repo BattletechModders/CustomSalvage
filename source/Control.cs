@@ -14,6 +14,7 @@ using HoudiniEngineUnity;
 namespace CustomSalvage
 {
 
+    public delegate void AdditionalSalvageStep(ContractHelper contract); 
 
     public class Control
     {
@@ -31,11 +32,16 @@ namespace CustomSalvage
         internal LostUnitActionDelegate LostUnitAction;
         internal PartsNumDelegeate GetNumParts;
 
+        public event AdditionalSalvageStep OnAdditionalSalvageStep;
 
+        internal void CallForAdditionalSavage(ContractHelper contract)
+        {
+            OnAdditionalSalvageStep?.Invoke(contract);
+        }
 
         public static void Init(string directory, string settingsJSON)
         {
-            _instance.InitNonStatic(directory, settingsJSON);
+            Instance.InitNonStatic(directory, settingsJSON);
 
 
         }

@@ -9,6 +9,7 @@ using BattleTech.UI;
 using CustomComponents;
 #endif
 using Harmony;
+using HBS.Collections;
 using Localize;
 using TMPro;
 using UnityEngine;
@@ -45,9 +46,9 @@ namespace CustomSalvage
 
         private static Dictionary<string, MechDef> ChassisToMech = new Dictionary<string, MechDef>();
         private static Dictionary<string, int> PartCount = new Dictionary<string, int>();
-        private static Dictionary<string, List<MechDef>> Compatible = new Dictionary<string, List<MechDef>>();
+        public static Dictionary<string, List<MechDef>> Compatible = new Dictionary<string, List<MechDef>>();
 
-        private static Dictionary<string, mech_info> Proccesed = new Dictionary<string, mech_info>();
+        public static Dictionary<string, mech_info> Proccesed = new Dictionary<string, mech_info>();
 
         public static void RegisterMechDef(MechDef mech, int part_count = 0)
         {
@@ -66,7 +67,7 @@ namespace CustomSalvage
                 var assembly = mech.Chassis.GetComponent<AssemblyVariant>();
 #endif
                 var info = new mech_info();
-                info.Omni = !string.IsNullOrEmpty(Control.Instance.Settings.OmniTechTag) && (
+                info.Omni = !String.IsNullOrEmpty(Control.Instance.Settings.OmniTechTag) && (
                             mech.Chassis.ChassisTags.Contains(Control.Instance.Settings.OmniTechTag) ||
                                 mech.MechTags.Contains(Control.Instance.Settings.OmniTechTag));
 
@@ -137,10 +138,10 @@ namespace CustomSalvage
             }
         }
 
-        private static string GetPrefabId(MechDef mech)
+        public static string GetPrefabId(MechDef mech)
         {
 #if USE_CC
-            if (mech.Chassis.Is<AssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
+            if (mech.Chassis.Is<AssemblyVariant>(out var a) && !String.IsNullOrEmpty(a.PrefabID))
                 return a.PrefabID + mech.Chassis.Tonnage.ToString();
 #endif
             return mech.Chassis.PrefabIdentifier + mech.Chassis.Tonnage.ToString();
@@ -269,7 +270,6 @@ namespace CustomSalvage
 
         private static void MakeMech(SimGameState sim, int other_parts)
         {
-
             Control.Instance.LogDebug($"Mech Assembly started for {mech.Description.UIName}");
             MechDef new_mech = new MechDef(mech, mechBay.Sim.GenerateSimGameUID(), true);
 
@@ -424,7 +424,7 @@ namespace CustomSalvage
                 roll = (float)rnd.NextDouble();
                 Control.Instance.LogDebug($"--- HeadRepaired: {settings.HeadRepaired}, roll: {roll} ");
                 if (!settings.HeadRepaired && (!settings.RepairMechLimbs ||
-                                                       roll > chances.LimbChance))
+                                               roll > chances.LimbChance))
                     new_mech.Head.CurrentInternalStructure = 0f;
                 else if (settings.RandomStructureOnRepairedLimbs)
                     new_mech.Head.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
@@ -433,7 +433,7 @@ namespace CustomSalvage
                 roll = (float)rnd.NextDouble();
                 Control.Instance.LogDebug($"--- CentralTorsoRepaired: {settings.CentralTorsoRepaired}, roll: {roll} ");
                 if (!settings.CentralTorsoRepaired && (!settings.RepairMechLimbs ||
-                                                               roll > chances.LimbChance))
+                                                       roll > chances.LimbChance))
                     new_mech.CenterTorso.CurrentInternalStructure = 0f;
                 else if (settings.RandomStructureOnRepairedLimbs)
                     new_mech.CenterTorso.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
@@ -442,7 +442,7 @@ namespace CustomSalvage
                 roll = (float)rnd.NextDouble();
                 Control.Instance.LogDebug($"--- RightTorsoRepaired: {settings.RightTorsoRepaired}, roll: {roll} ");
                 if (!settings.RightTorsoRepaired && (!settings.RepairMechLimbs ||
-                                                             roll > chances.LimbChance))
+                                                     roll > chances.LimbChance))
                     new_mech.RightTorso.CurrentInternalStructure = 0f;
                 else if (settings.RandomStructureOnRepairedLimbs)
                     new_mech.RightTorso.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
@@ -451,7 +451,7 @@ namespace CustomSalvage
                 roll = (float)rnd.NextDouble();
                 Control.Instance.LogDebug($"--- LeftTorsoRepaired: {settings.LeftTorsoRepaired}, roll: {roll} ");
                 if (!settings.LeftTorsoRepaired && (!settings.RepairMechLimbs ||
-                                                            roll > chances.LimbChance))
+                                                    roll > chances.LimbChance))
                     new_mech.LeftTorso.CurrentInternalStructure = 0f;
                 else if (settings.RandomStructureOnRepairedLimbs)
                     new_mech.LeftTorso.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
@@ -460,7 +460,7 @@ namespace CustomSalvage
                 roll = (float)rnd.NextDouble();
                 Control.Instance.LogDebug($"--- RightArmRepaired: {settings.RightArmRepaired}, roll: {roll} ");
                 if (!settings.RightArmRepaired && (!settings.RepairMechLimbs ||
-                                                           roll > chances.LimbChance))
+                                                   roll > chances.LimbChance))
                     new_mech.RightArm.CurrentInternalStructure = 0f;
                 else if (settings.RandomStructureOnRepairedLimbs)
                     new_mech.RightArm.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
@@ -469,7 +469,7 @@ namespace CustomSalvage
                 roll = (float)rnd.NextDouble();
                 Control.Instance.LogDebug($"--- LeftArmRepaired: {settings.LeftArmRepaired}, roll: {roll} ");
                 if (!settings.LeftArmRepaired && (!settings.RepairMechLimbs ||
-                                                          roll > chances.LimbChance))
+                                                  roll > chances.LimbChance))
                     new_mech.LeftArm.CurrentInternalStructure = 0f;
                 else if (settings.RandomStructureOnRepairedLimbs)
                     new_mech.LeftArm.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
@@ -479,7 +479,7 @@ namespace CustomSalvage
                 roll = (float)rnd.NextDouble();
                 Control.Instance.LogDebug($"--- RightLegRepaired: {settings.RightLegRepaired}, roll: {roll} ");
                 if (!settings.RightLegRepaired && (!settings.RepairMechLimbs ||
-                                                           roll > chances.LimbChance))
+                                                   roll > chances.LimbChance))
                     new_mech.RightLeg.CurrentInternalStructure = 0f;
                 else if (settings.RandomStructureOnRepairedLimbs)
                     new_mech.RightLeg.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
@@ -488,7 +488,7 @@ namespace CustomSalvage
                 Control.Instance.LogDebug($"--- LeftLegRepaired: {settings.LeftLegRepaired}, roll: {roll} ");
                 roll = (float)rnd.NextDouble();
                 if (!settings.LeftLegRepaired && (!settings.RepairMechLimbs ||
-                                                          roll > chances.LimbChance))
+                                                  roll > chances.LimbChance))
                     new_mech.LeftLeg.CurrentInternalStructure = 0f;
                 else if (settings.RandomStructureOnRepairedLimbs)
                     new_mech.LeftLeg.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
@@ -625,7 +625,7 @@ namespace CustomSalvage
                 new RequirementDef[0],
                 new SimGameEventObject[0],
                 options.ToArray(),
-                1, true, new HBS.Collections.TagSet());
+                1, true, new TagSet());
 
             if (!_hasInitEventTracker)
             {
@@ -777,6 +777,11 @@ namespace CustomSalvage
             {
                 Control.Instance.LogError("Error in Complete Mech", e);
             }
+        }
+
+        public static string GetMDefFromCDef(string cdefid)
+        {
+            return cdefid.Replace("chassisdef", "mechdef");
         }
     }
 }

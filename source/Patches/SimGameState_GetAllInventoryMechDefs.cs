@@ -34,7 +34,7 @@ namespace CustomSalvage
                         if (battleTechResourceType == BattleTechResourceType.MechDef)
                         {
                             var cdef = array[2];
-                            var mdef = array[2].Replace("chassisdef", "mechdef");
+                            var mdef = ChassisHandler.GetMDefFromCDef(array[2]);
 
                             if (__instance.DataManager.Exists(BattleTechResourceType.ChassisDef, cdef) &&
                                 __instance.DataManager.Exists(BattleTechResourceType.MechDef, mdef))

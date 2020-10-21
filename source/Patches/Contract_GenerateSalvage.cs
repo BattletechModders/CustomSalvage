@@ -86,11 +86,19 @@ namespace CustomSalvage
                 }
 
                 Control.Instance.LogDebug($"- Enemy Vechicle {__instance.Name}");
-                foreach (var vechicle in enemyVehicles)
+                var vehicles = Contract.Contract.BattleTechGame.Combat.AllEnemies.OfType<Vehicle>()
+                    .Where(i => i.IsDead);
+
+                foreach (var vehicle in vehicles)
                 {
-                    Control.Instance.LogDebug($"-- Salvaging {vechicle?.Chassis?.Description?.Name}");
-                    AddVechicleToSalvage(vechicle, Contract, simgame);
+                    Control.Instance.LogDebug($"-- Salvaging {vehicle?.VehicleDef?.Chassis?.Description?.Name}");
+                    AddVechicleToSalvage(vehicle, Contract, simgame);
                 }
+                //foreach (var vechicle in enemyVehicles)
+                //{
+                //    Control.Instance.LogDebug($"-- Salvaging {vechicle?.Chassis?.Description?.Name}");
+                //    AddVechicleToSalvage(vechicle, Contract, simgame);
+                //}
 
                 if (Control.Instance.Settings.SalvageTurrets)
                 {
@@ -105,6 +113,7 @@ namespace CustomSalvage
                     }
                 }
 
+                Control.Instance.CallForAdditionalSavage(Contract);
 
                 Contract.FilterPotentialSalvage(___finalPotentialSalvage);
                 int num2 = __instance.SalvagePotential;
@@ -161,9 +170,9 @@ namespace CustomSalvage
                 }
         }
 
-        private static void AddVechicleToSalvage(VehicleDef vechicle, ContractHelper contract, SimGameState simgame)
+        private static void AddVechicleToSalvage(Vehicle vechicle, ContractHelper contract, SimGameState simgame)
         {
-            foreach (var component in vechicle.Inventory)
+            foreach (var component in vechicle.VehicleDef.Inventory)
             {
                 if (component.DamageLevel != ComponentDamageLevel.Destroyed)
                 {
