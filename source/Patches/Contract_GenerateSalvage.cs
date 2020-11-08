@@ -92,7 +92,15 @@ namespace CustomSalvage
                 foreach (var vehicle in vehicles)
                 {
                     Control.Instance.LogDebug($"-- Salvaging {vehicle?.VehicleDef?.Chassis?.Description?.Name}");
-                    AddVechicleToSalvage(vehicle, Contract, simgame);
+                    var tag = Control.Instance.Settings.NoSalvageMechTag;
+                    if (!string.IsNullOrEmpty(tag) &&
+                        (vehicle.VehicleDef.VehicleTags != null &&
+                         vehicle.VehicleDef.VehicleTags.Contains(tag)))
+                    {
+                        Control.Instance.LogDebug($"--- NOSALVAGE by tag, skipped");
+                    }
+                    else
+                        AddVechicleToSalvage(vehicle, Contract, simgame);
                 }
                 //foreach (var vechicle in enemyVehicles)
                 //{
@@ -170,7 +178,7 @@ namespace CustomSalvage
                 }
         }
 
-        private static void AddVechicleToSalvage(Vehicle vechicle, ContractHelper contract, SimGameState simgame)
+        public static void AddVechicleToSalvage(Vehicle vechicle, ContractHelper contract, SimGameState simgame)
         {
             foreach (var component in vechicle.VehicleDef.Inventory)
             {
@@ -203,7 +211,7 @@ namespace CustomSalvage
                             Control.Instance.LogError($"---unknown mech {lm.ReplaceID}, rollback");
                         }
                     }
-                    catch 
+                    catch
                     {
                         mech_to_add = null;
                     }

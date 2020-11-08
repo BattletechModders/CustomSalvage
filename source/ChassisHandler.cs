@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using BattleTech;
 using BattleTech.Data;
 using BattleTech.UI;
@@ -32,6 +33,7 @@ namespace CustomSalvage
             public bool Excluded;
             public bool Omni;
             public bool Special;
+            public string PrefabID;
 
             public mech_info()
             {
@@ -63,64 +65,16 @@ namespace CustomSalvage
 
             if (!Proccesed.ContainsKey(id))
             {
-#if USE_CC
-                var assembly = mech.Chassis.GetComponent<AssemblyVariant>();
-#endif
-                var info = new mech_info();
-                info.Omni = !String.IsNullOrEmpty(Control.Instance.Settings.OmniTechTag) && (
-                            mech.Chassis.ChassisTags.Contains(Control.Instance.Settings.OmniTechTag) ||
-                                mech.MechTags.Contains(Control.Instance.Settings.OmniTechTag));
 
-#if USE_CC
-                if (assembly != null && assembly.Exclude)
-                    info.Excluded = true;
-                else if (assembly != null && assembly.Include)
-                    info.Excluded = false;
-                else
-#endif
-                if (Control.Instance.Settings.ExcludeVariants.Contains(id))
-                    info.Excluded = true;
-                else
-                    if (Control.Instance.Settings.ExcludeTags.Any(extag => mech.MechTags.Contains(extag)))
-                    info.Excluded = true;
-
-                if (Control.Instance.Settings.SpecialTags != null && Control.Instance.Settings.SpecialTags.Length > 0)
-
-
-                    foreach (var tag_info in Control.Instance.Settings.SpecialTags)
-                    {
-                        if (mech.MechTags.Contains(tag_info.Tag))
-                        {
-                            info.MinParts = min_parts_special;
-                            info.PriceMult *= tag_info.Mod;
-                            info.Special = true;
-                        }
-                    }
-
-                if (info.Omni)
-                    info.MinParts = 1;
-
-#if USE_CC
-                if (assembly != null)
-                {
-                    if (assembly.ReplacePriceMult)
-                        info.PriceMult = assembly.PriceMult;
-                    else
-                        info.PriceMult *= assembly.PriceMult;
-
-                    if (assembly.PartsMin >= 0)
-                        info.MinParts = Mathf.CeilToInt(max_parts * assembly.PartsMin);
-                }
-#endif
+                var info = GetMechInfo(mech);
 
                 if (!info.Excluded && Control.Instance.Settings.AssemblyVariants)
                 {
-                    string prefabid = GetPrefabId(mech);
 
-                    if (!Compatible.TryGetValue(prefabid, out var list))
+                    if (!Compatible.TryGetValue(info.PrefabID, out var list))
                     {
                         list = new List<MechDef>();
-                        Compatible[prefabid] = list;
+                        Compatible[info.PrefabID] = list;
                     }
 
                     if (list.All(i => i.Description.Id != id))
@@ -128,14 +82,66 @@ namespace CustomSalvage
                 }
 
                 Control.Instance.LogDebug($"Registring {mech.Description.Id}({mech.Description.UIName}) => {mech.ChassisID}");
-                Control.Instance.LogDebug($"-- Exclude:{info.Excluded} MinParts:{info.MinParts} PriceMult:{info.PriceMult}");
-#if USE_CC
-                if (assembly != null)
-                    Control.Instance.LogDebug($"-- PrefabID:{assembly.PrefabID} Exclude:{assembly.Exclude} include:{assembly.Include} Mult:{assembly.PriceMult} Parts:{assembly.PartsMin}");
-#endif
+                Control.Instance.LogDebug($"-- PrefabID:{info.PrefabID} Exclude:{info.Excluded} MinParts:{info.MinParts} PriceMult:{info.PriceMult}");
+
 
                 Proccesed[id] = info;
             }
+        }
+        private static mech_info GetMechInfo(MechDef mech)
+        {
+            string id = mech.Description.Id;
+            int max_parts = UnityGameInstance.BattleTechGame.Simulation.Constants.Story.DefaultMechPartMax;
+#if USE_CC
+            var assembly = mech.Chassis.GetComponent<AssemblyVariant>();
+#endif
+            var info = new mech_info();
+            info.Omni = !String.IsNullOrEmpty(Control.Instance.Settings.OmniTechTag) && (
+                mech.Chassis.ChassisTags.Contains(Control.Instance.Settings.OmniTechTag) ||
+                mech.MechTags.Contains(Control.Instance.Settings.OmniTechTag));
+
+#if USE_CC
+            if (assembly != null && assembly.Exclude)
+                info.Excluded = true;
+            else if (assembly != null && assembly.Include)
+                info.Excluded = false;
+            else
+#endif
+            if (Control.Instance.Settings.ExcludeVariants.Contains(id))
+                info.Excluded = true;
+            else if (Control.Instance.Settings.ExcludeTags.Any(extag => mech.MechTags.Contains(extag)))
+                info.Excluded = true;
+
+            if (Control.Instance.Settings.SpecialTags != null && Control.Instance.Settings.SpecialTags.Length > 0)
+
+
+                foreach (var tag_info in Control.Instance.Settings.SpecialTags)
+                {
+                    if (mech.MechTags.Contains(tag_info.Tag))
+                    {
+                        info.MinParts = min_parts_special;
+                        info.PriceMult *= tag_info.Mod;
+                        info.Special = true;
+                    }
+                }
+
+            if (info.Omni)
+                info.MinParts = 1;
+
+#if USE_CC
+            if (assembly != null)
+            {
+                if (assembly.ReplacePriceMult)
+                    info.PriceMult = assembly.PriceMult;
+                else
+                    info.PriceMult *= assembly.PriceMult;
+
+                if (assembly.PartsMin >= 0)
+                    info.MinParts = Mathf.CeilToInt(max_parts * assembly.PartsMin);
+            }
+#endif
+            info.PrefabID = GetPrefabId(mech);
+            return info;
         }
 
         public static string GetPrefabId(MechDef mech)
@@ -230,6 +236,7 @@ namespace CustomSalvage
         private static MechBayChassisInfoWidget infoWidget;
         private static ChassisDef chassis;
         private static MechDef mech;
+        private static string mech_type;
         private static List<parts_info> used_parts;
         private static SimGameEventTracker eventTracker = new SimGameEventTracker();
         private static bool _hasInitEventTracker = false;
@@ -400,7 +407,7 @@ namespace CustomSalvage
                         CompNFChance = Mathf.Clamp(CompNFChance + ctp, CompFChance, settings.ComponentMaxChance);
 
 #if CCDEBUG
-                        DEBUGText = $"\nLTP : {LimbTP:0.000}/{ltp:0.000}/{(int)(oLimbChance*100)}%";
+                        DEBUGText = $"\nLTP : {LimbTP:0.000}/{ltp:0.000}/{(int)(oLimbChance * 100)}%";
                         DEBUGText = $"\nCTP : {CompTP:0.000}/{ctp:0.000}/{(int)(oCompFChance * 100)}%/{(int)(oCompNFChance * 100)}%";
 #endif
                     }
@@ -611,13 +618,16 @@ namespace CustomSalvage
                 };
             }
 
+            mech_type = GetMechType(mech);
+
+
             var eventDef = new SimGameEventDef(
                 SimGameEventDef.EventPublishState.PUBLISHED,
                 SimGameEventDef.SimEventType.UNSELECTABLE,
                 EventScope.Company,
                 new DescriptionDef(
                     "CustomSalvageAssemblyEvent",
-                    "Mech Assembly",
+                    mech_type +" Assembly",
                     GetCurrentDescription(),
                     "uixTxrSpot_YangWorking.png",
                     0, 0, false, "", "", ""),
@@ -637,10 +647,16 @@ namespace CustomSalvage
 
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static string GetMechType(MechDef mech)
+        {
+           return "'Mech";
+        }
+
         public static string GetCurrentDescription()
         {
             var text = new Text(mech.Description.UIName);
-            var result = "Assembling <b><color=#20ff20>" + text.ToString() + "</color></b> Using `Mech Parts:\n";
+            var result = $"Assembling <b><color=#20ff20>" + text.ToString() + $"</color></b> Using {mech_type} Parts:\n";
 
             foreach (var info in used_parts)
             {
@@ -683,7 +699,7 @@ namespace CustomSalvage
                     if (info.used < info.count)
                     {
                         if (info.cbills > 0)
-                            set_info(option, $"Add <color=#20ff20>{info.mechname}</color> for <color=#ffff00>{SimGameState.GetCBillString(info.cbills)}</color>, {info.count - info.used} {(info.count - info.used == 1 ? "part" : "parts") } parts left",
+                            set_info(option, $"Add <color=#20ff20>{info.mechname}</color> for <color=#ffff00>{SimGameState.GetCBillString(info.cbills)}</color>, {info.count - info.used} {(info.count - info.used == 1 ? "part" : "parts") }  left",
                                 arg =>
                                 {
                                     info.used += 1;
