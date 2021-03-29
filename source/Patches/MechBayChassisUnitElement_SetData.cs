@@ -4,6 +4,7 @@ using BattleTech;
 using BattleTech.Data;
 using BattleTech.UI;
 using Harmony;
+using HBS.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,6 +15,8 @@ namespace CustomSalvage
     [HarmonyPatch("SetData")]
     public static class MechBayChassisUnitElement_SetData
     {
+        public static Sprite DefaultSprite { get; set; } = null;
+
         [HarmonyPostfix]
         public static void SetColor(MechBayChassisUnitElement __instance, Image ___mechImage, TextMeshProUGUI ___partsText, TextMeshProUGUI ___partsLabelText,
             ChassisDef chassisDef, DataManager dataManager, int partsCount, int partsMax, int chassisQuantity)
@@ -21,6 +24,8 @@ namespace CustomSalvage
             try
             {
                 var settings = Control.Instance.Settings;
+                if (DefaultSprite == null)
+                    DefaultSprite = ___mechImage.sprite;
                 if (partsCount != 0)
                 {
                     ___partsLabelText.SetText("Parts");
@@ -45,24 +50,58 @@ namespace CustomSalvage
 
                 var go = __instance.transform.Find("Representation/contents/storage_OverlayBars");
 
-                var mech = ChassisHandler.GetMech(chassisDef.Description.Id);
+                var mechtags = GetMechTags(chassisDef, dataManager);
 
-                if (settings.BGColors != null && settings.BGColors.Length > 0)
-                    foreach (var color in settings.BGColors)
-                    {
-                        if (mech.MechTags.Contains(color.Tag))
+                if (mechtags != null)
+                {
+
+                    if (settings.BGColors != null && settings.BGColors.Length > 0)
+                        foreach (var color in settings.BGColors)
                         {
-                            var tracker = go.GetComponent<UIColorRefTracker>();
-                            tracker.SetUIColor(UIColor.Custom);
-                            tracker.OverrideWithColor(color.color);
-                            break;
+                            if (mechtags.Contains(color.Tag))
+                            {
+                                var tracker = go.GetComponent<UIColorRefTracker>();
+                                tracker.SetUIColor(UIColor.Custom);
+                                tracker.OverrideWithColor(color.color);
+                                break;
+                            }
                         }
-                    }
+
+                    //var tags = Control.Instance.Settings.IconTags;
+                    //bool set = false;
+                    //if (tags != null && tags.Length > 0)
+                    //    foreach (var pair in tags.Where(i => !string.IsNullOrEmpty(i.Tag)))
+                    //        if (mechtags.Contains(pair.Tag))
+                    //        {
+                    //            ___mechImage.sprite = pair.Sprite;
+                    //            set = true;
+                    //            break;
+                    //        }
+
+                    //if (!set)
+                    //    ___mechImage.sprite = DefaultSprite;
+                }
+                else
+                {
+                    var tracker = go.GetComponent<UIColorRefTracker>();
+                    tracker.SetUIColor(UIColor.Custom);
+                    tracker.OverrideWithColor(Color.white);
+                    //___mechImage.sprite = DefaultSprite;
+                }
+
             }
-            catch 
+            catch (Exception e)
             {
-                Control.Instance.LogDebug("Error while get mechdef for " + chassisDef.Description.Id);
+                Control.Instance.LogDebug("Error setting data for " + chassisDef.Description.Id, e);
             }
+        }
+
+
+        public static TagSet GetMechTags(ChassisDef chassis, DataManager dm)
+        {
+            var mech = ChassisHandler.GetMech(chassis.Description.Id);
+            
+            return mech?.MechTags;
         }
     }
 }

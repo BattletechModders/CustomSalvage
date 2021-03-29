@@ -16,7 +16,14 @@ namespace CustomSalvage
         public static void SalvageItemsAndParts(UnitResult unit, ContractHelper contract)
         {
             int num_parts = Control.Instance.GetNumParts(unit.mech);
-            contract.AddMechPartsToPotentialSalvage(UnityGameInstance.BattleTechGame.Simulation.Constants, unit.mech, num_parts);
+
+            if (!unit.mech.MechTags.Contains(Control.Instance.Settings.NoSalvageMechTag) &&
+                !unit.mech.Chassis.ChassisTags.Contains(Control.Instance.Settings.NoSalvageMechTag))
+            {
+                contract.AddMechPartsToPotentialSalvage(UnityGameInstance.BattleTechGame.Simulation.Constants,
+                    unit.mech, num_parts);
+            }
+
             foreach (var item in unit.mech.Inventory.Where(i => i.DamageLevel != ComponentDamageLevel.Destroyed && !unit.mech.IsLocationDestroyed(i.MountedLocation)))
                 contract.AddComponentToPotentialSalvage(item.Def, item.DamageLevel, false);
         }

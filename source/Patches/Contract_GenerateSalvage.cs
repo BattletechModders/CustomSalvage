@@ -44,40 +44,16 @@ namespace CustomSalvage
                 var Constants = simgame.Constants;
 
                 Control.Instance.LogDebug("- Lost Units");
-                for (int i = 0; i < lostUnits.Count; i++)
+                foreach (var unitResult in lostUnits)
                 {
-                    var mech = lostUnits[i].mech;
-                    Control.Instance.LogDebug($"-- Salvaging {mech.Name}");
-
-                    if (!Control.Instance.IsDestroyed(lostUnits[i]))
-                    {
-                        Control.Instance.LogDebug("--- not destroyed - skipped");
-                        lostUnits[i].mechLost = false;
-                        continue;
-                    }
-
-                    lostUnits[i].mechLost = !Control.Instance.NeedRecovery(lostUnits[i], Contract);
-
-                    if (lostUnits[i].mechLost &&
-                        !lostUnits[i].mech.MechTags.Contains(Control.Instance.Settings.NoSalvageMechTag) &&
-                        !lostUnits[i].mech.Chassis.ChassisTags.Contains(Control.Instance.Settings.NoSalvageMechTag))
-                    {
-                        Control.Instance.LostUnitAction(lostUnits[i], Contract);
-                    }
+                    ProccessPlayerMech(unitResult, Contract);
                 }
                 Control.Instance.LogDebug($"- Enemy Mechs {__instance.Name}");
 
                 foreach (var unit in enemyMechs)
                 {
                     if (Control.Instance.IsDestroyed(unit) || unit.pilot.IsIncapacitated || unit.pilot.HasEjected)
-                        if (unit.mech.MechTags.Contains(Control.Instance.Settings.NoSalvageMechTag) ||
-                        unit.mech.Chassis.ChassisTags.Contains(Control.Instance.Settings.NoSalvageMechTag))
-                        {
-                            Control.Instance.LogDebug($"-- Salvaging {unit.mech.Name}");
-                            Control.Instance.LogDebug($"--- not salvagable, skipping");
-                        }
-                        else
-                            AddMechToSalvage(unit.mech, Contract, simgame, Constants, true);
+                        AddMechToSalvage(unit.mech, Contract, simgame, Constants, true);
                     else
                     {
                         Control.Instance.LogDebug($"-- Salvaging {unit.mech.Name}");
@@ -162,6 +138,24 @@ namespace CustomSalvage
             return false;
         }
 
+        public static void ProccessPlayerMech(UnitResult unitResult, ContractHelper Contract)
+        {
+            var mech = unitResult.mech;
+            Control.Instance.LogDebug($"-- Salvaging {mech.Name}");
+
+            if (!Control.Instance.IsDestroyed(unitResult))
+            {
+                Control.Instance.LogDebug("--- not destroyed - skipped");
+                unitResult.mechLost = false;
+                return;
+            }
+
+            unitResult.mechLost = !Control.Instance.NeedRecovery(unitResult, Contract);
+
+            if(unitResult.mechLost)
+                Control.Instance.LostUnitAction(unitResult, Contract);
+        }
+
         private static void AddTurretToSalvage(Turret turret, ContractHelper contract, SimGameState simgame)
         {
             if (turret == null || turret.allComponents != null)
@@ -180,6 +174,13 @@ namespace CustomSalvage
 
         public static void AddVechicleToSalvage(Vehicle vechicle, ContractHelper contract, SimGameState simgame)
         {
+            if (!string.IsNullOrEmpty(Control.Instance.Settings.NoSalvageVehicleTag) &&
+                vechicle.VehicleDef.VehicleTags.Contains(Control.Instance.Settings.NoSalvageVehicleTag))
+            {
+                Control.Instance.LogDebug($"-- NoSalvage - skipped");
+                return;
+            }
+            
             foreach (var component in vechicle.VehicleDef.Inventory)
             {
                 if (component.DamageLevel != ComponentDamageLevel.Destroyed)
@@ -224,10 +225,19 @@ namespace CustomSalvage
 
                 }
 #endif
-                Control.Instance.LogDebug($"--- Adding {numparts} parts");
 
-                contract.AddMechPartsToPotentialSalvage(constants, mech, numparts);
+                if (mech.MechTags.Contains(Control.Instance.Settings.NoSalvageMechTag) ||
+                    mech.Chassis.ChassisTags.Contains(Control.Instance.Settings.NoSalvageMechTag))
+                {
+                    Control.Instance.LogDebug($"--- {Control.Instance.Settings.NoSalvageMechTag} mech, no parts");
+                }
+                else
+                {
+                    Control.Instance.LogDebug($"--- Adding {numparts} parts");
+                    contract.AddMechPartsToPotentialSalvage(constants, mech, numparts);
+                }
             }
+
             catch (Exception e)
             {
                 Control.Instance.LogError("Error in adding parts", e);

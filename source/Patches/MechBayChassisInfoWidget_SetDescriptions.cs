@@ -3,6 +3,7 @@ using BattleTech;
 using BattleTech.UI;
 using BattleTech.UI.Tooltips;
 using Harmony;
+using HBS.Collections;
 using Localize;
 using TMPro;
 using UnityEngine;
@@ -17,7 +18,8 @@ namespace CustomSalvage
         public static void AddVariantsToDescriptions(
             MechBayChassisInfoWidget __instance, ChassisDef ___selectedChassis,
             TextMeshProUGUI ___mechDetails, HBSTooltip ___chassisStorageTooltip,
-            GameObject ___readyBtnObj, GameObject ___partsCountObj, TextMeshProUGUI ___partsCountText)
+            GameObject ___readyBtnObj, GameObject ___partsCountObj,
+            MechUnitElementWidget ___mechIcon, TextMeshProUGUI ___partsCountText)
         {
             if (___selectedChassis == null)
                 return;
@@ -121,6 +123,8 @@ namespace CustomSalvage
             }
 
             ___mechDetails.SetText(___mechDetails.text + add);
+
         }
+
     }
 }

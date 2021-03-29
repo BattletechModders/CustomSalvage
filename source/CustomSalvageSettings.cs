@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using BattleTech;
+using BattleTech.Data;
 using BattleTech.UI;
+using Harmony;
 using HBS.Logging;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -47,6 +49,36 @@ namespace CustomSalvage
 
         }
 
+        public class tagicon_def
+        {
+            public string Tag { get; set; }
+            public string Value { get; set; }
+
+            [JsonIgnore]
+            public Sprite Sprite
+            {
+                get;
+                private set;
+            }
+
+            public void Complete(SimGameState sim)
+            {
+                if (Sprite == null)
+                {
+                    Control.Instance.LogDebug($"Request icon [{Value}] for [{Tag}]");
+                    sim.RequestItem<Sprite>(
+                        Tag,
+                        (sprite) =>
+                        {
+                            Control.Instance.LogDebug($"sprite [{Value}] loaded");
+                            Sprite = sprite;
+                        },
+                        BattleTechResourceType.Sprite
+                    );
+                }
+            }
+        }
+
         public class colordef
         {
             public string Tag { get; set; }
@@ -58,6 +90,8 @@ namespace CustomSalvage
             {
                 color = ColorUtility.TryParseHtmlString(Color, out var c) ? c : UnityEngine.Color.magenta;
             }
+
+
         }
 
         public class special
@@ -75,6 +109,8 @@ namespace CustomSalvage
 
         public bool AllowDropBlackListed = false;
         public string NoSalvageMechTag = "NOSALVAGE";
+        public string NoSalvageVehicleTag = "NOSALVAGE";
+
         public float RecoveryMod = 1;
         public float LimbRecoveryPenalty = 0.05f;
         public float TorsoRecoveryPenalty = 0.1f;
@@ -177,6 +213,9 @@ namespace CustomSalvage
         public float OmniSpecialtoNormalMod = 0.25f;
         public float OmniNormalMod = 0f;
         public bool ShowLogPrefix { get; set; } = true;
+        public tagicon_def[] IconTags { get; set; } = null;
+
+
 
         public void Complete()
         {
