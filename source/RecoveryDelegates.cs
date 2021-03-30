@@ -11,7 +11,7 @@ namespace CustomSalvage
             var simgame = contract.Contract.BattleTechGame.Simulation;
             var chance = simgame.Constants.Salvage.DestroyedMechRecoveryChance;
             var mech = result.mech;
-
+            Control.Instance.LogDebug($"--- base chance: {chance:0.00}");
 
             var settings = Control.Instance.Settings;
             chance -= mech.IsLocationDamaged(ChassisLocations.Head)
