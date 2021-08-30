@@ -274,6 +274,8 @@ namespace CustomSalvage
 
         public void AddMechPartsToPotentialSalvage(SimGameConstants constants, MechDef mech, int numparts)
         {
+
+
             if (!Control.Instance.Settings.AllowDropBlackListed &&  mech.MechTags.Contains("BLACKLISTED"))
             {
                 Control.Instance.LogDebug($"--- {mech.Description.Id} is BLACKLISTED. skipped");

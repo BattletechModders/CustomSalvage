@@ -168,6 +168,7 @@ namespace CustomSalvage
 
         public int MaxVariantsInDescription = 5;
 
+        public bool UseGameSettingsUnequiped = false;
         public bool UnEquipedMech = false;
         public bool BrokenMech = true;
         public bool ShowBrokeChances = true;

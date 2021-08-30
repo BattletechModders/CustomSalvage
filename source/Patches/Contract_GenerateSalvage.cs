@@ -198,43 +198,17 @@ namespace CustomSalvage
 
             try
             {
-                var mech_to_add = mech;
+                var mech_to_salvage = ChassisHandler.FindMechReplace(mech);
 
-#if USE_CC
-                if (mech.Chassis.Is<LootableMech>(out var lm))
-                {
-                    Control.Instance.LogDebug($"--- Mech Replacing with {lm.ReplaceID}");
-                    try
-                    {
-                        mech_to_add = UnityGameInstance.BattleTechGame.Simulation.DataManager.MechDefs.Get(lm.ReplaceID);
-                        if (mech_to_add == null)
-                        {
-                            Control.Instance.LogError($"---unknown mech {lm.ReplaceID}, rollback");
-                        }
-                    }
-                    catch
-                    {
-                        mech_to_add = null;
-                    }
-
-                    if (mech_to_add == null)
-                    {
-                        Control.Instance.LogError($"---unknown mech {lm.ReplaceID}, rollback");
-                        mech_to_add = mech;
-                    }
-
-                }
-#endif
-
-                if (mech.MechTags.Contains(Control.Instance.Settings.NoSalvageMechTag) ||
-                    mech.Chassis.ChassisTags.Contains(Control.Instance.Settings.NoSalvageMechTag))
+                if (mech_to_salvage == null || mech_to_salvage.MechTags.Contains(Control.Instance.Settings.NoSalvageMechTag) ||
+                    mech_to_salvage.Chassis.ChassisTags.Contains(Control.Instance.Settings.NoSalvageMechTag))
                 {
                     Control.Instance.LogDebug($"--- {Control.Instance.Settings.NoSalvageMechTag} mech, no parts");
                 }
                 else
                 {
                     Control.Instance.LogDebug($"--- Adding {numparts} parts");
-                    contract.AddMechPartsToPotentialSalvage(constants, mech, numparts);
+                    contract.AddMechPartsToPotentialSalvage(constants, mech_to_salvage, numparts);
                 }
             }
 
@@ -258,5 +232,7 @@ namespace CustomSalvage
                 Control.Instance.LogError("Error in adding component", e);
             }
         }
+
+
     }
 }

@@ -282,7 +282,11 @@ namespace CustomSalvage
 
             try
             {
-                if (Control.Instance.Settings.UnEquipedMech)
+                var clear = Control.Instance.Settings.UseGameSettingsUnequiped
+                    ? !sim.Constants.Salvage.EquipMechOnSalvage
+                    : Control.Instance.Settings.UnEquipedMech;
+
+                if (clear)
                 {
                     Control.Instance.LogDebug($"-- Clear Inventory");
 #if USE_CC
@@ -798,6 +802,42 @@ namespace CustomSalvage
         public static string GetMDefFromCDef(string cdefid)
         {
             return cdefid.Replace("chassisdef", "mechdef");
+        }
+
+        public static MechDef FindMechReplace(MechDef mech)
+        {
+            if (mech == null)
+                return null;
+            var result = mech;
+
+#if USE_CC
+            if (mech.Chassis.Is<LootableMech>(out var lm))
+            {
+                Control.Instance.LogDebug($"--- Mech Replacing with {lm.ReplaceID}");
+                try
+                {
+                    result = UnityGameInstance.BattleTechGame.Simulation.DataManager.MechDefs.Get(lm.ReplaceID);
+                    if (result == null)
+                    {
+                        Control.Instance.LogError($"---unknown mech {lm.ReplaceID}, rollback");
+                    }
+                }
+                catch
+                {
+                    result = null;
+                }
+
+                if (result == null)
+                {
+                    Control.Instance.LogError($"---unknown mech {lm.ReplaceID}, rollback");
+                    result = mech;
+                }
+            }
+
+#endif
+
+            var id = GetMDefFromCDef(mech.ChassisID);
+            return UnityGameInstance.BattleTechGame.DataManager.MechDefs.TryGet(id, out mech) ? result : null;
         }
     }
 }
