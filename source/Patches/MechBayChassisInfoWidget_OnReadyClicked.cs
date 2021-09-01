@@ -33,8 +33,8 @@ namespace CustomSalvage
             if (___selectedChassis.MechPartCount == 0)
             {
 
-                int num2 = Mathf.CeilToInt((float) ___mechBay.Sim.Constants.Story.MechReadyTime /
-                                           (float) ___mechBay.Sim.MechTechSkill);
+                int num2 = Mathf.CeilToInt((float)___mechBay.Sim.Constants.Story.MechReadyTime /
+                                           (float)___mechBay.Sim.MechTechSkill);
 
                 GenericPopupBuilder.Create("Ready 'Mech?",
                         $"It will take {num2} day(s) to ready this BattleMech chassis for combat.")
@@ -45,20 +45,23 @@ namespace CustomSalvage
                             .PopupBackfill), 0f, true)
                     .CancelOnEscape()
                     .Render();
-                    return false;
+                return false;
             }
 
             if (___selectedChassis.MechPartCount >= ___selectedChassis.MechPartMax)
             {
-                GenericPopupBuilder.Create("Assembly 'Mech?",
-                        $"It will take {___selectedChassis.MechPartMax} parts from storage.")
-                    .AddButton("Cancel", null, true, null)
-                    .AddButton("Ready", ChassisHandler.OnPartsAssembly, true, null)
-                    .AddFader(
-                        new UIColorRef?(LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants
-                            .PopupBackfill), 0f, true)
-                    .CancelOnEscape()
-                    .Render();
+                if (Control.Instance.Settings.MechBrokeType == BrokeType.Normalized)
+                    ChassisHandler.StartDialog();
+                else
+                    GenericPopupBuilder.Create("Assembly 'Mech?",
+                            $"It will take {___selectedChassis.MechPartMax} parts from storage.")
+                        .AddButton("Cancel", null, true, null)
+                        .AddButton("Ready", ChassisHandler.OnPartsAssembly, true, null)
+                        .AddFader(
+                            new UIColorRef?(LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants
+                                .PopupBackfill), 0f, true)
+                        .CancelOnEscape()
+                        .Render();
                 return false;
             }
 

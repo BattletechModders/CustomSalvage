@@ -45,6 +45,37 @@ namespace CustomSalvage
         Normalized
     }
 
+    public class Strings
+    {
+        public string FrankenPenaltyCaption = "FrankenMech";
+        public string TPBonusCaption = "Tech Points";
+
+        public string ScrapDialogTitle = "Scrap {0}?";
+        public string ScrapPartsDialogTitle = "Scrap {0} parts?";
+        
+        public string ScrapMultyPartsDialogTitle = "Scrap";
+        public string ScrapMultyPartsDialogText = "{0} parts?";
+
+        public string ScrapDialogTextWithParts =
+            "Do you want scrap this chassis and sale spare parts for <color=#F79B26FF>{0}</color> or scrap and keep parts ({1}-{2} parts)";
+
+        public string ScrapDialogText =
+            "Are you sure you want to scrap this 'Mech Chassis? It will be removed permanently from your inventory.\n\nSCRAP VALUE: <color=#F79B26FF>{0}</color>";
+
+        public string ScrapPartsDialogText =
+            "Are you sure you want to scrap this 'Mech part? It will be removed permanently from your inventory.\n\nSCRAP VALUE: <color=#F79B26FF>{0}</color>";
+
+        public string ScrapResultTitle = "Scraped {0}";
+        public string ScrapResultText = "We manage to get <color=#20ff20>{0}</color> parts from {1} chassis";
+
+
+        public string ButtonOk = "OK";
+        public string ButtonCancel = "Cancel";
+        public string ButtonKeepParts = "Keep Parts";
+        public string ButtonSell = "Sell";
+        public string ButtonScrap = "Scrap";
+    }
+
     public class Settings
     {
         
@@ -238,12 +269,10 @@ namespace CustomSalvage
 
         public int DiceBaseTP = -4;
         public int DiceTPStep = 5;
-        public string FrankenPenaltyCaption = "Frankenmech";
-        public string TPBonusCaption = "Tech Points";
             
 
         public Dictionary<int, float> PartPenalty;
-
+        public Strings Strings;
        
         public void Complete()
         {
@@ -269,8 +298,7 @@ namespace CustomSalvage
             if (PartCountPenalty == null || PartCountPenalty.Length == 0)
                 for (int i = 0; i < PartCountPenalty.GetLength(0); i++)
                     PartPenalty[(int) PartCountPenalty[i, 0]] = PartCountPenalty[i, 1];
-
-
+            if(Strings == null) Strings = new Strings();
         }
     }
 }

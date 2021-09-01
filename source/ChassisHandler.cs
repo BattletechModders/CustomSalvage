@@ -434,13 +434,16 @@ namespace CustomSalvage
             }
         }
 
+ 
         public static void StartDialog()
         {
             ShowInfo();
 
             var list = GetCompatible(chassis.Description.Id);
             used_parts = new List<parts_info>();
-            used_parts.Add(new parts_info(GetCount(mech.Description.Id), GetCount(mech.Description.Id), 0,
+            int c = GetCount(mech.Description.Id);
+
+            used_parts.Add(new parts_info(c , c > chassis.MechPartMax ? chassis.MechPartMax : c, 0,
                 mech.Description.UIName, mech.Description.Id));
             var info = Proccesed[mech.Description.Id];
 
@@ -551,6 +554,12 @@ namespace CustomSalvage
                         result += $", <color=#ffff00>{SimGameState.GetCBillString(info.cbills * info.used)}</color>";
                     }
                 }
+            }
+
+            if (Control.Instance.Settings.MechBrokeType == BrokeType.Normalized)
+            {
+
+
             }
 
             int cbills = used_parts.Sum(i => i.used * i.cbills);
@@ -743,5 +752,7 @@ namespace CustomSalvage
 
             return result;
         }
+
+        
     }
 }

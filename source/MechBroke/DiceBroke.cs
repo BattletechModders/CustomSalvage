@@ -100,12 +100,12 @@ namespace CustomSalvage.MechBroke
 
             if (other_parts > 0)
                 sb.AppendLine($"{-parts_bonus(other_parts),-4:-0,+#}" +
-                              new Text(Control.Instance.Settings.FrankenPenaltyCaption).ToString());
+                              new Text(Control.Instance.Settings.Strings.FrankenPenaltyCaption).ToString());
 
             var tp = tp_bonus(sim);
             if (tp != 0)
                 sb.AppendLine($"{tp,-4:-0,+#}" +
-                              new Text(Control.Instance.Settings.TPBonusCaption).ToString());
+                              new Text(Control.Instance.Settings.Strings.TPBonusCaption).ToString());
             return sb.ToString();
         }
 
