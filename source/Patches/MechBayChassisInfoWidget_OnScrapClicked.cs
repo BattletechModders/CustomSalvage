@@ -20,6 +20,11 @@ namespace CustomSalvage
             if (___selectedChassis == null)
                 return false;
 
+            //foreach (var item in ___mechBay.Sim.CompanyStats)
+            //{
+            //    Control.Instance.Log($"{item.Key} : {item.Value.CurrentValue.ToString()} ");
+            //}
+
             var mech = ChassisHandler.GetMech(___selectedChassis.Description.Id);
             var name = new Text(mech.Description.UIName).ToString();
 

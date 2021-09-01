@@ -38,8 +38,17 @@ namespace CustomSalvage
         FullMechSalvage
     }
 
+    public enum BrokeType
+    {
+        None,
+        Random,
+        Normalized
+    }
+
     public class Settings
     {
+        
+
         public class broke_info
         {
             public string tag;
@@ -106,6 +115,7 @@ namespace CustomSalvage
         public RecoveryCalculationType RecoveryType = RecoveryCalculationType.PartDestroyed;
         public PartCalculationType PartCountType = PartCalculationType.PartDestroyedIgnoreCT;
         public LostMechActionType LostMechAction = LostMechActionType.ReturnItemsToPlayer;
+        public BrokeType MechBrokeType = BrokeType.Random;
 
         public bool AllowDropBlackListed = false;
         public string NoSalvageMechTag = "NOSALVAGE";
@@ -170,7 +180,6 @@ namespace CustomSalvage
 
         public bool UseGameSettingsUnequiped = false;
         public bool UnEquipedMech = false;
-        public bool BrokenMech = true;
         public bool ShowBrokeChances = true;
         public bool ShowDEBUGChances = true;
 
@@ -215,9 +224,27 @@ namespace CustomSalvage
         public float OmniNormalMod = 0f;
         public bool ShowLogPrefix { get; set; } = true;
         public tagicon_def[] IconTags { get; set; } = null;
+        public bool ShowBrokeChancesFirst = false;
 
+        public float[,] PartCountPenalty = new float[,]
+        {
+            { 3, 2 },
+            { 4, 1.5f },
+            { 5, 1.2f },
+            { 6, 1f },
+            { 7, 0.75f },
+            { 8, 0.5f },
+        };
 
+        public int DiceBaseTP = -4;
+        public int DiceTPStep = 5;
+        public string FrankenPenaltyCaption = "Frankenmech";
+        public string TPBonusCaption = "Tech Points";
+            
 
+        public Dictionary<int, float> PartPenalty;
+
+       
         public void Complete()
         {
             if (BGColors != null && BGColors.Length > 1)
@@ -229,6 +256,21 @@ namespace CustomSalvage
             color_stored = ColorUtility.TryParseHtmlString(StoredMechColor, out c) ? c : UnityEngine.Color.white;
             color_notready = ColorUtility.TryParseHtmlString(NotReadyColor, out c) ? c : UnityEngine.Color.grey;
             color_exclude = ColorUtility.TryParseHtmlString(ExcludedColor, out c) ? c : new Color(127, 255, 212);
+
+            PartPenalty = new Dictionary<int, float>()
+            {
+                { 3, 2 },
+                { 4, 1.5f },
+                { 5, 1.2f },
+                { 6, 1f },
+                { 7, 0.75f },
+                { 8, 0.5f },
+            };
+            if (PartCountPenalty == null || PartCountPenalty.Length == 0)
+                for (int i = 0; i < PartCountPenalty.GetLength(0); i++)
+                    PartPenalty[(int) PartCountPenalty[i, 0]] = PartCountPenalty[i, 1];
+
+
         }
     }
 }

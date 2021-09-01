@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using BattleTech;
 using BattleTech.Data;
 using BattleTech.UI;
+using CustomSalvage.MechBroke;
 #if USE_CC
 using CustomComponents;
 #endif
@@ -301,10 +302,13 @@ namespace CustomSalvage
                 Control.Instance.LogError($"ERROR in ClearInventory", e);
             }
 
-            if (Control.Instance.Settings.BrokenMech)
+            switch (Control.Instance.Settings.MechBrokeType)
             {
-                BrokeMech(new_mech, sim, other_parts);
-
+                case BrokeType.Random:
+                    RandomBroke.BrokeMech(new_mech, sim, other_parts);
+                    break;
+                case BrokeType.Normalized:
+                    break;
             }
 
             try
@@ -416,132 +420,6 @@ namespace CustomSalvage
 #endif
                     }
                 }
-            }
-        }
-
-        private static void BrokeMech(MechDef new_mech, SimGameState sim, int other_parts)
-        {
-            try
-            {
-
-                Control.Instance.LogDebug($"-- broke parts");
-                var rnd = new Random();
-                var chances = new AssemblyChancesResult(new_mech, sim, other_parts);
-                var settings = Control.Instance.Settings;
-
-                Control.Instance.LogDebug($"--- RepairMechLimbsChance: {chances.LimbChance}, RepairMechLimbs: {settings.RepairMechLimbs} ");
-                float roll = 0;
-                //hd
-                roll = (float)rnd.NextDouble();
-                Control.Instance.LogDebug($"--- HeadRepaired: {settings.HeadRepaired}, roll: {roll} ");
-                if (!settings.HeadRepaired && (!settings.RepairMechLimbs ||
-                                               roll > chances.LimbChance))
-                    new_mech.Head.CurrentInternalStructure = 0f;
-                else if (settings.RandomStructureOnRepairedLimbs)
-                    new_mech.Head.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
-
-                //ct
-                roll = (float)rnd.NextDouble();
-                Control.Instance.LogDebug($"--- CentralTorsoRepaired: {settings.CentralTorsoRepaired}, roll: {roll} ");
-                if (!settings.CentralTorsoRepaired && (!settings.RepairMechLimbs ||
-                                                       roll > chances.LimbChance))
-                    new_mech.CenterTorso.CurrentInternalStructure = 0f;
-                else if (settings.RandomStructureOnRepairedLimbs)
-                    new_mech.CenterTorso.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
-
-                //rt
-                roll = (float)rnd.NextDouble();
-                Control.Instance.LogDebug($"--- RightTorsoRepaired: {settings.RightTorsoRepaired}, roll: {roll} ");
-                if (!settings.RightTorsoRepaired && (!settings.RepairMechLimbs ||
-                                                     roll > chances.LimbChance))
-                    new_mech.RightTorso.CurrentInternalStructure = 0f;
-                else if (settings.RandomStructureOnRepairedLimbs)
-                    new_mech.RightTorso.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
-
-                //lt
-                roll = (float)rnd.NextDouble();
-                Control.Instance.LogDebug($"--- LeftTorsoRepaired: {settings.LeftTorsoRepaired}, roll: {roll} ");
-                if (!settings.LeftTorsoRepaired && (!settings.RepairMechLimbs ||
-                                                    roll > chances.LimbChance))
-                    new_mech.LeftTorso.CurrentInternalStructure = 0f;
-                else if (settings.RandomStructureOnRepairedLimbs)
-                    new_mech.LeftTorso.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
-
-                //ra
-                roll = (float)rnd.NextDouble();
-                Control.Instance.LogDebug($"--- RightArmRepaired: {settings.RightArmRepaired}, roll: {roll} ");
-                if (!settings.RightArmRepaired && (!settings.RepairMechLimbs ||
-                                                   roll > chances.LimbChance))
-                    new_mech.RightArm.CurrentInternalStructure = 0f;
-                else if (settings.RandomStructureOnRepairedLimbs)
-                    new_mech.RightArm.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
-
-                //la
-                roll = (float)rnd.NextDouble();
-                Control.Instance.LogDebug($"--- LeftArmRepaired: {settings.LeftArmRepaired}, roll: {roll} ");
-                if (!settings.LeftArmRepaired && (!settings.RepairMechLimbs ||
-                                                  roll > chances.LimbChance))
-                    new_mech.LeftArm.CurrentInternalStructure = 0f;
-                else if (settings.RandomStructureOnRepairedLimbs)
-                    new_mech.LeftArm.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
-
-                //rl
-
-                roll = (float)rnd.NextDouble();
-                Control.Instance.LogDebug($"--- RightLegRepaired: {settings.RightLegRepaired}, roll: {roll} ");
-                if (!settings.RightLegRepaired && (!settings.RepairMechLimbs ||
-                                                   roll > chances.LimbChance))
-                    new_mech.RightLeg.CurrentInternalStructure = 0f;
-                else if (settings.RandomStructureOnRepairedLimbs)
-                    new_mech.RightLeg.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
-
-                //ll
-                Control.Instance.LogDebug($"--- LeftLegRepaired: {settings.LeftLegRepaired}, roll: {roll} ");
-                roll = (float)rnd.NextDouble();
-                if (!settings.LeftLegRepaired && (!settings.RepairMechLimbs ||
-                                                  roll > chances.LimbChance))
-                    new_mech.LeftLeg.CurrentInternalStructure = 0f;
-                else if (settings.RandomStructureOnRepairedLimbs)
-                    new_mech.LeftLeg.CurrentInternalStructure *= Math.Min(settings.MinStructure, (float)rnd.NextDouble());
-
-                Control.Instance.LogDebug($"-- broke equipment");
-
-                foreach (var cref in new_mech.Inventory)
-                {
-                    if (new_mech.IsLocationDestroyed(cref.MountedLocation))
-                    {
-                        Control.Instance.LogDebug($"---- {cref.ComponentDefID} - location destroyed");
-                        cref.DamageLevel = ComponentDamageLevel.Destroyed;
-                    }
-                    else if (settings.RepairMechComponents)
-                    {
-                        roll = (float)rnd.NextDouble();
-
-                        if (roll < chances.CompFChance)
-                        {
-                            Control.Instance.LogDebug(
-                                $"---- {cref.ComponentDefID} - {roll} vs {chances.CompFChance} - repaired ");
-                            cref.DamageLevel = ComponentDamageLevel.Functional;
-                        }
-                        else if (roll < chances.CompNFChance)
-                        {
-                            Control.Instance.LogDebug(
-                                $"---- {cref.ComponentDefID} - {roll} vs {chances.CompNFChance} - broken ");
-                            cref.DamageLevel = ComponentDamageLevel.NonFunctional;
-                        }
-                        else
-                        {
-                            Control.Instance.LogDebug(
-                                $"---- {cref.ComponentDefID} - {roll} vs {chances.CompNFChance} - fubar ");
-                            cref.DamageLevel = ComponentDamageLevel.Destroyed;
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Control.Instance.LogError($"ERROR in BrokeParts", e);
-                throw;
             }
         }
 
@@ -838,6 +716,32 @@ namespace CustomSalvage
 
             var id = GetMDefFromCDef(mech.ChassisID);
             return UnityGameInstance.BattleTechGame.DataManager.MechDefs.TryGet(id, out mech) ? result : null;
+        }
+
+        private static Dictionary<string, HashSet<string>> mechtags = new Dictionary<string, HashSet<string>>();
+        
+        public static HashSet<string> GetMechTags(MechDef mech)
+        {
+            if (mech?.Chassis == null)
+                return null;
+
+            if (mechtags.TryGetValue(mech.ChassisID, out var res))
+                return res;
+            
+            var new_tags =  build_mech_tags(mech);
+            mechtags[mech.ChassisID] = new_tags;
+            return new_tags;
+        }
+
+        private static HashSet<string> build_mech_tags(MechDef mech)
+        {
+            var result = new HashSet<string>();
+            if (mech.MechTags != null)
+                result.UnionWith(mech.MechTags);
+            if (mech.Chassis.ChassisTags != null)
+                result.UnionWith(mech.Chassis.ChassisTags);
+
+            return result;
         }
     }
 }

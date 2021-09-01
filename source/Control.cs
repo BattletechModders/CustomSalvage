@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using BattleTech;
+using CustomSalvage.MechBroke;
 using HBS.Logging;
 using HBS.Util;
 using HoudiniEngineUnity;
@@ -45,6 +46,34 @@ namespace CustomSalvage
 
 
         }
+
+        public static void FinishedLoading(Dictionary<string, Dictionary<string, VersionManifestEntry>> customResources)
+        {
+            Instance.Log("Finish Loading");
+            Dictionary<string, VersionManifestEntry> manifest = null;
+            if (customResources.TryGetValue("CSTags", out manifest))
+            {
+                Instance.LogDebug("- Loading CSTags");
+                Tags.Instatnce.LoadTags(CustomLoader<CSTag>.Load(manifest));
+            }
+
+            if (customResources.TryGetValue("CSBonus", out manifest))
+            {
+                Instance.LogDebug("- Loading CSBonus");
+                Instance.LoadCSBonuses(manifest);
+            }
+
+        }
+
+        private void LoadCSBonuses(Dictionary<string, VersionManifestEntry> manifest)
+        {
+
+        }
+
+        private void LoadCSTags(Dictionary<string, VersionManifestEntry> manifest)
+        {
+        }
+
 
         private void InitNonStatic(string directory, string settingsJson)
         {
