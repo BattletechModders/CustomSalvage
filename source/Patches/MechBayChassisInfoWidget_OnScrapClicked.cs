@@ -99,6 +99,8 @@ namespace CustomSalvage
         private static void SplitToParts(ChassisDef chassisDef, int min, int max, MechBayPanel mechBay)
         {
             int k = mechBay.Sim.NetworkRandom.Int(min, max+1);
+            if (Control.Instance.Settings.DEBUG_LOTOFPARTS)
+                k = 20;
             UnityGameInstance.BattleTechGame.Simulation.ScrapInactiveMech(chassisDef.Description.Id, false);
             var mech = ChassisHandler.GetMech(chassisDef.Description.Id);
             for (int i = 0;i < k;i++ )

@@ -27,6 +27,7 @@ namespace CustomSalvage
                 try
                 {
                     var obj = fastJSON.JSON.ToObject<List<T>>(json);
+                    result.AddRange(obj);
                 }
                 catch (Exception e)
                 {

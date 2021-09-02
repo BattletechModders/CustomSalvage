@@ -9,6 +9,7 @@ namespace CustomSalvage.MechBroke
 {
     public delegate bool ConditionDelegate(Condition condition, MechDef mech, HashSet<string> mechtags, SimGameState sim);
 
+
     public class Condition
     {
         public string Type { get; set; }
@@ -23,7 +24,7 @@ namespace CustomSalvage.MechBroke
     {
         private static Conditions _instance;
 
-        public static Conditions Instatnce
+        public static Conditions Instance
         {
             get
             {
@@ -60,10 +61,16 @@ namespace CustomSalvage.MechBroke
             if (conditions != null)
                 foreach (var condition in conditions)
                 {
-                    if (condition != null
-                        && handlers.TryGetValue(condition.Type, out var handler)
-                        && !handler(condition, mech, mechtags, sim))
-                        return false;
+                    if (condition != null)
+                        if (handlers.TryGetValue(condition.Type, out var handler))
+                        {
+                            if (!handler(condition, mech, mechtags, sim))
+                                return false;
+                        }
+                        else
+                        {
+                            Control.Instance.LogError($"Not found handler for {condition.Type} condition");
+                        }
                 }
 
             return true;

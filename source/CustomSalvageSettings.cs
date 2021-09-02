@@ -49,10 +49,11 @@ namespace CustomSalvage
     {
         public string FrankenPenaltyCaption = "FrankenMech";
         public string TPBonusCaption = "Tech Points";
+        public string TotalBonusCatption = "Total";
 
         public string ScrapDialogTitle = "Scrap {0}?";
         public string ScrapPartsDialogTitle = "Scrap {0} parts?";
-        
+
         public string ScrapMultyPartsDialogTitle = "Scrap";
         public string ScrapMultyPartsDialogText = "{0} parts?";
 
@@ -60,10 +61,10 @@ namespace CustomSalvage
             "Do you want scrap this chassis and sale spare parts for <color=#F79B26FF>{0}</color> or scrap and keep parts ({1}-{2} parts)";
 
         public string ScrapDialogText =
-            "Are you sure you want to scrap this 'Mech Chassis? It will be removed permanently from your inventory.\n\nSCRAP VALUE: <color=#F79B26FF>{0}</color>";
+            "Are you sure you want to scrap this Chassis? It will be removed permanently from your inventory.\n\nSCRAP VALUE: <color=#F79B26FF>{0}</color>";
 
         public string ScrapPartsDialogText =
-            "Are you sure you want to scrap this 'Mech part? It will be removed permanently from your inventory.\n\nSCRAP VALUE: <color=#F79B26FF>{0}</color>";
+            "Are you sure you want to scrap this part? It will be removed permanently from your inventory.\n\nSCRAP VALUE: <color=#F79B26FF>{0}</color>";
 
         public string ScrapResultTitle = "Scraped {0}";
         public string ScrapResultText = "We manage to get <color=#20ff20>{0}</color> parts from {1} chassis";
@@ -78,7 +79,7 @@ namespace CustomSalvage
 
     public class Settings
     {
-        
+
 
         public class broke_info
         {
@@ -140,8 +141,12 @@ namespace CustomSalvage
             public float Mod = 1f;
         }
 
-        public LogLevel LogLevel = LogLevel.Debug;
+        public Strings Strings;
 
+        public LogLevel LogLevel = LogLevel.Debug;
+        public bool DEBUG_ShowLoadingTags = false;
+        public bool DEBUG_LOTOFPARTS = false;
+        public bool DEBUG_ShowConfig = true;
 
         public RecoveryCalculationType RecoveryType = RecoveryCalculationType.PartDestroyed;
         public PartCalculationType PartCountType = PartCalculationType.PartDestroyedIgnoreCT;
@@ -255,7 +260,10 @@ namespace CustomSalvage
         public float OmniNormalMod = 0f;
         public bool ShowLogPrefix { get; set; } = true;
         public tagicon_def[] IconTags { get; set; } = null;
-        public bool ShowBrokeChancesFirst = false;
+
+        public bool ShowDetailBonuses = true;
+        public bool ShowDiceChances = true;
+        public bool ShowBrokeChancesFirst = true;
 
         public float[,] PartCountPenalty = new float[,]
         {
@@ -267,13 +275,45 @@ namespace CustomSalvage
             { 8, 0.5f },
         };
 
-        public int DiceBaseTP = -4;
-        public int DiceTPStep = 5;
-            
+        public int DiceBaseTP = -8;
+        public int DiceTPStep = 4;
+        public int MinRoll = -5;
+        public int MaxRoll = 20;
+        public int CTRoll = 6;
+        private int[,] PartResults = new int[,]
+        {
+            {-5, 8},
+            {-4, 7},
+            {-3, 7},
+            {-2, 7},
+            {-1, 7},
+            {0, 6},
+            {1, 6},
+            {2, 6},
+            {3, 5},
+            {4, 5},
+            {5, 5},
+            {6, 4},
+            {7, 4},
+            {8, 4},
+            {9, 3},
+            {10, 3},
+            {11, 3},
+            {12, 2},
+            {13, 2},
+            {14, 2},
+            {15, 1},
+            {16, 1},
+            {17, 1},
+            {19, 1},
+            {20, 0}
+        };
 
-        public Dictionary<int, float> PartPenalty;
-        public Strings Strings;
-       
+        [JsonIgnore]
+        internal Dictionary<int, int> partresults;
+        [JsonIgnore]
+        internal Dictionary<int, float> PartPenalty;
+
         public void Complete()
         {
             if (BGColors != null && BGColors.Length > 1)
@@ -297,8 +337,27 @@ namespace CustomSalvage
             };
             if (PartCountPenalty == null || PartCountPenalty.Length == 0)
                 for (int i = 0; i < PartCountPenalty.GetLength(0); i++)
-                    PartPenalty[(int) PartCountPenalty[i, 0]] = PartCountPenalty[i, 1];
-            if(Strings == null) Strings = new Strings();
+                    PartPenalty[(int)PartCountPenalty[i, 0]] = PartCountPenalty[i, 1];
+            if (Strings == null) Strings = new Strings();
+
+            partresults = new Dictionary<int, int>();
+            partresults[MinRoll] = 8;
+            partresults[MaxRoll] = 0;
+            int t = MaxRoll - MinRoll;
+            for (int i = MinRoll + 1; i < MaxRoll; i++)
+            {
+                int a = (int)(((float)i - MinRoll) / t * 6 + 1);
+                partresults[i] = a;
+            }
+
+            if (PartResults != null)
+                for (int i = 0; i < PartResults.GetLength(0); i++)
+                    if (PartResults[i, 0] > MinRoll 
+                        && PartResults[i, 0] < MaxRoll 
+                        && PartResults[i, 1] >= 0 
+                        && PartResults[i, 1] <= 8)
+
+                        partresults[PartResults[i, 0]] = PartResults[i, 1];
         }
     }
 }

@@ -15,14 +15,14 @@ using HoudiniEngineUnity;
 namespace CustomSalvage
 {
 
-    public delegate void AdditionalSalvageStep(ContractHelper contract); 
+    public delegate void AdditionalSalvageStep(ContractHelper contract);
 
     public class Control
     {
-        private static  Control _instance;
+        private static Control _instance;
         public static Control Instance => _instance ?? (_instance = new Control());
 
-        public  Settings Settings = new Settings();
+        public Settings Settings = new Settings();
 
         private ILog Logger;
         private FileLogAppender logAppender;
@@ -54,26 +54,9 @@ namespace CustomSalvage
             if (customResources.TryGetValue("CSTags", out manifest))
             {
                 Instance.LogDebug("- Loading CSTags");
-                Tags.Instatnce.LoadTags(CustomLoader<CSTag>.Load(manifest));
+                Tags.Instance.LoadTags(CustomLoader<CSTag>.Load(manifest));
             }
-
-            if (customResources.TryGetValue("CSBonus", out manifest))
-            {
-                Instance.LogDebug("- Loading CSBonus");
-                Instance.LoadCSBonuses(manifest);
-            }
-
         }
-
-        private void LoadCSBonuses(Dictionary<string, VersionManifestEntry> manifest)
-        {
-
-        }
-
-        private void LoadCSTags(Dictionary<string, VersionManifestEntry> manifest)
-        {
-        }
-
 
         private void InitNonStatic(string directory, string settingsJson)
         {
@@ -161,7 +144,8 @@ namespace CustomSalvage
 #endif
 
                 Logger.LogDebug("done");
-                Logger.LogDebug(JSONSerializationUtility.ToJSON(Settings));
+                if (Settings.DEBUG_ShowConfig)
+                    Logger.LogDebug(JSONSerializationUtility.ToJSON(Settings));
             }
             catch (Exception e)
             {
@@ -171,37 +155,37 @@ namespace CustomSalvage
 
         #region LOGGING
         [Conditional("CCDEBUG")]
-        public  void LogDebug(string message)
+        public void LogDebug(string message)
         {
             Logger.LogDebug(LogPrefix + message);
         }
         [Conditional("CCDEBUG")]
-        public  void LogDebug(string message, Exception e)
+        public void LogDebug(string message, Exception e)
         {
             Logger.LogDebug(LogPrefix + message, e);
         }
 
-        public  void LogError(string message)
+        public void LogError(string message)
         {
             Logger.LogError(LogPrefix + message);
         }
-        public  void LogError(string message, Exception e)
+        public void LogError(string message, Exception e)
         {
             Logger.LogError(LogPrefix + message, e);
         }
-        public  void LogError(Exception e)
+        public void LogError(Exception e)
         {
             Logger.LogError(e);
         }
 
-        public  void Log(string message)
+        public void Log(string message)
         {
             Logger.Log(message);
         }
 
 
 
-        internal  void SetupLogging(string Directory)
+        internal void SetupLogging(string Directory)
         {
             var logFilePath = Path.Combine(Directory, "log.txt");
 
@@ -216,7 +200,7 @@ namespace CustomSalvage
             }
         }
 
-        internal  void ShutdownLogging()
+        internal void ShutdownLogging()
         {
             if (logAppender == null)
             {
@@ -236,7 +220,7 @@ namespace CustomSalvage
             logAppender = null;
         }
 
-        private  void AddLogFileForLogger(string logFilePath)
+        private void AddLogFileForLogger(string logFilePath)
         {
             try
             {
@@ -250,7 +234,7 @@ namespace CustomSalvage
             }
         }
 
-#endregion
+        #endregion
 
         public bool IsDestroyed(UnitResult lostUnit)
         {

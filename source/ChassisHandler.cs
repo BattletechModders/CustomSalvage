@@ -439,96 +439,107 @@ namespace CustomSalvage
         {
             ShowInfo();
 
-            var list = GetCompatible(chassis.Description.Id);
-            used_parts = new List<parts_info>();
-            int c = GetCount(mech.Description.Id);
-
-            used_parts.Add(new parts_info(c , c > chassis.MechPartMax ? chassis.MechPartMax : c, 0,
-                mech.Description.UIName, mech.Description.Id));
-            var info = Proccesed[mech.Description.Id];
-
-            var settings = Control.Instance.Settings;
-
-            float cb = settings.AdaptPartBaseCost * mech.Description.Cost / chassis.MechPartMax;
-            Control.Instance.LogDebug($"base part price for {mech.Description.UIName}({mech.Description.Id}): {cb}. mechcost: {mech.Description.Cost} ");
-            Control.Instance.LogDebug($"-- setting:{settings.AdaptPartBaseCost}, maxparts:{chassis.MechPartMax}, minparts:{info.MinParts}, pricemult: {info.PriceMult}");
-
-            foreach (var mechDef in list)
+            try
             {
-                int num = GetCount(mechDef.Description.Id);
-                if (num == 0)
-                    continue;
-                var id = mechDef.Description.Id;
+                var list = GetCompatible(chassis.Description.Id);
+                used_parts = new List<parts_info>();
+                int c = GetCount(mech.Description.Id);
+
+                used_parts.Add(new parts_info(c, c > chassis.MechPartMax ? chassis.MechPartMax : c, 0,
+                    mech.Description.UIName, mech.Description.Id));
+                var info = Proccesed[mech.Description.Id];
+
+                var settings = Control.Instance.Settings;
+
+                float cb = settings.AdaptPartBaseCost * mech.Description.Cost / chassis.MechPartMax;
+                Control.Instance.LogDebug(
+                    $"base part price for {mech.Description.UIName}({mech.Description.Id}): {cb}. mechcost: {mech.Description.Cost} ");
+                Control.Instance.LogDebug(
+                    $"-- setting:{settings.AdaptPartBaseCost}, maxparts:{chassis.MechPartMax}, minparts:{info.MinParts}, pricemult: {info.PriceMult}");
 
 
-                if (id == mech.Description.Id)
-                    continue;
-                else
+                foreach (var mechDef in list)
                 {
-                    float omnimod = 1;
-                    float mod = 1 + Mathf.Abs(mech.Description.Cost - mechDef.Description.Cost) /
-                                (float)mech.Description.Cost * settings.AdaptModWeight;
-                    if (mod > settings.MaxAdaptMod)
-                        mod = settings.MaxAdaptMod;
-
-                    var info2 = Proccesed[mechDef.Description.Id];
-
-                    if (info.Omni && info2.Omni)
-                        if (info.Special && info2.Special)
-                            omnimod = settings.OmniSpecialtoSpecialMod;
-                        else if (!info.Special && !info2.Special)
-                            omnimod = settings.OmniNormalMod;
-                        else
-                            omnimod = settings.OmniSpecialtoNormalMod;
+                    int num = GetCount(mechDef.Description.Id);
+                    if (num == 0)
+                        continue;
+                    var id = mechDef.Description.Id;
 
 
+                    if (id == mech.Description.Id)
+                        continue;
+                    else
+                    {
+                        float omnimod = 1;
+                        float mod = 1 + Mathf.Abs(mech.Description.Cost - mechDef.Description.Cost) /
+                            (float) mech.Description.Cost * settings.AdaptModWeight;
+                        if (mod > settings.MaxAdaptMod)
+                            mod = settings.MaxAdaptMod;
 
-                    var price = (int)(cb * omnimod * mod * info.PriceMult * (settings.ApplyPartPriceMod ? info2.PriceMult : 1));
+                        var info2 = Proccesed[mechDef.Description.Id];
 
-                    Control.Instance.LogDebug($"-- price for {mechDef.Description.UIName}({mechDef.Description.Id}) mechcost: {mechDef.Description.Cost}. price mod: {mod:0.000}, tag mod:{info2.PriceMult:0.000} omnimod:{omnimod:0.000} adopt price: {price}");
-                    used_parts.Add(new parts_info(num, 0, price, mechDef.Description.UIName, mechDef.Description.Id));
+                        if (info.Omni && info2.Omni)
+                            if (info.Special && info2.Special)
+                                omnimod = settings.OmniSpecialtoSpecialMod;
+                            else if (!info.Special && !info2.Special)
+                                omnimod = settings.OmniNormalMod;
+                            else
+                                omnimod = settings.OmniSpecialtoNormalMod;
+
+
+
+                        var price = (int) (cb * omnimod * mod * info.PriceMult *
+                                           (settings.ApplyPartPriceMod ? info2.PriceMult : 1));
+
+                        Control.Instance.LogDebug(
+                            $"-- price for {mechDef.Description.UIName}({mechDef.Description.Id}) mechcost: {mechDef.Description.Cost}. price mod: {mod:0.000}, tag mod:{info2.PriceMult:0.000} omnimod:{omnimod:0.000} adopt price: {price}");
+                        used_parts.Add(
+                            new parts_info(num, 0, price, mechDef.Description.UIName, mechDef.Description.Id));
+                    }
                 }
-            }
 
-            var options = new SimGameEventOption[4];
-
-
-            for (int i = 0; i < 4; i++)
-            {
-                options[i] = new SimGameEventOption()
+                var options = new SimGameEventOption[4];
+                for (int i = 0; i < 4; i++)
                 {
-                    Description = new BaseDescriptionDef($"test_{i}", $"test_{i}", $"test_{i}", ""),
-                    RequirementList = null,
-                    ResultSets = null
-                };
+                    options[i] = new SimGameEventOption()
+                    {
+                        Description = new BaseDescriptionDef($"test_{i}", $"test_{i}", $"test_{i}", ""),
+                        RequirementList = null,
+                        ResultSets = null
+                    };
+                }
+
+                mech_type = GetMechType(mech);
+
+                var eventDef = new SimGameEventDef(
+                    SimGameEventDef.EventPublishState.PUBLISHED,
+                    SimGameEventDef.SimEventType.UNSELECTABLE,
+                    EventScope.Company,
+                    new DescriptionDef(
+                        "CustomSalvageAssemblyEvent",
+                        mech_type + " Assembly",
+                        GetCurrentDescription(),
+                        "uixTxrSpot_YangWorking.png",
+                        0, 0, false, "", "", ""),
+                    new RequirementDef {Scope = EventScope.Company},
+                    new RequirementDef[0],
+                    new SimGameEventObject[0],
+                    options.ToArray(),
+                    1, true, new TagSet());
+
+                if (!_hasInitEventTracker)
+                {
+                    eventTracker.Init(new[] {EventScope.Company}, 0, 0, SimGameEventDef.SimEventType.NORMAL,
+                        mechBay.Sim);
+                    _hasInitEventTracker = true;
+                }
+
+                mechBay.Sim.InterruptQueue.QueueEventPopup(eventDef, EventScope.Company, eventTracker);
             }
-
-            mech_type = GetMechType(mech);
-
-
-            var eventDef = new SimGameEventDef(
-                SimGameEventDef.EventPublishState.PUBLISHED,
-                SimGameEventDef.SimEventType.UNSELECTABLE,
-                EventScope.Company,
-                new DescriptionDef(
-                    "CustomSalvageAssemblyEvent",
-                    mech_type +" Assembly",
-                    GetCurrentDescription(),
-                    "uixTxrSpot_YangWorking.png",
-                    0, 0, false, "", "", ""),
-                new RequirementDef { Scope = EventScope.Company },
-                new RequirementDef[0],
-                new SimGameEventObject[0],
-                options.ToArray(),
-                1, true, new TagSet());
-
-            if (!_hasInitEventTracker)
+            catch (Exception e)
             {
-                eventTracker.Init(new[] { EventScope.Company }, 0, 0, SimGameEventDef.SimEventType.NORMAL, mechBay.Sim);
-                _hasInitEventTracker = true;
+                Control.Instance.LogError(e);
             }
-
-            mechBay.Sim.InterruptQueue.QueueEventPopup(eventDef, EventScope.Company, eventTracker);
 
         }
 
@@ -540,6 +551,7 @@ namespace CustomSalvage
 
         public static string GetCurrentDescription()
         {
+            var strs = Control.Instance.Settings.Strings;
             var text = new Text(mech.Description.UIName);
             var result = $"Assembling <b><color=#20ff20>" + text.ToString() + $"</color></b> Using {mech_type} Parts:\n";
 
@@ -558,8 +570,25 @@ namespace CustomSalvage
 
             if (Control.Instance.Settings.MechBrokeType == BrokeType.Normalized)
             {
+                result += "\n\n";
+                var parts = used_parts.Sum(i => i.used) - used_parts[0].used;
 
+                //Control.Instance.Log("1");
 
+                if (Control.Instance.Settings.ShowDetailBonuses)
+                {
+                    var bonuses = DiceBroke.GetBonusString(mech, UnityGameInstance.BattleTechGame.Simulation, parts);
+                    result += bonuses;
+                }
+                //Control.Instance.Log("2");
+                int total = DiceBroke.GetBonus(mech, UnityGameInstance.BattleTechGame.Simulation, parts);
+                result += $"<b><color=#ffff00>{total,-4:+0;-#}" + new Text(strs.TotalBonusCatption) + "</color></b>";
+                ////Control.Instance.Log("3");
+                if (Control.Instance.Settings.ShowBrokeChances)
+                {
+                    result += "\n\n";
+                    result += DiceBroke.GetResultString(total);
+                }
             }
 
             int cbills = used_parts.Sum(i => i.used * i.cbills);

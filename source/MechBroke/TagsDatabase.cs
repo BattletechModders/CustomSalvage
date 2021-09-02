@@ -7,7 +7,7 @@ namespace CustomSalvage.MechBroke
     {
         private static Tags _instance;
 
-        public static Tags Instatnce {
+        public static Tags Instance {
             get
             {
                if(_instance == null)
@@ -29,6 +29,8 @@ namespace CustomSalvage.MechBroke
             foreach (var tag in tags)
             {
                 CSTags[tag.ID] = tag;
+                if(Control.Instance.Settings.DEBUG_ShowLoadingTags)
+                    Control.Instance.Log(tag.ToString());
             }
 
             AllCSTags = CSTags.Values.ToList();

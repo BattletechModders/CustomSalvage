@@ -33,18 +33,18 @@ namespace CustomSalvage.MechBroke
             if (Tokens != null)
                 foreach (var token in Tokens)
                 {
-                    if (Conditions.Instatnce.CheckCondition(token.Conditions, mech, tags, sim))
+                    if (Conditions.Instance.CheckCondition(token.Conditions, mech, tags, sim))
                         switch (Type)
                         {
                             case CType.Sum:
                                 result += token.Value;
                                 break;
                             case CType.Min:
-                                if (result > token.Value)
+                                if (result > token.Value || result == 0)
                                     result = token.Value;
                                 break;
                             case CType.Max:
-                                if (result < token.Value)
+                                if (result < token.Value || result == 0)
                                     result = token.Value;
                                 break;
                         }
@@ -61,7 +61,7 @@ namespace CustomSalvage.MechBroke
             if (Tokens != null)
                 foreach (var token in Tokens)
                 {
-                    if (Conditions.Instatnce.CheckCondition(token.Conditions, mech, tags, sim))
+                    if (Conditions.Instance.CheckCondition(token.Conditions, mech, tags, sim))
                         switch (Type)
                         {
                             case CType.Sum:
@@ -69,7 +69,7 @@ namespace CustomSalvage.MechBroke
                                 result += token.ToString() + "\n";
                                 break;
                             case CType.Min:
-                                if (curvalue > token.Value)
+                                if (curvalue > token.Value || curvalue == 0)
                                 {
                                     curvalue = token.Value;
                                     result = token.ToString() + "\n";
@@ -77,7 +77,7 @@ namespace CustomSalvage.MechBroke
 
                                 break;
                             case CType.Max:
-                                if (curvalue < token.Value)
+                                if (curvalue < token.Value || curvalue == 0)
                                 {
                                     curvalue = token.Value;
                                     result = token.ToString() + "\n";
@@ -95,10 +95,10 @@ namespace CustomSalvage.MechBroke
             foreach (var token in Tokens)
             {
                 sb.Append("- " + token.ToString() + "\n");
-                sb.Append("-- C: [");
+                sb.Append("-- C: [\n");
                 if (token.Conditions != null && token.Conditions.Length > 0)
                 {
-                    Conditions.Instatnce.PrintConditions(sb, token.Conditions);
+                    Conditions.Instance.PrintConditions(sb, token.Conditions);
                     sb.Append("    ]\n");
                 }
                 else
