@@ -226,7 +226,6 @@ namespace CustomSalvage
             {
                 logAppender = new FileLogAppender(logFilePath, FileLogAppender.WriteMode.INSTANT);
                 HBS.Logging.Logger.AddAppender("CustomSalvage", logAppender);
-
             }
             catch (Exception e)
             {

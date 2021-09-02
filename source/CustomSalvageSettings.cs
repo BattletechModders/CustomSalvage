@@ -49,6 +49,7 @@ namespace CustomSalvage
     {
         public string FrankenPenaltyCaption = "FrankenMech";
         public string TPBonusCaption = "Tech Points";
+        public string SparePartsCaption = "Spare Parts";
         public string TotalBonusCatption = "Total";
 
         public string ScrapDialogTitle = "Scrap {0}?";
@@ -75,6 +76,7 @@ namespace CustomSalvage
         public string ButtonKeepParts = "Keep Parts";
         public string ButtonSell = "Sell";
         public string ButtonScrap = "Scrap";
+
     }
 
     public class Settings
@@ -216,7 +218,6 @@ namespace CustomSalvage
 
         public bool UseGameSettingsUnequiped = false;
         public bool UnEquipedMech = false;
-        public bool ShowBrokeChances = true;
         public bool ShowDEBUGChances = true;
 
         public bool RepairChanceByTP = false;
@@ -261,8 +262,9 @@ namespace CustomSalvage
         public bool ShowLogPrefix { get; set; } = true;
         public tagicon_def[] IconTags { get; set; } = null;
 
+        public int MaxSpareParts = 5;
         public bool ShowDetailBonuses = true;
-        public bool ShowDiceChances = true;
+        public bool ShowBrokeChances = true;
         public bool ShowBrokeChancesFirst = true;
 
         public float[,] PartCountPenalty = new float[,]

@@ -3,6 +3,7 @@ using System.Linq;
 using BattleTech;
 using BattleTech.UI;
 using BattleTech.UI.Tooltips;
+using CustomSalvage.MechBroke;
 using Harmony;
 using HBS.Collections;
 using Localize;
@@ -140,8 +141,9 @@ namespace CustomSalvage
 #endif
                         break;
                     case BrokeType.Normalized:
+                        ConditionsHandler.Instance.PrepareCheck(mech, UnityGameInstance.BattleTechGame.Simulation);
                         broke_chance = "Total TechBonus: " + MechBroke.DiceBroke
-                            .GetBonus(mech, UnityGameInstance.BattleTechGame.Simulation, 0)
+                            .GetBonus(mech, UnityGameInstance.BattleTechGame.Simulation, 0, 0)
                             .ToString("+0;-#");
                         break;
                 }

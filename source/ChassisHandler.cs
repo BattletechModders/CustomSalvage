@@ -218,6 +218,7 @@ namespace CustomSalvage
         {
             public int count;
             public int used;
+            public int spare;
             public int cbills;
             public string mechname;
             public string mechid;
@@ -229,6 +230,7 @@ namespace CustomSalvage
                 cbills = cb;
                 mechname = new Text(mn).ToString();
                 mechid = mi;
+                spare = 0;
             }
         }
 
@@ -308,6 +310,7 @@ namespace CustomSalvage
                     RandomBroke.BrokeMech(new_mech, sim, other_parts);
                     break;
                 case BrokeType.Normalized:
+                    DiceBroke.BrokeMech(new_mech, sim, other_parts, used_parts.Sum(i => i.spare));
                     break;
             }
 
@@ -434,13 +437,14 @@ namespace CustomSalvage
             }
         }
 
- 
+
         public static void StartDialog()
         {
             ShowInfo();
 
             try
             {
+                _state = opt_state.Default;
                 var list = GetCompatible(chassis.Description.Id);
                 used_parts = new List<parts_info>();
                 int c = GetCount(mech.Description.Id);
@@ -472,7 +476,7 @@ namespace CustomSalvage
                     {
                         float omnimod = 1;
                         float mod = 1 + Mathf.Abs(mech.Description.Cost - mechDef.Description.Cost) /
-                            (float) mech.Description.Cost * settings.AdaptModWeight;
+                            (float)mech.Description.Cost * settings.AdaptModWeight;
                         if (mod > settings.MaxAdaptMod)
                             mod = settings.MaxAdaptMod;
 
@@ -488,7 +492,7 @@ namespace CustomSalvage
 
 
 
-                        var price = (int) (cb * omnimod * mod * info.PriceMult *
+                        var price = (int)(cb * omnimod * mod * info.PriceMult *
                                            (settings.ApplyPartPriceMod ? info2.PriceMult : 1));
 
                         Control.Instance.LogDebug(
@@ -510,6 +514,11 @@ namespace CustomSalvage
                 }
 
                 mech_type = GetMechType(mech);
+                if (settings.MechBrokeType == BrokeType.Normalized)
+                {
+                    ConditionsHandler.Instance.PrepareCheck(mech, mechBay.Sim);
+                    DiceBroke.PrepareTechKits(mech, mechBay.Sim);
+                }
 
                 var eventDef = new SimGameEventDef(
                     SimGameEventDef.EventPublishState.PUBLISHED,
@@ -521,7 +530,7 @@ namespace CustomSalvage
                         GetCurrentDescription(),
                         "uixTxrSpot_YangWorking.png",
                         0, 0, false, "", "", ""),
-                    new RequirementDef {Scope = EventScope.Company},
+                    new RequirementDef { Scope = EventScope.Company },
                     new RequirementDef[0],
                     new SimGameEventObject[0],
                     options.ToArray(),
@@ -529,7 +538,7 @@ namespace CustomSalvage
 
                 if (!_hasInitEventTracker)
                 {
-                    eventTracker.Init(new[] {EventScope.Company}, 0, 0, SimGameEventDef.SimEventType.NORMAL,
+                    eventTracker.Init(new[] { EventScope.Company }, 0, 0, SimGameEventDef.SimEventType.NORMAL,
                         mechBay.Sim);
                     _hasInitEventTracker = true;
                 }
@@ -546,7 +555,7 @@ namespace CustomSalvage
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static string GetMechType(MechDef mech)
         {
-           return "'Mech";
+            return "'Mech";
         }
 
         public static string GetCurrentDescription()
@@ -557,14 +566,20 @@ namespace CustomSalvage
 
             foreach (var info in used_parts)
             {
-                if (info.used > 0)
+                if (info.used > 0 || info.spare > 0)
                 {
-                    result +=
-                        $"\n  <b>{info.mechname}</b>: <color=#20ff20>{info.used}</color> {(info.used == 1 ? "part" : "parts")}";
-                    if (info.cbills > 0)
-                    {
-                        result += $", <color=#ffff00>{SimGameState.GetCBillString(info.cbills * info.used)}</color>";
-                    }
+                    if (info.spare == 0)
+                        result +=
+                            $"\n  <b>{info.mechname}</b>: <color=#20ff20>{info.used}</color> {(info.used == 1 ? "part" : "parts")}";
+                    else if (info.used == 0)
+                        result +=
+                            $"\n  <b>{info.mechname}</b>: <color=#ffff20>{info.spare}</color> {(info.spare == 1 ? "part" : "parts")}";
+                    else
+                        result +=
+                            $"\n  <b>{info.mechname}</b>: <color=#20ff20>{info.used}</color><color=#ffff20>+{info.spare}</color> {(info.used + info.spare == 1 ? "part" : "parts")}";
+                    if (info.cbills > 0 && info.used > 0)
+                        result +=
+                            $", <color=#ffff00>{SimGameState.GetCBillString(info.cbills * info.used)}</color>";
                 }
             }
 
@@ -572,16 +587,17 @@ namespace CustomSalvage
             {
                 result += "\n\n";
                 var parts = used_parts.Sum(i => i.used) - used_parts[0].used;
+                var spare = used_parts.Sum(i => i.spare);
 
                 //Control.Instance.Log("1");
 
                 if (Control.Instance.Settings.ShowDetailBonuses)
                 {
-                    var bonuses = DiceBroke.GetBonusString(mech, UnityGameInstance.BattleTechGame.Simulation, parts);
+                    var bonuses = DiceBroke.GetBonusString(mech, UnityGameInstance.BattleTechGame.Simulation, parts, spare);
                     result += bonuses;
                 }
                 //Control.Instance.Log("2");
-                int total = DiceBroke.GetBonus(mech, UnityGameInstance.BattleTechGame.Simulation, parts);
+                int total = DiceBroke.GetBonus(mech, UnityGameInstance.BattleTechGame.Simulation, parts, spare);
                 result += $"<b><color=#ffff00>{total,-4:+0;-#}" + new Text(strs.TotalBonusCatption) + "</color></b>";
                 ////Control.Instance.Log("3");
                 if (Control.Instance.Settings.ShowBrokeChances)
@@ -602,6 +618,10 @@ namespace CustomSalvage
             return result;
         }
 
+        private enum opt_state { Default, AddSpare, AddMechKit }
+
+        private static opt_state _state = opt_state.Default;
+
         public static void MakeOptions(TextMeshProUGUI eventDescription, SGEventPanel sgEventPanel, DataManager dataManager, RectTransform optionParent, List<SGEventOption> optionsList)
         {
             void set_info(SGEventOption option, string text, UnityAction<SimGameEventOption> action)
@@ -616,17 +636,17 @@ namespace CustomSalvage
                 if (num < used_parts.Count)
                 {
                     var info = used_parts[num];
-                    if (info.used < info.count)
+                    if (info.used < info.count + info.spare)
                     {
                         if (info.cbills > 0)
-                            set_info(option, $"Add <color=#20ff20>{info.mechname}</color> for <color=#ffff00>{SimGameState.GetCBillString(info.cbills)}</color>, {info.count - info.used} {(info.count - info.used == 1 ? "part" : "parts") }  left",
+                            set_info(option, $"Add <color=#20ff20>{info.mechname}</color> for <color=#ffff00>{SimGameState.GetCBillString(info.cbills)}</color>, {info.count - info.used - info.spare}  {(info.count - info.used - info.spare == 1 ? "part" : "parts") }  left",
                                 arg =>
                                 {
                                     info.used += 1;
                                     MakeOptions(eventDescription, sgEventPanel, dataManager, optionParent, optionsList);
                                 });
                         else
-                            set_info(option, $"Add <color=#20ff20>{info.mechname}</color> {info.count - info.used} {(info.count - info.used == 1 ? "part" : "parts") } left",
+                            set_info(option, $"Add <color=#20ff20>{info.mechname}</color> {info.count - info.used - info.spare} {(info.count - info.used - info.spare == 1 ? "part" : "parts") } left",
                                 arg =>
                                 {
                                     info.used += 1;
@@ -634,9 +654,7 @@ namespace CustomSalvage
                                 });
                     }
                     else
-                    {
                         set_info(option, $"<i><color=#a0a0a0>{info.mechname}</color>: <color=#ff4040>All parts used</color></i>", arg => { });
-                    }
                 }
                 else
                 {
@@ -644,12 +662,86 @@ namespace CustomSalvage
                 }
             }
 
+            void set_add_spare_part(SGEventOption option, int num)
+            {
+                if (num < used_parts.Count)
+                {
+                    var info = used_parts[num];
+                    if (info.used < info.count + info.spare)
+                        set_info(option,
+                            $"Add <color=#20ff20>{info.mechname}</color> {info.count - info.used - info.spare} {(info.count - info.used - info.spare == 1 ? "part" : "parts")} left",
+                            arg =>
+                            {
+                                info.spare += 1;
+                                if (used_parts.Sum(i => i.spare) >= Control.Instance.Settings.MaxSpareParts
+                                    || used_parts.Sum(i => i.count - i.used - i.spare) <= 0)
+                                    _state = opt_state.Default;
+                                MakeOptions(eventDescription, sgEventPanel, dataManager, optionParent, optionsList);
+                            });
+                    else
+                        set_info(option,
+                            $"<i><color=#a0a0a0>{info.mechname}</color>: <color=#ff4040>All parts used</color></i>",
+                            arg => { });
+                }
+                else if (num == used_parts.Count)
+                {
+                    set_info(option, "Clear spare parts", arg =>
+                    {
+                        foreach (var partsInfo in used_parts)
+                            partsInfo.spare = 0;
+                        MakeOptions(eventDescription, sgEventPanel, dataManager, optionParent, optionsList);
+                    });
+                }
+                else if (num == used_parts.Count + 1)
+                {
+                    set_info(option, "Confirm", arg =>
+                    {
+                        _state = opt_state.Default;
+                        MakeOptions(eventDescription, sgEventPanel, dataManager, optionParent, optionsList);
+                    });
+                }
+                else
+                    set_info(option, "---", arg => { });
+            }
+
             int count = used_parts.Sum(i => i.used);
 
             eventDescription.SetText(GetCurrentDescription());
 
+            if (_state == opt_state.AddMechKit)
+            {
+                set_info(optionsList[0], "---", arg => { });
+                set_info(optionsList[1], "---", arg => { });
+                set_info(optionsList[2], "---", arg => { });
+                set_info(optionsList[3], "Cancel", arg =>
+                {
+                    _state = opt_state.Default;
+                    MakeOptions(eventDescription, sgEventPanel, dataManager, optionParent, optionsList);
+                });
+            }
+            else if (_state == opt_state.AddSpare)
+            {
+                if (used_parts.Count+2 > 4)
+                {
+                    set_add_spare_part(optionsList[0], 0 + page * 3);
+                    set_add_spare_part(optionsList[1], 1 + page * 3);
+                    set_add_spare_part(optionsList[2], 2 + page * 3);
+                    set_info(optionsList[3], "Next Page >>", arg =>
+                    {
+                        page = (page + 1) % ((used_parts.Count + 2) / 3 + 1);
+                        MakeOptions(eventDescription, sgEventPanel, dataManager, optionParent, optionsList);
+                    });
 
-            if (count < mechBay.Sim.Constants.Story.DefaultMechPartMax)
+                }
+                else
+                {
+                    set_add_spare_part(optionsList[0], 0);
+                    set_add_spare_part(optionsList[1], 1);
+                    set_add_spare_part(optionsList[2], 2);
+                    set_add_spare_part(optionsList[3], 3);
+                }
+            }
+            else if (count < mechBay.Sim.Constants.Story.DefaultMechPartMax)
             {
                 if (used_parts.Count > 5)
                 {
@@ -679,10 +771,49 @@ namespace CustomSalvage
                     set_info(optionsList[0], "Confirm", arg => { CompeteMech(); sgEventPanel.Dismiss(); });
                 else
                     set_info(optionsList[0], "<color=#ff2020><i>Not enough C-Bills</i></color>", arg => { sgEventPanel.Dismiss(); });
-                set_info(optionsList[1], "Cancel", arg => { sgEventPanel.Dismiss(); });
-                set_info(optionsList[2], "---", arg => { });
-                set_info(optionsList[3], "---", arg => { });
+                if (Control.Instance.Settings.MechBrokeType == BrokeType.Normalized)
+                {
+                    if (used_parts.Sum(i => i.count - i.used) == 0)
+                        set_info(optionsList[1], "<i>no spare parts</i>", arg => { });
+                    else if (used_parts.Sum(i => i.spare) < Control.Instance.Settings.MaxSpareParts
+                            && used_parts.Sum(i => i.count - i.used - i.spare) > 0)
+                        set_info(optionsList[1], "Add spare part", arg =>
+                        {
+                            _state = opt_state.AddSpare;
+                            MakeOptions(eventDescription, sgEventPanel, dataManager, optionParent, optionsList);
+                        });
+                    else
+                        set_info(optionsList[1], "Clear spare parts", arg =>
+                        {
+                            foreach (var partsInfo in used_parts)
+                                partsInfo.spare = 0;
+                            MakeOptions(eventDescription, sgEventPanel, dataManager, optionParent, optionsList);
+                        });
 
+                    if (DiceBroke.CompatibleTechKits.Count > 0)
+                        if (DiceBroke.SelectedTechKit == null)
+                            set_info(optionsList[2], "Add TechKit", arg =>
+                            {
+                                _state = opt_state.AddMechKit;
+                                MakeOptions(eventDescription, sgEventPanel, dataManager, optionParent, optionsList);
+                            });
+                        else
+                            set_info(optionsList[2], "RemoveTechKit", arg =>
+                            {
+                                DiceBroke.SelectedTechKit = null;
+                                _state = opt_state.Default;
+                                MakeOptions(eventDescription, sgEventPanel, dataManager, optionParent, optionsList);
+                            });
+                    else
+                        set_info(optionsList[2], "<i>no techkits</i>", arg => { });
+                }
+                else
+                {
+                    set_info(optionsList[1], "---", arg => { });
+                    set_info(optionsList[2], "---", arg => { });
+                }
+
+                set_info(optionsList[3], "Cancel", arg => { sgEventPanel.Dismiss(); });
             }
         }
 
@@ -697,7 +828,7 @@ namespace CustomSalvage
                 foreach (var info in used_parts)
                 {
                     if (info.used > 0)
-                        RemoveMechPart(info.mechid, info.used);
+                        RemoveMechPart(info.mechid, info.used + info.spare);
                 }
 
                 int total = used_parts.Sum(i => i.cbills * i.used);
@@ -757,7 +888,7 @@ namespace CustomSalvage
         }
 
         private static Dictionary<string, HashSet<string>> mechtags = new Dictionary<string, HashSet<string>>();
-        
+
         public static HashSet<string> GetMechTags(MechDef mech)
         {
             if (mech?.Chassis == null)
@@ -765,8 +896,8 @@ namespace CustomSalvage
 
             if (mechtags.TryGetValue(mech.ChassisID, out var res))
                 return res;
-            
-            var new_tags =  build_mech_tags(mech);
+
+            var new_tags = build_mech_tags(mech);
             mechtags[mech.ChassisID] = new_tags;
             return new_tags;
         }
@@ -781,7 +912,5 @@ namespace CustomSalvage
 
             return result;
         }
-
-        
     }
 }

@@ -110,11 +110,15 @@
     <Compile Include="LootableMech.cs" />
     <Compile Include="LostUnitActions.cs" />
     <Compile Include="MechBroke\BrokeTools.cs" />
-    <Compile Include="MechBroke\Conditions.cs" />
+    <Compile Include="MechBroke\Conditions\Boolean.cs" />
+    <Compile Include="MechBroke\Conditions\CompanyStat.cs" />
+    <Compile Include="MechBroke\Conditions\ConditionsHandler.cs" />
+    <Compile Include="MechBroke\Conditions\MechTags.cs" />
     <Compile Include="MechBroke\DiceBroke.cs" />
     <Compile Include="MechBroke\CSTags.cs" />
     <Compile Include="MechBroke\RandomBroke.cs" />
     <Compile Include="MechBroke\TagsDatabase.cs" />
+    <Compile Include="MechBroke\TechKitCustom.cs" />
     <Compile Include="MultyBuyWidgetHelper.cs" />
     <Compile Include="PartsNumCalculations.cs" />
     <Compile Include="Patches\Contract_GenerateSalvage.cs" />

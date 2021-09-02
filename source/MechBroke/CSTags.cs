@@ -33,7 +33,7 @@ namespace CustomSalvage.MechBroke
             if (Tokens != null)
                 foreach (var token in Tokens)
                 {
-                    if (Conditions.Instance.CheckCondition(token.Conditions, mech, tags, sim))
+                    if (ConditionsHandler.Instance.CheckCondition(token.Conditions, mech))
                         switch (Type)
                         {
                             case CType.Sum:
@@ -58,10 +58,11 @@ namespace CustomSalvage.MechBroke
         {
             var curvalue = 0;
             string result = "";
+
             if (Tokens != null)
                 foreach (var token in Tokens)
                 {
-                    if (Conditions.Instance.CheckCondition(token.Conditions, mech, tags, sim))
+                    if (ConditionsHandler.Instance.CheckCondition(token.Conditions, mech))
                         switch (Type)
                         {
                             case CType.Sum:
@@ -98,7 +99,7 @@ namespace CustomSalvage.MechBroke
                 sb.Append("-- C: [\n");
                 if (token.Conditions != null && token.Conditions.Length > 0)
                 {
-                    Conditions.Instance.PrintConditions(sb, token.Conditions);
+                    ConditionsHandler.Instance.PrintConditions(sb, token.Conditions);
                     sb.Append("    ]\n");
                 }
                 else

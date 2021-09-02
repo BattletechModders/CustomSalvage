@@ -7,7 +7,9 @@ using Harmony;
 
 namespace CustomSalvage.MechBroke
 {
-    public delegate bool ConditionDelegate(Condition condition, MechDef mech, HashSet<string> mechtags, SimGameState sim);
+    public delegate bool ConditionDelegate(MechDef mech, Condition condition);
+
+    public delegate void PrepareDelegate(MechDef mech, SimGameState sim);
 
 
     public class Condition
@@ -20,43 +22,55 @@ namespace CustomSalvage.MechBroke
         public Condition[] Subs { get; set; }
     }
 
-    public class Conditions
+    public class ConditionsHandler
     {
-        private static Conditions _instance;
+        private static ConditionsHandler _instance;
 
-        public static Conditions Instance
+        public static ConditionsHandler Instance
         {
             get
             {
                 if (_instance == null)
-                    _instance = new Conditions();
+                    _instance = new ConditionsHandler();
 
                 return _instance;
             }
         }
 
         private Dictionary<string, ConditionDelegate> handlers;
+        private List<PrepareDelegate> prepare_delegates;
 
 
-        private Conditions()
+        private ConditionsHandler()
         {
             handlers = new Dictionary<string, ConditionDelegate>();
+            prepare_delegates = new List<PrepareDelegate>();
+            RegisterHandler("mechtag", Conditions.MechTags.Handler, Conditions.MechTags.Prepare);
+            RegisterHandler("companystat", Conditions.CompanyStat.Handler, Conditions.CompanyStat.Prepare);
 
-            handlers["not"] = handler_not;
-            handlers["and"] = handler_and;
-            handlers["or"] = handler_or;
-            handlers["companystat"] = handler_companystat;
-            handlers["mechtag"] = handler_mechtag;
-
+            RegisterHandler("true", Conditions.Boolean.True);
+            RegisterHandler("false", Conditions.Boolean.False);
+            RegisterHandler("and", Conditions.Boolean.And);
+            RegisterHandler("not", Conditions.Boolean.Not);
+            RegisterHandler("or", Conditions.Boolean.Or);
         }
 
-        public void RegisterHandler(string keyword, ConditionDelegate handler)
+        public void RegisterHandler(string keyword, ConditionDelegate handler, PrepareDelegate prepare = null)
         {
             handlers[keyword] = handler;
+            if (prepare != null)
+                prepare_delegates.Add(prepare);
         }
 
-        public bool CheckCondition(IEnumerable<Condition> conditions, MechDef mech, HashSet<string> mechtags,
-            SimGameState sim)
+        public void PrepareCheck(MechDef mech, SimGameState sim)
+        {
+            foreach (var prepareDelegate in prepare_delegates)
+            {
+                prepareDelegate(mech, sim);
+            }
+        }
+
+        public bool CheckCondition(IEnumerable<Condition> conditions, MechDef mech)
         {
             if (conditions != null)
                 foreach (var condition in conditions)
@@ -64,7 +78,7 @@ namespace CustomSalvage.MechBroke
                     if (condition != null)
                         if (handlers.TryGetValue(condition.Type, out var handler))
                         {
-                            if (!handler(condition, mech, mechtags, sim))
+                            if (!handler(mech, condition))
                                 return false;
                         }
                         else
@@ -74,46 +88,6 @@ namespace CustomSalvage.MechBroke
                 }
 
             return true;
-        }
-
-        private bool handler_and(Condition condition, MechDef mech, HashSet<string> mechtags, SimGameState sim)
-        {
-            return CheckCondition(condition.Subs, mech, mechtags, sim);
-        }
-
-        private bool handler_not(Condition condition, MechDef mech, HashSet<string> mechtags, SimGameState sim)
-        {
-            return !CheckCondition(condition.Subs, mech, mechtags, sim);
-        }
-
-        private bool handler_or(Condition condition, MechDef mech, HashSet<string> mechtags, SimGameState sim)
-        {
-            if (condition.Subs != null)
-                foreach (var c in condition.Subs)
-                {
-                    if (c == null
-                        || !handlers.TryGetValue(condition.Type, out var handler)
-                        || handler(condition, mech, mechtags, sim))
-                        return true;
-                }
-
-            return false;
-        }
-
-        private bool handler_mechtag(Condition condition, MechDef mech, HashSet<string> mechtags, SimGameState sim)
-        {
-            if (mechtags == null || condition.Strings == null || condition.Strings.Length < 1)
-                return false;
-
-            return condition.Strings.All(tag => mechtags.Contains(tag));
-        }
-
-        private bool handler_companystat(Condition condition, MechDef mech, HashSet<string> mechtags, SimGameState sim)
-        {
-            if (mechtags == null || condition.Strings == null || condition.Strings.Length < 1)
-                return false;
-
-            return sim.CompanyStats.GetStatistic(condition.Strings[0]) == null;
         }
 
         public void PrintConditions(StringBuilder sb, Condition[] tokenConditions)

@@ -29,8 +29,12 @@ namespace CustomSalvage.MechBroke
             ChassisLocations.RightLeg,ChassisLocations.LeftLeg,
         };
 
+        private static List<TechKitCustom> tech_kits = new List<TechKitCustom>();
 
 
+        public static TechKitCustom SelectedTechKit { get; set; }
+        public static List<TechKitCustom> CompatibleTechKits { get; set; }
+        public static List<ChassisHandler.parts_info> SpareParts { get; set; }
 
         private static readonly float[] probs =
         {
@@ -47,9 +51,9 @@ namespace CustomSalvage.MechBroke
             2.77f
         };
 
-        public static (int roll, int total) BrokeMech(MechDef mech, SimGameState sim, int other_parts)
+        public static (int roll, int total) BrokeMech(MechDef mech, SimGameState sim, int other_parts, int spare_parts)
         {
-            var target = GetBonus(mech, sim, other_parts);
+            var target = GetBonus(mech, sim, other_parts, spare_parts);
             var roll = Random.Range(1, 7) + Random.Range(1, 7);
             target += roll;
 
@@ -95,7 +99,7 @@ namespace CustomSalvage.MechBroke
                 - (parts > 0 ? 1 : 0);
         }
 
-        public static int GetBonus(MechDef mech, SimGameState sim, int other_parts)
+        public static int GetBonus(MechDef mech, SimGameState sim, int other_parts, int spare_parts)
         {
             //penalties
             //Control.Instance.LogError("1-1");
@@ -107,6 +111,7 @@ namespace CustomSalvage.MechBroke
             var parts = sim.Constants.Story.DefaultMechPartMax;
             result += parts_bonus(other_parts);
             result += tp_bonus(sim);
+            result += spare_parts;
             //bonuses
             return result;
         }
@@ -164,7 +169,7 @@ namespace CustomSalvage.MechBroke
             return result;
         }
 
-        public static string GetBonusString(MechDef mech, SimGameState sim, int other_parts)
+        public static string GetBonusString(MechDef mech, SimGameState sim, int other_parts, int spare_parts)
         {
             StringBuilder sb = new StringBuilder();
             var tags = ChassisHandler.GetMechTags(mech);
@@ -183,12 +188,33 @@ namespace CustomSalvage.MechBroke
             if (tp != 0)
                 sb.AppendLine($"{tp,-4:+0;-#}" +
                               new Text(Control.Instance.Settings.Strings.TPBonusCaption).ToString());
+
+            if( spare_parts > 0)
+                sb.AppendLine($"{spare_parts,-4:+0;-#}" +
+                              new Text(Control.Instance.Settings.Strings.SparePartsCaption).ToString());
+
             return sb.ToString();
         }
 
         private static int tp_bonus(SimGameState sim)
         {
             return sim.MechTechSkill / Control.Instance.Settings.DiceTPStep + Control.Instance.Settings.DiceBaseTP;
+        }
+
+        public static void AddKit(TechKitCustom techKitCustom)
+        {
+            tech_kits.Add(techKitCustom);
+        }
+        public static void PrepareTechKits(MechDef mech, SimGameState mechBaySim)
+        {
+            SelectedTechKit = null;
+            CompatibleTechKits = new List<TechKitCustom>();
+            SpareParts = new List<ChassisHandler.parts_info>();
+            foreach (var kit in tech_kits)
+            {
+                if (ConditionsHandler.Instance.CheckCondition(kit.Info.Conditions, mech))
+                    CompatibleTechKits.Add(kit);
+            }
         }
     }
 }
