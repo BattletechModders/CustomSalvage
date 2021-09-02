@@ -76,6 +76,23 @@ namespace CustomSalvage
         public string ButtonKeepParts = "Keep Parts";
         public string ButtonSell = "Sell";
         public string ButtonScrap = "Scrap";
+        public string ButtonNextPage = "Next Page >>";
+        public string ButtonConfirm = "Confirm";
+        public string ButtonApplySpare = "Apply spare parts";
+        public string ButtonClearSpare = "Clear spare parts";
+        public string ButtonAddSpare = "Add spare parts";
+        public string ButtonNoSpare = "<i>no spare parts left</i>";
+
+        public string ButtonNoMoney = "<color=#ff2020><i>Not enough C-Bills</i></color>";
+        public string ButtonAddTechKit = "Clear TechKit";
+        public string ButtonClearTechKit = "Clear TechKit";
+        public string ButtonNoTechKit = "<i>no compatible TechKits</i>";
+        public string ButtonAllPartsUsed = "<i><color=#a0a0a0>{0}</color>: <color=#ff4040>All parts used</color></i>";
+
+        public string ButtonAddPart = "Add <color=#20ff20>{0}</color> {1} part left";
+        public string ButtonAddParts = "Add <color=#20ff20>{0}</color> {1} parts left";
+        public string ButtonAddPartMoney = "Add <color=#20ff20>{0}</color> for <color=#ffff00>{1}</color> {2} part left";
+        public string ButtonAddPartsMoney = "Add <color=#20ff20>{0}</color> for <color=#ffff00>{1}</color> {2} parts left";
 
     }
 

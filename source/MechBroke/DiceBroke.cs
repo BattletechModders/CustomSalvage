@@ -63,23 +63,34 @@ namespace CustomSalvage.MechBroke
             (bool ct_remove, int parts_to_remove) = get_parts_to_remove(target);
             if (ct_remove)
             {
-                remove.Set(ChassisLocations.CenterTorso);
+                remove = remove.Set(ChassisLocations.CenterTorso);
                 parts_to_remove -= 1;
             }
 
+            if (parts_to_remove >= 7)
+                remove = ChassisLocations.All;
+            else if (parts_to_remove == 0)
+                remove = ChassisLocations.None;
+            else
+                for (int i = 0; i < parts_to_remove && parts.Count > 0; i++)
+                {
+                    int n = Random.Range(0, parts.Count);
+                    remove = remove.Set(parts[n]);
+                    parts.RemoveAt(n);
+                }
 
-            for (int i = 0; i < parts_to_remove; i++)
-            {
-                int n = Random.Range(0, parts.Count);
-                remove.Set(parts[n]);
-                parts.RemoveAt(n);
-            }
 
-            if (target < 6)
-                remove.Set(ChassisLocations.CenterTorso);
+            Control.Instance.LogDebug($"Breaking {mech.Description.Id}");
+            Control.Instance.LogDebug($"- roll: {roll} + {target - roll} = {target}");
+            Control.Instance.LogDebug($"- parts: {parts_to_remove} CT:{ct_remove}");
+            Control.Instance.LogDebug($"- break: {remove}");
+
 
             foreach (var to_remove in all_parts)
+            {
                 BrokeTools.BrokeLocation(mech, to_remove, remove.HasFlag(to_remove));
+                Control.Instance.LogDebug($"-- {to_remove}: {remove.HasFlag(to_remove)}");
+            }
 
             BrokeTools.BrokeEquipment(mech, 0.25f, 0.75f);
 
@@ -90,7 +101,7 @@ namespace CustomSalvage.MechBroke
         {
             var s = Control.Instance.Settings;
             int n = Mathf.Clamp(target, s.MinRoll, s.MaxRoll);
-            return (n >= s.CTRoll, s.partresults[n]);
+            return (n < s.CTRoll, s.partresults[n]);
         }
 
         private static int parts_bonus(int parts)
@@ -112,6 +123,8 @@ namespace CustomSalvage.MechBroke
             result += parts_bonus(other_parts);
             result += tp_bonus(sim);
             result += spare_parts;
+            if (SelectedTechKit != null)
+                result += SelectedTechKit.Value;
             //bonuses
             return result;
         }
@@ -127,9 +140,9 @@ namespace CustomSalvage.MechBroke
             float ct_chance = 0;
             for (int i = 0; i < 11; i++)
             {
-                (var ct_alive, int parts) = get_parts_to_remove(i + 2 + bonus);
+                (var ct_destroyed, int parts) = get_parts_to_remove(i + 2 + bonus);
                 a[i] = parts;
-                if (ct_alive)
+                if (!ct_destroyed)
                 {
                     ct_chance += probs[i];
                     if (ct == 0)
@@ -160,7 +173,7 @@ namespace CustomSalvage.MechBroke
             }
 
             add_to_result(prob, last);
-            if (ct_chance == 0)
+            if (ct_chance < 0.01)
                 result += "\n CT will not be repaired";
             else
                 result += $"\nCT Repaired at {ct} roll - { Mathf.RoundToInt(ct_chance)}%";
@@ -189,9 +202,13 @@ namespace CustomSalvage.MechBroke
                 sb.AppendLine($"{tp,-4:+0;-#}" +
                               new Text(Control.Instance.Settings.Strings.TPBonusCaption).ToString());
 
-            if( spare_parts > 0)
+            if (spare_parts > 0)
                 sb.AppendLine($"{spare_parts,-4:+0;-#}" +
                               new Text(Control.Instance.Settings.Strings.SparePartsCaption).ToString());
+
+            if (SelectedTechKit != null && SelectedTechKit.Value != 0)
+                sb.AppendLine($"{SelectedTechKit.Value,-4:+0;-#}" +
+                              SelectedTechKit.Def.Description.UIName);
 
             return sb.ToString();
         }
@@ -212,7 +229,7 @@ namespace CustomSalvage.MechBroke
             SpareParts = new List<ChassisHandler.parts_info>();
             foreach (var kit in tech_kits)
             {
-                if (ConditionsHandler.Instance.CheckCondition(kit.Info.Conditions, mech))
+                if (ConditionsHandler.Instance.CheckCondition(kit.Condition, mech))
                     CompatibleTechKits.Add(kit);
             }
         }
