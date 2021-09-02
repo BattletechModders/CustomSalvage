@@ -1,0 +1,38 @@
+[
+	{
+		"ID" : "Specials",
+		"Type" : "Sum",
+		"Tokens" : [
+			{
+				"Caption" : "OmniMech",
+				"Value" : 1,
+				"Conditions" : [ { "Type" : "mechtag", "Strings" : [ "OmniMech" ] }]
+			},
+			{
+				"Caption" : "Elite",
+				"Value" : -2,
+				"Conditions" : [ { "Type" : "mechtag", "Strings" : [ "unit_elite" ] }]
+			},
+			{
+				"Caption" : "Prototype",
+				"Value" : -5,
+				"Conditions" : [ { "Type" : "mechtag", "Strings" : [ "unit_prototype" ] }]
+			},
+			{
+				"Caption" : "HeroMech",
+				"Value" : -4,
+				"Conditions" : [ { "Type" : "mechtag", "Strings" : [ "unit_hero" ] }]
+			},
+			{
+				"Caption" : "Totem Mech",
+				"Value" : -3,
+				"Conditions" : [ { "Type" : "mechtag", "Strings" : [ "unit_totem" ] }]
+			},
+			{
+				"Caption" : "Legendary",
+				"Value" : -8,
+				"Conditions" : [ { "Type" : "mechtag", "Strings" : [ "unit_legendary" ] }]
+			}
+		]
+	}
+]

@@ -1,0 +1,37 @@
+[
+	{
+		"ID" : "TechBase",
+		"Type" : "Min",
+		"Tokens" : [
+			{
+				"Caption" : "Primitive",
+				"Value" : 2,
+				"Conditions" : [ { "Type" : "mechtag", "Strings" : [ "unit_primitive" ] }]
+			},
+			{
+				"Caption" : "Advanced",
+				"Value" : -2,
+				"Conditions" : [ { "Type" : "mechtag", "Strings" : [ "unit_advanced" ] }]
+			},			{
+				"Caption" : "SLDFMech",
+				"Value" : -2,
+				"Conditions" : [ { "Type" : "mechtag", "Strings" : [ "SLDFMech" ] }]
+			},
+			{
+				"Caption" : "ClanTech",
+				"Value" : -4,
+				"Conditions" : [ { "Type" : "mechtag", "Strings" : [ "ClanMech" ] }]
+			},
+			{
+				"Caption" : "Society",
+				"Value" : -6,
+				"Conditions" : [ { "Type" : "mechtag", "Strings" : [ "SocietyMech" ] }]
+			},
+			{
+				"Caption" : "RISC",
+				"Value" : -6,
+				"Conditions" : [ { "Type" : "mechtag", "Strings" : [ "RISCBattleMech" ] }]
+			}
+		]
+	}
+]
