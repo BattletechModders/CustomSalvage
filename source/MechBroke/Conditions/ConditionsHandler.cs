@@ -46,6 +46,11 @@ namespace CustomSalvage.MechBroke
             handlers = new Dictionary<string, ConditionDelegate>();
             prepare_delegates = new List<PrepareDelegate>();
             RegisterHandler("mechtag", Conditions.MechTags.Handler, Conditions.MechTags.Prepare);
+            RegisterHandler("mechtagany", Conditions.AnyMechTags.Handler, Conditions.AnyMechTags.Prepare);
+            RegisterHandler("systemtag", Conditions.PlanetTags.Handler, Conditions.PlanetTags.Prepare);
+            RegisterHandler("systemtagany", Conditions.AnyPlanetTags.Handler, Conditions.AnyPlanetTags.Prepare);
+            RegisterHandler("pilottag", Conditions.PilotTag.Handler, Conditions.PilotTag.Prepare);
+            RegisterHandler("pilottagany", Conditions.AnyPilotTag.Handler, Conditions.AnyPilotTag.Prepare);
             RegisterHandler("companystat", Conditions.CompanyStat.Handler, Conditions.CompanyStat.Prepare);
 
             RegisterHandler("true", Conditions.Boolean.True);
