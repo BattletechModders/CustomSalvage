@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using BattleTech;
 using BattleTech.DataObjects;
+using Localize;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -50,6 +52,14 @@ namespace CustomSalvage.MechBroke
 
         public static void BrokeEquipment(MechDef mech, float repaired, float damaged)
         {
+            if(Control.Instance.Settings.ComponentDamageRandom)
+                BrokeEquipmentRandom(mech, repaired, damaged);
+            else
+                BrokeEquipmentProportional(mech, repaired, damaged);
+        }
+
+        public static void BrokeEquipmentRandom(MechDef mech, float repaired, float damaged)
+        {
             foreach (var cref in mech.Inventory)
             {
                 if (mech.IsLocationDestroyed(cref.MountedLocation))
@@ -82,5 +92,95 @@ namespace CustomSalvage.MechBroke
                 }
             }
         }
+
+        public static void BrokeEquipmentProportional(MechDef mech, float repaired, float damaged)
+        {
+            var list = new List<MechComponentRef>();
+            foreach (var cref in mech.Inventory)
+            {
+                if (mech.IsLocationDestroyed(cref.MountedLocation))
+                {
+                    Control.Instance.LogDebug($"---- {cref.ComponentDefID} - location destroyed");
+                    cref.DamageLevel = ComponentDamageLevel.Destroyed;
+                }
+                else
+                    list.Add(cref);
+            }
+
+            if (list.Count <= 1)
+                return;
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                var n1 = Random.Range(0, list.Count);
+                var n2 = Random.Range(0, list.Count);
+
+                var t = list[n1];
+                list[n1] = list[n2];
+                list[n2] = t;
+            }
+
+            float frep = list.Count * repaired;
+            float fdam = list.Count * damaged;
+            int nrep = (int) frep;
+            int ndam = (int) fdam;
+            float prep = frep - nrep;
+            float pdam = fdam - ndam;
+
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                var cref = list[i];
+                if (i < nrep)
+                {
+                    Control.Instance.LogDebug(
+                        $"---- {cref.ComponentDefID} - repaired");
+                    cref.DamageLevel = ComponentDamageLevel.Functional;
+                }
+                else if(i == nrep)
+                {
+                    if (Random.Range(0f, 1f) < prep)
+                    {
+                        Control.Instance.LogDebug(
+                            $"---- {cref.ComponentDefID} - repaired");
+                        cref.DamageLevel = ComponentDamageLevel.Functional;
+                    }
+                    else
+                    {
+                        Control.Instance.LogDebug(
+                            $"---- {cref.ComponentDefID} - damaged");
+                        cref.DamageLevel = ComponentDamageLevel.NonFunctional;
+                    }
+                }
+                else if (i < ndam)
+                {
+                    Control.Instance.LogDebug(
+                        $"---- {cref.ComponentDefID} - damaged");
+                    cref.DamageLevel = ComponentDamageLevel.NonFunctional;
+                }
+                else if (i == ndam)
+                {
+                    if (Random.Range(0f, 1f) < pdam)
+                    {
+                        Control.Instance.LogDebug(
+                            $"---- {cref.ComponentDefID} - damaged");
+                        cref.DamageLevel = ComponentDamageLevel.NonFunctional;
+                    }
+                    else
+                    {
+                        Control.Instance.LogDebug(
+                            $"---- {cref.ComponentDefID} - fubar");
+                        cref.DamageLevel = ComponentDamageLevel.Destroyed;
+                    }
+                }
+                else
+                {
+                    Control.Instance.LogDebug(
+                        $"---- {cref.ComponentDefID} - fubar");
+                    cref.DamageLevel = ComponentDamageLevel.Destroyed;
+                }
+            }
+        }
+
     }
 }

@@ -278,6 +278,7 @@ namespace CustomSalvage
         public float OmniNormalMod = 0f;
         public bool ShowLogPrefix { get; set; } = true;
         public tagicon_def[] IconTags { get; set; } = null;
+        public bool ComponentDamageRandom = false;
 
         public int MaxSpareParts = 5;
         public bool ShowDetailBonuses = true;
