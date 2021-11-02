@@ -118,6 +118,7 @@
     <Compile Include="MechBroke\Conditions\PlanetTags.cs" />
     <Compile Include="MechBroke\DiceBroke.cs" />
     <Compile Include="MechBroke\CSTags.cs" />
+    <Compile Include="MechBroke\IBrokeMech.cs" />
     <Compile Include="MechBroke\RandomBroke.cs" />
     <Compile Include="MechBroke\TagsDatabase.cs" />
     <Compile Include="MechBroke\TechKitCustom.cs" />

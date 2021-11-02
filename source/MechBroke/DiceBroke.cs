@@ -54,13 +54,15 @@ namespace CustomSalvage.MechBroke
         public static (int roll, int total) BrokeMech(MechDef mech, SimGameState sim, int other_parts, int spare_parts)
         {
             var target = GetBonus(mech, sim, other_parts, spare_parts);
-            var roll = Random.Range(1, 7) + Random.Range(1, 7);
+            var roll =  Random.Range(1, 7) + Random.Range(1, 7);
             target += roll;
 
             var parts = locs.ToList();
             var remove = ChassisLocations.None;
 
             (bool ct_remove, int parts_to_remove) = get_parts_to_remove(target);
+            Control.Instance.LogDebug($"target:{target} ct_remove{ct_remove}, parts:{parts_to_remove}");
+
             if (ct_remove)
             {
                 remove = remove.Set(ChassisLocations.CenterTorso);
@@ -92,7 +94,9 @@ namespace CustomSalvage.MechBroke
                 Control.Instance.LogDebug($"-- {to_remove}: {remove.HasFlag(to_remove)}");
             }
 
-            BrokeTools.BrokeEquipment(mech, 0.25f, 0.75f);
+            var compchance = 1 - GetComp(mech, sim, other_parts, spare_parts);
+
+            BrokeTools.BrokeEquipment(mech, compchance, compchance);
 
             return (roll, target);
         }
@@ -129,6 +133,24 @@ namespace CustomSalvage.MechBroke
             return result;
         }
 
+        public static float GetComp(MechDef mech, SimGameState sim, int other_parts, int spare_parts)
+        {
+            var s = Control.Instance.Settings;
+
+            float result = s.ComponentDamageBase;
+            result += sim.MechTechSkill * s.ComponentChancePerTp;
+            result += other_parts * s.ComponentDamageFranken;
+            result += spare_parts * s.ComponentDamageSpare;
+
+            if (SelectedTechKit != null)
+            {
+                result -= SelectedTechKit.CompRepairAddBonus;
+            }
+
+
+            return result;
+        }
+
         public static string GetResultString(int bonus)
         {
             int[] a = new int[11];
@@ -141,6 +163,7 @@ namespace CustomSalvage.MechBroke
             for (int i = 0; i < 11; i++)
             {
                 (var ct_destroyed, int parts) = get_parts_to_remove(i + 2 + bonus);
+                Control.Instance.LogDebug($"{i,2}: target:{i + 2 + bonus} ct_remove{ct_destroyed}, parts:{parts}, probs:{probs[i]}");
                 a[i] = parts;
                 if (!ct_destroyed)
                 {
@@ -150,6 +173,7 @@ namespace CustomSalvage.MechBroke
                 }
 
             }
+            Control.Instance.LogDebug("--");
 
             void add_to_result(float pr, int pt)
             {
@@ -178,10 +202,10 @@ namespace CustomSalvage.MechBroke
             else
                 result += $"\nCT Repaired at {ct} roll - { Mathf.RoundToInt(ct_chance)}%";
 
+            //var c = GetComp(mech, )
 
             return result;
         }
-
         public static string GetBonusString(MechDef mech, SimGameState sim, int other_parts, int spare_parts)
         {
             StringBuilder sb = new StringBuilder();
@@ -210,6 +234,8 @@ namespace CustomSalvage.MechBroke
                 sb.AppendLine($"{SelectedTechKit.Value,-4:+0;-#}" +
                               SelectedTechKit.Def.Description.UIName);
 
+
+
             return sb.ToString();
         }
 
@@ -229,7 +255,7 @@ namespace CustomSalvage.MechBroke
             SpareParts = new List<ChassisHandler.parts_info>();
             foreach (var kit in tech_kits)
             {
-                if (ConditionsHandler.Instance.CheckCondition(kit.Condition, mech))
+                if (ConditionsHandler.Instance.CheckCondition(kit.Conditions, mech))
                     CompatibleTechKits.Add(kit);
             }
         }

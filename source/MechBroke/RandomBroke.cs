@@ -13,7 +13,7 @@ namespace CustomSalvage.MechBroke
 
                 Control.Instance.LogDebug($"-- broke parts");
                 var rnd = new Random();
-                var chances = new ChassisHandler.AssemblyChancesResult(new_mech, sim, other_parts);
+                var chances = new AssemblyChancesResult(new_mech, sim, other_parts);
                 var settings = Control.Instance.Settings;
 
                 Control.Instance.LogDebug($"--- RepairMechLimbsChance: {chances.LimbChance}, RepairMechLimbs: {settings.RepairMechLimbs} ");

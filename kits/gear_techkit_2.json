@@ -1,0 +1,41 @@
+{
+    "Custom" :
+    {
+		"TechKit" : 
+		{
+			"Value" : 2,			
+		}
+		"Category" : { "CategoryID" : "techkit" }
+    },
+
+   "Description" : {
+      "Id" : "gear_techkit_2",
+      "Name" : "TechKit +2",
+      "UIName" : "TechKit +2",
+      "Details" : "This TechKit add 2 to mech assembly roll",
+      "Icon" : "uixSvgIcon_quantity",
+      "Cost" : 0,
+      "Rarity" : 99,
+      "Purchasable" : false
+	},
+   "BonusValueA" : "",
+   "BonusValueB" : "",
+   "ComponentType" : "Upgrade",
+   "ComponentSubType" : "NotSet",
+   "PrefabIdentifier" : "",
+   "BattleValue" : 0,
+   "InventorySize" : 1,
+   "Tonnage" : 0,
+   "AllowedLocations" : "All",
+   "DisallowedLocations" : "None",
+   "CriticalComponent" : false,
+   "ComponentTags": {
+      "items": [
+         "component_type_stock"
+      ],
+      "tagSetSourceFile": ""
+   },
+   "statusEffects" : [
+      
+   ]
+}

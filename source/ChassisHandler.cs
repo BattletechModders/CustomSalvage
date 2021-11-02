@@ -328,104 +328,6 @@ namespace CustomSalvage
 
         }
 
-        public class AssemblyChancesResult
-        {
-            public float LimbChance { get; private set; } = Control.Instance.Settings.RepairMechLimbsChance;
-            public float CompFChance { get; private set; } = Control.Instance.Settings.RepairComponentsFunctionalThreshold;
-            public float CompNFChance { get; private set; } = Control.Instance.Settings.RepairComponentsNonFunctionalThreshold;
-
-            public int BaseTP { get; private set; } = Control.Instance.Settings.BaseTP;
-            public float LimbTP { get; private set; } = Control.Instance.Settings.LimbChancePerTp;
-            public float CompTP { get; private set; } = Control.Instance.Settings.ComponentChancePerTp;
-#if CCDEBUG
-            public string DEBUGText { get; private set; } = "";
-#endif
-            public AssemblyChancesResult(MechDef mech, SimGameState sim, int other_parts)
-            {
-                var settings = Control.Instance.Settings;
-                if (settings.RepairChanceByTP)
-                {
-                    if (settings.BrokeByTag != null && settings.BrokeByTag.Length > 1)
-                    {
-                        int numb = 0;
-                        int numl = 0;
-                        int numc = 0;
-
-                        int sumb = 0;
-                        float suml = 0;
-                        float sumc = 0;
-
-                        foreach (var info in settings.BrokeByTag)
-                        {
-                            if (mech.MechTags.Contains(info.tag) || mech.Chassis.ChassisTags.Contains(info.tag))
-                            {
-#if CCDEBUG
-                                string logstr = info.tag;
-#endif
-                                if (info.BaseTp > 0)
-                                {
-                                    sumb += info.BaseTp;
-                                    numb += 1;
-#if CCDEBUG
-                                    logstr += $" base:{info.BaseTp}";
-#endif
-                                }
-
-                                if (info.Limb > 0)
-                                {
-                                    suml += info.Limb;
-                                    numl += 1;
-#if CCDEBUG
-                                    logstr += $" limb:{info.Limb:0.000}";
-#endif
-                                }
-                                if (info.Component > 0)
-                                {
-                                    sumc += info.Component;
-                                    numc += 1;
-#if CCDEBUG
-                                    logstr += $" comp:{info.Component:0.000}";
-#endif
-                                }
-#if CCDEBUG
-                                Control.Instance.LogDebug(logstr);
-#endif
-
-                            }
-                        }
-
-                        if (numb > 0)
-                            BaseTP = sumb / numb;
-                        if (numl > 0)
-                            LimbTP = suml / numl;
-                        if (numc > 0)
-                            CompTP = sumc / numc;
-
-                        Control.Instance.LogDebug($"totals: base:{BaseTP}, limb:{LimbTP:0.000}, component:{CompTP:0.000}");
-
-                        var tp = sim.MechTechSkill - BaseTP;
-                        var ltp = Mathf.Clamp(tp * LimbTP, -settings.RepairTPMaxEffect, settings.RepairTPMaxEffect);
-                        var ctp = Mathf.Clamp(tp * CompTP, -settings.RepairTPMaxEffect, settings.RepairTPMaxEffect);
-
-                        Control.Instance.LogDebug($"LeftTP: {tp} limb_change = {ltp:0.000} comp_change = {ctp * CompTP:0.000}");
-#if CCDEBUG
-                        var oLimbChance = LimbChance;
-                        var oCompFChance = CompFChance;
-                        var oCompNFChance = CompNFChance;
-#endif
-                        LimbChance = Mathf.Clamp(LimbChance + ltp, settings.LimbMinChance, settings.LimbMaxChance);
-                        CompFChance = Mathf.Clamp(CompFChance + ctp, settings.ComponentMinChance, settings.ComponentMaxChance);
-                        CompNFChance = Mathf.Clamp(CompNFChance + ctp, CompFChance, settings.ComponentMaxChance);
-
-#if CCDEBUG
-                        DEBUGText = $"\nLTP : {LimbTP:0.000}/{ltp:0.000}/{(int)(oLimbChance * 100)}%";
-                        DEBUGText = $"\nCTP : {CompTP:0.000}/{ctp:0.000}/{(int)(oCompFChance * 100)}%/{(int)(oCompNFChance * 100)}%";
-#endif
-                    }
-                }
-            }
-        }
-
         private static void RemoveMechPart(string id, int count)
         {
             var method = mechBay.Sim.GetType()
@@ -610,9 +512,8 @@ namespace CustomSalvage
                 {
                     result += "\n\n";
                     result += DiceBroke.GetResultString(total);
+                    result += $"\nComponent damage chance: {Mathf.RoundToInt(100 * DiceBroke.GetComp(mech, UnityGameInstance.BattleTechGame.Simulation, parts, spare))}%";
                 }
-
-
             }
 
             var cbills = GetCbills();
@@ -946,6 +847,104 @@ namespace CustomSalvage
                 result.UnionWith(mech.Chassis.ChassisTags);
 
             return result;
+        }
+    }
+
+    public class AssemblyChancesResult
+    {
+        public float LimbChance { get; private set; } = Control.Instance.Settings.RepairMechLimbsChance;
+        public float CompFChance { get; private set; } = Control.Instance.Settings.RepairComponentsFunctionalThreshold;
+        public float CompNFChance { get; private set; } = Control.Instance.Settings.RepairComponentsNonFunctionalThreshold;
+
+        public int BaseTP { get; private set; } = Control.Instance.Settings.BaseTP;
+        public float LimbTP { get; private set; } = Control.Instance.Settings.LimbChancePerTp;
+        public float CompTP { get; private set; } = Control.Instance.Settings.ComponentChancePerTp;
+#if CCDEBUG
+        public string DEBUGText { get; private set; } = "";
+#endif
+        public AssemblyChancesResult(MechDef mech, SimGameState sim, int other_parts)
+        {
+            var settings = Control.Instance.Settings;
+            if (settings.RepairChanceByTP)
+            {
+                if (settings.BrokeByTag != null && settings.BrokeByTag.Length > 1)
+                {
+                    int numb = 0;
+                    int numl = 0;
+                    int numc = 0;
+
+                    int sumb = 0;
+                    float suml = 0;
+                    float sumc = 0;
+
+                    foreach (var info in settings.BrokeByTag)
+                    {
+                        if (mech.MechTags.Contains(info.tag) || mech.Chassis.ChassisTags.Contains(info.tag))
+                        {
+#if CCDEBUG
+                            string logstr = info.tag;
+#endif
+                            if (info.BaseTp > 0)
+                            {
+                                sumb += info.BaseTp;
+                                numb += 1;
+#if CCDEBUG
+                                logstr += $" base:{info.BaseTp}";
+#endif
+                            }
+
+                            if (info.Limb > 0)
+                            {
+                                suml += info.Limb;
+                                numl += 1;
+#if CCDEBUG
+                                logstr += $" limb:{info.Limb:0.000}";
+#endif
+                            }
+                            if (info.Component > 0)
+                            {
+                                sumc += info.Component;
+                                numc += 1;
+#if CCDEBUG
+                                logstr += $" comp:{info.Component:0.000}";
+#endif
+                            }
+#if CCDEBUG
+                            Control.Instance.LogDebug(logstr);
+#endif
+
+                        }
+                    }
+
+                    if (numb > 0)
+                        BaseTP = sumb / numb;
+                    if (numl > 0)
+                        LimbTP = suml / numl;
+                    if (numc > 0)
+                        CompTP = sumc / numc;
+
+                    Control.Instance.LogDebug($"totals: base:{BaseTP}, limb:{LimbTP:0.000}, component:{CompTP:0.000}");
+
+                    var tp = sim.MechTechSkill - BaseTP;
+                    var ltp = Mathf.Clamp(tp * LimbTP, -settings.RepairTPMaxEffect, settings.RepairTPMaxEffect);
+                    var ctp = Mathf.Clamp(tp * CompTP, -settings.RepairTPMaxEffect, settings.RepairTPMaxEffect);
+
+                    Control.Instance.LogDebug($"LeftTP: {tp} limb_change = {ltp:0.000} comp_change = {ctp * CompTP:0.000}");
+#if CCDEBUG
+                    var oLimbChance = LimbChance;
+                    var oCompFChance = CompFChance;
+                    var oCompNFChance = CompNFChance;
+#endif
+                    LimbChance = Mathf.Clamp(LimbChance + ltp, settings.LimbMinChance, settings.LimbMaxChance);
+                    CompFChance = Mathf.Clamp(CompFChance + ctp, settings.ComponentMinChance, settings.ComponentMaxChance);
+                    CompNFChance = Mathf.Clamp(CompNFChance + ctp, CompFChance, settings.ComponentMaxChance);
+
+#if CCDEBUG
+                    DEBUGText = $"\nLTP : {LimbTP:0.000}/{ltp:0.000}/{(int)(oLimbChance * 100)}%";
+                    DEBUGText = $"\nCTP : {CompTP:0.000}/{ctp:0.000}/{(int)(oCompFChance * 100)}%/{(int)(oCompNFChance * 100)}%";
+#endif
+                }
+            }
         }
     }
 }

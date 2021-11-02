@@ -95,6 +95,8 @@ namespace CustomSalvage.MechBroke
 
         public static void BrokeEquipmentProportional(MechDef mech, float repaired, float damaged)
         {
+            Control.Instance.LogDebug($"BrokeEquipmentProportional: broke:{damaged:0.00} repair:{repaired:0.00}");
+
             var list = new List<MechComponentRef>();
             foreach (var cref in mech.Inventory)
             {
@@ -103,7 +105,7 @@ namespace CustomSalvage.MechBroke
                     Control.Instance.LogDebug($"---- {cref.ComponentDefID} - location destroyed");
                     cref.DamageLevel = ComponentDamageLevel.Destroyed;
                 }
-                else
+                else if(!cref.IsFixed)
                     list.Add(cref);
             }
 
@@ -145,6 +147,12 @@ namespace CustomSalvage.MechBroke
                             $"---- {cref.ComponentDefID} - repaired");
                         cref.DamageLevel = ComponentDamageLevel.Functional;
                     }
+                    else if (damaged == repaired)
+                    {
+                        Control.Instance.LogDebug(
+                            $"---- {cref.ComponentDefID} - fubar");
+                        cref.DamageLevel = ComponentDamageLevel.Destroyed;
+                    }
                     else
                     {
                         Control.Instance.LogDebug(
@@ -181,6 +189,7 @@ namespace CustomSalvage.MechBroke
                 }
             }
         }
+
 
     }
 }

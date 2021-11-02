@@ -279,11 +279,17 @@ namespace CustomSalvage
         public bool ShowLogPrefix { get; set; } = true;
         public tagicon_def[] IconTags { get; set; } = null;
         public bool ComponentDamageRandom = false;
+        public float ComponentDamageBase = 0.4f;
+        public float ComponentDamagePerTP = 0.005f;
+        public float ComponentDamageFranken = 0.02f;
+        public float ComponentDamageSpare = -0.01f;
 
         public int MaxSpareParts = 5;
         public bool ShowDetailBonuses = true;
         public bool ShowBrokeChances = true;
         public bool ShowBrokeChancesFirst = true;
+
+
 
         public float[,] PartCountPenalty = new float[,]
         {

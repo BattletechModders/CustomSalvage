@@ -8,19 +8,16 @@
 	"DependsOn": ["CustomComponents"],
 	"DLL": "CustomSalvage.dll",
 	"DLLEntryPoint": "CustomSalvage.Control.Init",
-	"CustomResourceTypes": [ "CSTags" ],
-	
+	"CustomResourceTypes": [ "CSTags"],
+
 	"Settings" : {
-		"LogLevel" : "Debug",
-		"DEBUG_ShowLoadingTags" : true,
-		"DEBUG_LOTOFPARTS" : true,
-		
+		"LogLevel" : "Error",
+                "DEBUG_LOTOFPARTS" : true,
 		"ShowDEBUGChances": false,
 		"RecoveryType" : "PartDestroyed",
 		"PartCountType" : "PartDestroyed",
 		"LostMechAction" : "MoveItemsAndPartsToSalvage",
-		"MechBrokeType" : "Normalized",
-		
+                "MechBrokeType" : "Normalized",
 		"RecoveryMod" : 1,
 		"LimbRecoveryPenalty" : 0.05,
 		"TorsoRecoveryPenalty" : 0.1,
@@ -97,30 +94,31 @@
 
 		],
 		"SpecialTags" : [
-			{ "Tag" : "unit_legendary", "Mod" : 1.8 },
-			{ "Tag" : "unit_hero", "Mod" : 1.3 },
-			{ "Tag" : "unit_prototype", "Mod" : 1.7 },
-			{ "Tag" : "unit_totem", "Mod" : 1.4 },
-			{ "Tag" : "unit_elite", "Mod" : 1.9 },
-			{ "Tag" : "unit_risc", "Mod" : 1.25 },
-			{ "Tag" : "unit_primitive", "Mod" : 0.6 },
-			{ "Tag" : "OmniMech", "Mod" : 0.9 }
+		{ "Tag" : "unit_legendary", "Mod" : 1.8 },
+		{ "Tag" : "unit_hero", "Mod" : 1.3 },
+		{ "Tag" : "unit_prototype", "Mod" : 1.7 },
+		{ "Tag" : "unit_totem", "Mod" : 1.4 },
+		{ "Tag" : "unit_elite", "Mod" : 1.9 },
+		{ "Tag" : "unit_risc", "Mod" : 1.25 },
+		{ "Tag" : "unit_primitive", "Mod" : 0.6 },
+		{ "Tag" : "OmniMech", "Mod" : 0.9 }
 		],
 		"BrokeByTag" : [
-			{ "tag" : "unit_elite", "BaseTp" : "30", "Limb" : "0.01", "Component" : "0.01" },
-			{ "tag" : "unit_prototype", "BaseTp" : "20", "Limb" : "0.005", "Component" : "0.005" },
-			{ "tag" : "unit_hero", "BaseTp" : "15", "Limb" : "0.0075", "Component" : "0.0075" },
-			{ "tag" : "unit_totem", "BaseTp" : "18", "Limb" : "0.007", "Component" : "0.007" },
-			{ "tag" : "unit_primitive", "BaseTp" : "5", "Limb" : "0.015", "Component" : "0.015" },
-			{ "tag" : "OmniMech", "BaseTp" : "13", "Limb" : "0.011", "Component" : "0.011" },
-			{ "tag" : "ClanMech", "BaseTp" : "14", "Limb" : "0.007", "Component" : "0.007" },
-			{ "tag" : "SocietyMech", "BaseTp" : "16", "Limb" : "0.008", "Component" : "0.008" },
-			{ "tag" : "SLDFMech", "BaseTp" : "11", "Limb" : "0.0085", "Component" : "0.0085" },
-			{ "tag" : "RISCBattleMech", "BaseTp" : "16", "Limb" : "0.0085", "Component" : "0.0085" }
-		],
+    { "tag" : "unit_elite", "BaseTp" : "30", "Limb" : "0.01", "Component" : "0.01" },
+    { "tag" : "unit_prototype", "BaseTp" : "20", "Limb" : "0.005", "Component" : "0.005" },
+	{ "tag" : "unit_hero", "BaseTp" : "15", "Limb" : "0.0075", "Component" : "0.0075" },
+	{ "tag" : "unit_totem", "BaseTp" : "18", "Limb" : "0.007", "Component" : "0.007" },
+	{ "tag" : "unit_primitive", "BaseTp" : "5", "Limb" : "0.015", "Component" : "0.015" },
+	{ "tag" : "OmniMech", "BaseTp" : "13", "Limb" : "0.011", "Component" : "0.011" },
+	{ "tag" : "ClanMech", "BaseTp" : "14", "Limb" : "0.007", "Component" : "0.007" },
+	{ "tag" : "SocietyMech", "BaseTp" : "16", "Limb" : "0.008", "Component" : "0.008" },
+	{ "tag" : "SLDFMech", "BaseTp" : "11", "Limb" : "0.0085", "Component" : "0.0085" },
+	{ "tag" : "RISCBattleMech", "BaseTp" : "16", "Limb" : "0.0085", "Component" : "0.0085" }
+],
 		"MaxVariantsInDescription" : 5,
 		"ApplyPartPriceMod": true,
 		"UnEquipedMech" : false,
+		"BrokenMech" : true,
 		"HeadRepaired" : false,
 		"LeftArmRepaired" : false,
 		"RightArmRepaired" : false,
@@ -153,17 +151,17 @@
 		"LimbMinChance": 0.1,
 		"LimbMaxChance": 0.9,
 		"ComponentMinChance": 0.2,
-		"ComponentMaxChance": 0.95,
-		
-		"DiceBaseTP" : -5,
-		"DiceTPStep" : 4,
-		
+		"ComponentMaxChance": 0.95
 	},
 
 	"Manifest": [
 		{
             "Type": "CSTags",
             "Path": "tags"
+        },
+		{
+            "Type": "UpgradeDef",
+            "Path": "kits"
         }
 	]
 }

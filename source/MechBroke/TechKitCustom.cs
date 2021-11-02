@@ -6,12 +6,12 @@ using CustomComponents;
 
 namespace CustomSalvage.MechBroke
 {
+    [CustomComponent("TechKit")]
     public class TechKitCustom : SimpleCustomComponent, IMechLabFilter, IAfterLoad
     {
-        public Condition[] Condition;
+        public Condition[] Conditions;
         public int Value = 0;
         public float CompRepairAddBonus = 0;
-        public float CompRepairMulBonus = 1;
         public int CBill = 0;
         public float CBIllMul = 1;
 
@@ -33,8 +33,6 @@ namespace CustomSalvage.MechBroke
                 result += "  Tech " + Value.ToString("-0;+#");
             if (CompRepairAddBonus != 0)
                 result += "  Comp " + ((int) CompRepairAddBonus * 100).ToString("-0;+#") + "%";
-            if(CompRepairMulBonus != 1)
-                result += "  Comp x" + CompRepairMulBonus.ToString();
 
             if (CBill != 0)
                 result += "  Cost " + SimGameState.GetCBillString(CBill);

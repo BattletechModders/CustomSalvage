@@ -126,7 +126,7 @@ namespace CustomSalvage
                 {
                     case BrokeType.Random:
                         var chances =
-                            new ChassisHandler.AssemblyChancesResult(mech, UnityGameInstance.BattleTechGame.Simulation,
+                            new AssemblyChancesResult(mech, UnityGameInstance.BattleTechGame.Simulation,
                                 0);
 
                         broke_chance += $"Base Tech: {chances.BaseTP}";
@@ -142,7 +142,7 @@ namespace CustomSalvage
                         break;
                     case BrokeType.Normalized:
                         ConditionsHandler.Instance.PrepareCheck(mech, UnityGameInstance.BattleTechGame.Simulation);
-                        broke_chance = "Total TechBonus: " + MechBroke.DiceBroke
+                        broke_chance += "Total TechBonus: " + MechBroke.DiceBroke
                             .GetBonus(mech, UnityGameInstance.BattleTechGame.Simulation, 0, 0)
                             .ToString("+0;-#");
                         break;
