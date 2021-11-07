@@ -4,7 +4,7 @@
 		"TechKit" : 
 		{
 			"Value" : 3,
-			"CompRepairAddBonus" : 5,
+			"CompRepairAddBonus" : 0.05,
 			"Conditions" : [ { "Type" : "mechtag", "Strings" : [ "unit_elite" ] }]
 			
 		}

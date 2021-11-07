@@ -84,7 +84,7 @@ namespace CustomSalvage
         public string ButtonNoSpare = "<i>no spare parts left</i>";
 
         public string ButtonNoMoney = "<color=#ff2020><i>Not enough C-Bills</i></color>";
-        public string ButtonAddTechKit = "Clear TechKit";
+        public string ButtonAddTechKit = "Add TechKit";
         public string ButtonClearTechKit = "Clear TechKit";
         public string ButtonNoTechKit = "<i>no compatible TechKits</i>";
         public string ButtonAllPartsUsed = "<i><color=#a0a0a0>{0}</color>: <color=#ff4040>All parts used</color></i>";

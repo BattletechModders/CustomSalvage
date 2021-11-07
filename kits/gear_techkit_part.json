@@ -4,7 +4,7 @@
 		"TechKit" : 
 		{
 			"Value" : 5,
-			"CompRepairAddBonus" : -10,
+			"CompRepairAddBonus" : -0.2,
 			
 		}
 		"Category" : { "CategoryID" : "techkit" }

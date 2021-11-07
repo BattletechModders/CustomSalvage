@@ -30,9 +30,9 @@ namespace CustomSalvage.MechBroke
             var result = Def.Description.UIName;
 
             if (Value != 0)
-                result += "  Tech " + Value.ToString("-0;+#");
+                result += "  Tech " + (-Value).ToString("-0;+#");
             if (CompRepairAddBonus != 0)
-                result += "  Comp " + ((int) CompRepairAddBonus * 100).ToString("-0;+#") + "%";
+                result += "  Comp " + (-((int)(CompRepairAddBonus * 1000)/10.0)).ToString("-0;+#") + "%";
 
             if (CBill != 0)
                 result += "  Cost " + SimGameState.GetCBillString(CBill);

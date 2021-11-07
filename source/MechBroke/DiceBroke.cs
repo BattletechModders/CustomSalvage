@@ -2,12 +2,8 @@
 using System.Linq;
 using System.Text;
 using BattleTech;
-using BattleTech.UI;
 using FluffyUnderware.DevTools.Extensions;
-using HBS.Logging;
-using JetBrains.Annotations;
 using Localize;
-using Steamworks;
 using UnityEngine;
 
 namespace CustomSalvage.MechBroke
@@ -29,11 +25,10 @@ namespace CustomSalvage.MechBroke
             ChassisLocations.RightLeg,ChassisLocations.LeftLeg,
         };
 
-        private static List<TechKitCustom> tech_kits = new List<TechKitCustom>();
-
+        private static Dictionary<string, TechKitCustom> tech_kits = new Dictionary<string, TechKitCustom>();
 
         public static TechKitCustom SelectedTechKit { get; set; }
-        public static List<TechKitCustom> CompatibleTechKits { get; set; }
+        public static List<System.Tuple<TechKitCustom, int>> CompatibleTechKits { get; set; }
         public static List<ChassisHandler.parts_info> SpareParts { get; set; }
 
         private static readonly float[] probs =
@@ -54,14 +49,13 @@ namespace CustomSalvage.MechBroke
         public static (int roll, int total) BrokeMech(MechDef mech, SimGameState sim, int other_parts, int spare_parts)
         {
             var target = GetBonus(mech, sim, other_parts, spare_parts);
-            var roll =  Random.Range(1, 7) + Random.Range(1, 7);
+            var roll = Random.Range(1, 7) + Random.Range(1, 7);
             target += roll;
 
             var parts = locs.ToList();
             var remove = ChassisLocations.None;
 
             (bool ct_remove, int parts_to_remove) = get_parts_to_remove(target);
-            Control.Instance.LogDebug($"target:{target} ct_remove{ct_remove}, parts:{parts_to_remove}");
 
             if (ct_remove)
             {
@@ -120,15 +114,20 @@ namespace CustomSalvage.MechBroke
             //Control.Instance.LogError("1-1");
             var tags = ChassisHandler.GetMechTags(mech);
             //Control.Instance.LogError("1-2");
-
+            //Control.Instance.Log("bonus:");
             var result = Tags.Instance.AllCSTags.Sum(i => i.GetValue(mech, tags, sim));
-            //Control.Instance.LogError("1-3");
-            var parts = sim.Constants.Story.DefaultMechPartMax;
+            //Control.Instance.Log($" {result}: tags");
+
+            //var parts = sim.Constants.Story.DefaultMechPartMax;
             result += parts_bonus(other_parts);
+            //Control.Instance.Log($" {result}: +parts {other_parts}");
             result += tp_bonus(sim);
+            //Control.Instance.Log($" {result}: +tp");
             result += spare_parts;
+            //Control.Instance.Log($" {result}: +spare");
             if (SelectedTechKit != null)
                 result += SelectedTechKit.Value;
+            //Control.Instance.Log($" {result}: +kit");
             //bonuses
             return result;
         }
@@ -163,7 +162,6 @@ namespace CustomSalvage.MechBroke
             for (int i = 0; i < 11; i++)
             {
                 (var ct_destroyed, int parts) = get_parts_to_remove(i + 2 + bonus);
-                Control.Instance.LogDebug($"{i,2}: target:{i + 2 + bonus} ct_remove{ct_destroyed}, parts:{parts}, probs:{probs[i]}");
                 a[i] = parts;
                 if (!ct_destroyed)
                 {
@@ -246,18 +244,31 @@ namespace CustomSalvage.MechBroke
 
         public static void AddKit(TechKitCustom techKitCustom)
         {
-            tech_kits.Add(techKitCustom);
+            tech_kits.Add(techKitCustom.Def.Description.Id, techKitCustom);
         }
-        public static void PrepareTechKits(MechDef mech, SimGameState mechBaySim)
+        public static void PrepareTechKits(MechDef mech, SimGameState sim)
         {
             SelectedTechKit = null;
-            CompatibleTechKits = new List<TechKitCustom>();
+            CompatibleTechKits = new ();
             SpareParts = new List<ChassisHandler.parts_info>();
-            foreach (var kit in tech_kits)
-            {
-                if (ConditionsHandler.Instance.CheckCondition(kit.Conditions, mech))
-                    CompatibleTechKits.Add(kit);
-            }
+
+            var items = sim.GetAllInventoryStrings();
+
+            Control.Instance.LogDebug("TechKits:");
+
+            if (items != null)
+                foreach (var item in items)
+                    if (item.StartsWith("Item.UpgradeDef"))
+                    {
+                        var id = item.Substring(16);
+                        var num = sim.CompanyStats.GetValue<int>(item);
+                        bool comp = tech_kits.TryGetValue(id, out var kit) && num >= 1;
+                        Control.Instance.LogDebug($"- {id}: {num} {comp}");
+                        if (comp)
+                        {
+                            CompatibleTechKits.Add(new(kit, num));
+                        }
+                    }
         }
     }
 }

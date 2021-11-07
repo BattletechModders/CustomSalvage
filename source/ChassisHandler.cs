@@ -323,7 +323,7 @@ namespace CustomSalvage
             }
             catch (Exception e)
             {
-                Control.Instance.LogError($"ERROR in MakeMach", e);
+                Control.Instance.LogError($"ERROR in MakeMech", e);
             }
 
         }
@@ -637,24 +637,52 @@ namespace CustomSalvage
                     set_info(option, "---", arg => { });
             }
 
+            void set_add_techkit(SGEventOption option, int num)
+            {
+                if (num < DiceBroke.CompatibleTechKits.Count)
+                {
+                    var info = DiceBroke.CompatibleTechKits[num];
+                    set_info(option, new Text(info.Item1.ToString() + " " + info.Item2.ToString() + " left").ToString(),
+                            arg => {
+                                DiceBroke.SelectedTechKit = info.Item1;
+                                _state = opt_state.Default;
+                                MakeOptions(eventDescription, sgEventPanel, dataManager, optionParent, optionsList);
+                            });
+                }
+                else
+                {
+                    set_info(option, "---", arg => { });
+                }
+            }
+
             int count = used_parts.Sum(i => i.used);
 
             eventDescription.SetText(GetCurrentDescription());
 
             if (_state == opt_state.AddMechKit)
             {
-                set_info(optionsList[0], "---", arg => { });
-                set_info(optionsList[1], "---", arg => { });
-                set_info(optionsList[2], "---", arg => { });
-                set_info(optionsList[3], new Text(str.ButtonCancel).ToString(), arg =>
+                if (DiceBroke.CompatibleTechKits.Count > 4)
                 {
-                    _state = opt_state.Default;
-                    MakeOptions(eventDescription, sgEventPanel, dataManager, optionParent, optionsList);
-                });
+                    set_add_techkit(optionsList[0], 0 + page * 3);
+                    set_add_techkit(optionsList[1], 1 + page * 3);
+                    set_add_techkit(optionsList[2], 2 + page * 3);
+                    set_info(optionsList[3], new Text(str.ButtonNextPage).ToString(), arg =>
+                    {
+                        page = (page + 1) % ((DiceBroke.CompatibleTechKits.Count + 2) / 3 + 1);
+                        MakeOptions(eventDescription, sgEventPanel, dataManager, optionParent, optionsList);
+                    });
+                }
+                else
+                {
+                    set_add_techkit(optionsList[0], 0);
+                    set_add_techkit(optionsList[1], 1);
+                    set_add_techkit(optionsList[2], 2);
+                    set_add_techkit(optionsList[3], 3);
+                }
             }
             else if (_state == opt_state.AddSpare)
             {
-                if (used_parts.Count+2 > 4)
+                if (used_parts.Count + 2 > 4)
                 {
                     set_add_spare_part(optionsList[0], 0 + page * 3);
                     set_add_spare_part(optionsList[1], 1 + page * 3);
@@ -753,7 +781,7 @@ namespace CustomSalvage
         private static void CompeteMech()
         {
 
-            Control.Instance.LogDebug($"Compete mech {mech.Description.UIName}({mech.Description.Id})");
+            Control.Instance.LogDebug($"Compete mech {mech.Description.UIName}({mech.Description.Id})()");
             try
             {
                 Control.Instance.LogDebug($"-- remove parts");
@@ -770,8 +798,11 @@ namespace CustomSalvage
 
                 Control.Instance.LogDebug($"-- take money {total}");
                 mechBay.Sim.AddFunds(-total);
-                Control.Instance.LogDebug($"-- making mech");
-                MakeMech(mechBay.Sim, used_parts.Where(i => i.mechid != mech.Description.Id).Sum(i => i.count));
+                //foreach (var item in used_parts)
+                //    Control.Instance.Log($"- {item.mechid}[{item.mechname}] {item.used}/{item.spare}/{item.count}");
+                var op = used_parts.Where(i => i.mechid != mech.Description.Id).Sum(i => i.used);
+                Control.Instance.LogDebug($"-- making mech other_parts:{op}");
+                MakeMech(mechBay.Sim, op);
                 used_parts.Clear();
                 Control.Instance.LogDebug($"-- refresh mechlab");
                 mechBay.RefreshData(false);
