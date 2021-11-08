@@ -5,20 +5,27 @@ using CustomComponents;
 
 namespace CustomSalvage
 {
-    [CustomComponent("AssemblyVariant")]
-    public class AssemblyVariant : SimpleCustomChassis
+    public interface IAssemblyVariant
     {
-        public string PrefabID = "";
-        public bool Exclude = false;
-        public bool Include = false;
+        string PrefabID { get; }
+        bool Exclude { get; }
+        bool Include { get; }
 
-        //public bool Special = false;
-        //public bool CanUseSpecial = false;
-        //public bool CanUseOnNormal = false;
+        bool ReplacePriceMult { get; }
+        float PriceMult { get; }
+        float PartsMin { get; }
+    }
 
-        public bool ReplacePriceMult = false;
-        public float PriceMult = 1f;
-        public float PartsMin = -1;
+    [CustomComponent("AssemblyVariant")]
+    public class AssemblyVariant : SimpleCustomChassis, IAssemblyVariant
+    {
+        public string PrefabID { get; set; } = "";
+        public bool Exclude { get; set; } = false;
+        public bool Include { get; set; } = false;
+
+        public bool ReplacePriceMult { get; set; } = false;
+        public float PriceMult { get; set; } = 1f;
+        public float PartsMin { get; set; } = -1;
     }
 }
 

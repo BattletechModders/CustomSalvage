@@ -22,7 +22,7 @@ using Random = System.Random;
 
 namespace CustomSalvage
 {
-    public static class ChassisHandler
+    public static partial class ChassisHandler
     {
         private static int min_parts = 0;
         private static int min_parts_special = 0;
@@ -89,17 +89,19 @@ namespace CustomSalvage
                 Proccesed[id] = info;
             }
         }
+
+
         private static mech_info GetMechInfo(MechDef mech)
         {
             string id = mech.Description.Id;
             int max_parts = UnityGameInstance.BattleTechGame.Simulation.Constants.Story.DefaultMechPartMax;
 #if USE_CC
-            var assembly = mech.Chassis.GetComponent<AssemblyVariant>();
+            var assembly = get_variant(mech);
 #endif
             var info = new mech_info();
-            info.Omni = !String.IsNullOrEmpty(Control.Instance.Settings.OmniTechTag) && (
-                mech.Chassis.ChassisTags.Contains(Control.Instance.Settings.OmniTechTag) ||
-                mech.MechTags.Contains(Control.Instance.Settings.OmniTechTag));
+            var tags = GetMechTags(mech);
+            info.Omni = !String.IsNullOrEmpty(Control.Instance.Settings.OmniTechTag) && 
+                tags.Contains(Control.Instance.Settings.OmniTechTag);
 
 #if USE_CC
             if (assembly != null && assembly.Exclude)
@@ -118,7 +120,7 @@ namespace CustomSalvage
 
                 foreach (var tag_info in Control.Instance.Settings.SpecialTags)
                 {
-                    if (mech.MechTags.Contains(tag_info.Tag))
+                    if (tags.Contains(tag_info.Tag))
                     {
                         info.MinParts = min_parts_special;
                         info.PriceMult *= tag_info.Mod;
@@ -869,16 +871,6 @@ namespace CustomSalvage
             return new_tags;
         }
 
-        private static HashSet<string> build_mech_tags(MechDef mech)
-        {
-            var result = new HashSet<string>();
-            if (mech.MechTags != null)
-                result.UnionWith(mech.MechTags);
-            if (mech.Chassis.ChassisTags != null)
-                result.UnionWith(mech.Chassis.ChassisTags);
-
-            return result;
-        }
     }
 
     public class AssemblyChancesResult

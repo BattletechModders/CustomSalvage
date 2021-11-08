@@ -105,6 +105,7 @@
   <ItemGroup>
     <Compile Include="AssemblyVariant.cs" />
     <Compile Include="ChassisHandler.cs" />
+    <Compile Include="ChassisHandler.PatchedMethods.cs" />
     <Compile Include="ContractHelper.cs" />
     <Compile Include="CustomResourse.cs" />
     <Compile Include="LootableMech.cs" />
