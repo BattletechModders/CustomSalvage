@@ -75,7 +75,7 @@ namespace CustomSalvage
         
         internal MechComponentDef CheckDefaults(MechComponentDef def)
         {
-            if (!def.Is<Flags>(out var f) || !f.NotSalvagable) return def;
+            if (!def.Is<Flags>(out var f) || !def.Flags<CCFlags>().NoSalvage) return def;
 
             if (!def.Is<LootableDefault>(out var lootable)) return null;
 
@@ -108,7 +108,7 @@ namespace CustomSalvage
                     break;
             }
 
-            if (component == null || (component.Is<Flags>(out f) && f.NotSalvagable))
+            if (component == null || component.Flags<CCFlags>().NoSalvage)
                 return null;
 
             return component;
