@@ -33,6 +33,7 @@
     </Target>
   <ItemGroup Condition="$(DefineConstants.Contains('USE_CC'))">
     <Reference Include="CustomComponents">
+      <HintPath>$(CustomSalvageModPath)\..\CustomComponents\CustomComponents.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
