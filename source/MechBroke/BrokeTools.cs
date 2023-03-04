@@ -64,7 +64,7 @@ namespace CustomSalvage.MechBroke
             {
                 if (mech.IsLocationDestroyed(cref.MountedLocation))
                 {
-                    Control.Instance.LogDebug($"---- {cref.ComponentDefID} - location destroyed");
+                    Log.Main.Debug?.Log($"---- {cref.ComponentDefID} - location destroyed");
                     cref.DamageLevel = ComponentDamageLevel.Destroyed;
                 }
                 else if (Control.Instance.Settings.RepairMechComponents)
@@ -73,20 +73,17 @@ namespace CustomSalvage.MechBroke
 
                     if (roll < repaired)
                     {
-                        Control.Instance.LogDebug(
-                            $"---- {cref.ComponentDefID} - {roll} vs {repaired} - repaired ");
+                        Log.Main.Debug?.Log($"---- {cref.ComponentDefID} - {roll} vs {repaired} - repaired ");
                         cref.DamageLevel = ComponentDamageLevel.Functional;
                     }
                     else if (roll < damaged)
                     {
-                        Control.Instance.LogDebug(
-                            $"---- {cref.ComponentDefID} - {roll} vs {damaged} - damaged ");
+                        Log.Main.Debug?.Log($"---- {cref.ComponentDefID} - {roll} vs {damaged} - damaged ");
                         cref.DamageLevel = ComponentDamageLevel.NonFunctional;
                     }
                     else
                     {
-                        Control.Instance.LogDebug(
-                            $"---- {cref.ComponentDefID} - {roll} vs {damaged} - fubar ");
+                        Log.Main.Debug?.Log($"---- {cref.ComponentDefID} - {roll} vs {damaged} - fubar ");
                         cref.DamageLevel = ComponentDamageLevel.Destroyed;
                     }
                 }
@@ -95,14 +92,14 @@ namespace CustomSalvage.MechBroke
 
         public static void BrokeEquipmentProportional(MechDef mech, float repaired, float damaged)
         {
-            Control.Instance.LogDebug($"BrokeEquipmentProportional: broke:{damaged:0.00} repair:{repaired:0.00}");
+            Log.Main.Debug?.Log($"BrokeEquipmentProportional: broke:{damaged:0.00} repair:{repaired:0.00}");
 
             var list = new List<MechComponentRef>();
             foreach (var cref in mech.Inventory)
             {
                 if (mech.IsLocationDestroyed(cref.MountedLocation))
                 {
-                    Control.Instance.LogDebug($"---- {cref.ComponentDefID} - location destroyed");
+                    Log.Main.Debug?.Log($"---- {cref.ComponentDefID} - location destroyed");
                     cref.DamageLevel = ComponentDamageLevel.Destroyed;
                 }
                 else if(!cref.IsFixed)
@@ -135,56 +132,48 @@ namespace CustomSalvage.MechBroke
                 var cref = list[i];
                 if (i < nrep)
                 {
-                    Control.Instance.LogDebug(
-                        $"---- {cref.ComponentDefID} - repaired");
+                    Log.Main.Debug?.Log($"---- {cref.ComponentDefID} - repaired");
                     cref.DamageLevel = ComponentDamageLevel.Functional;
                 }
                 else if(i == nrep)
                 {
                     if (Random.Range(0f, 1f) < prep)
                     {
-                        Control.Instance.LogDebug(
-                            $"---- {cref.ComponentDefID} - repaired");
+                        Log.Main.Debug?.Log($"---- {cref.ComponentDefID} - repaired");
                         cref.DamageLevel = ComponentDamageLevel.Functional;
                     }
                     else if (damaged == repaired)
                     {
-                        Control.Instance.LogDebug(
-                            $"---- {cref.ComponentDefID} - fubar");
+                        Log.Main.Debug?.Log($"---- {cref.ComponentDefID} - fubar");
                         cref.DamageLevel = ComponentDamageLevel.Destroyed;
                     }
                     else
                     {
-                        Control.Instance.LogDebug(
-                            $"---- {cref.ComponentDefID} - damaged");
+                        Log.Main.Debug?.Log($"---- {cref.ComponentDefID} - damaged");
                         cref.DamageLevel = ComponentDamageLevel.NonFunctional;
                     }
                 }
                 else if (i < ndam)
                 {
-                    Control.Instance.LogDebug(
-                        $"---- {cref.ComponentDefID} - damaged");
+                    Log.Main.Debug?.Log($"---- {cref.ComponentDefID} - damaged");
                     cref.DamageLevel = ComponentDamageLevel.NonFunctional;
                 }
                 else if (i == ndam)
                 {
                     if (Random.Range(0f, 1f) < pdam)
                     {
-                        Control.Instance.LogDebug(
-                            $"---- {cref.ComponentDefID} - damaged");
+                        Log.Main.Debug?.Log($"---- {cref.ComponentDefID} - damaged");
                         cref.DamageLevel = ComponentDamageLevel.NonFunctional;
                     }
                     else
                     {
-                        Control.Instance.LogDebug(
-                            $"---- {cref.ComponentDefID} - fubar");
+                        Log.Main.Debug?.Log($"---- {cref.ComponentDefID} - fubar");
                         cref.DamageLevel = ComponentDamageLevel.Destroyed;
                     }
                 }
                 else
                 {
-                    Control.Instance.LogDebug(
-                        $"---- {cref.ComponentDefID} - fubar");
+                    Log.Main.Debug?.Log($"---- {cref.ComponentDefID} - fubar");
                     cref.DamageLevel = ComponentDamageLevel.Destroyed;
                 }
             }

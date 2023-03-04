@@ -125,12 +125,12 @@ namespace CustomSalvage
             {
                 if (Sprite == null)
                 {
-                    Control.Instance.LogDebug($"Request icon [{Value}] for [{Tag}]");
+                    Log.Main.Debug?.Log($"Request icon [{Value}] for [{Tag}]");
                     sim.RequestItem<Sprite>(
                         Tag,
                         (sprite) =>
                         {
-                            Control.Instance.LogDebug($"sprite [{Value}] loaded");
+                            Log.Main.Debug?.Log($"sprite [{Value}] loaded");
                             Sprite = sprite;
                         },
                         BattleTechResourceType.Sprite
@@ -162,7 +162,6 @@ namespace CustomSalvage
 
         public Strings Strings;
 
-        public LogLevel LogLevel = LogLevel.Debug;
         public bool DEBUG_ShowLoadingTags = false;
         public bool DEBUG_LOTOFPARTS = false;
         public bool DEBUG_ShowConfig = true;
@@ -276,7 +275,6 @@ namespace CustomSalvage
         public float OmniSpecialtoSpecialMod = 0.1f;
         public float OmniSpecialtoNormalMod = 0.25f;
         public float OmniNormalMod = 0f;
-        public bool ShowLogPrefix { get; set; } = true;
         public tagicon_def[] IconTags { get; set; } = null;
         public bool ComponentDamageRandom = false;
         public float ComponentDamageBase = 0.4f;

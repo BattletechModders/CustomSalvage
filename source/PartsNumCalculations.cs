@@ -56,7 +56,7 @@ namespace CustomSalvage
             if (numparts > constants.Story.DefaultMechPartMax)
                 numparts = constants.Story.DefaultMechPartMax;
 
-            Control.Instance.LogDebug($"Parts {val}/{total} = {val/total:0.00} =  {numparts}");
+            Log.Main.Debug?.Log($"Parts {val}/{total} = {val/total:0.00} =  {numparts}");
 
             return numparts;
         }
@@ -95,7 +95,7 @@ namespace CustomSalvage
             if (numparts > constants.Story.DefaultMechPartMax)
                 numparts = constants.Story.DefaultMechPartMax;
 
-            Control.Instance.LogDebug($"Parts {val}/{total} = {val / total:0.00} =  {numparts}");
+            Log.Main.Debug?.Log($"Parts {val}/{total} = {val / total:0.00} =  {numparts}");
             return numparts;
         }
 

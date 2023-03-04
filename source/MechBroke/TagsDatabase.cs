@@ -30,7 +30,7 @@ namespace CustomSalvage.MechBroke
             {
                 CSTags[tag.ID] = tag;
                 if(Control.Instance.Settings.DEBUG_ShowLoadingTags)
-                    Control.Instance.Log(tag.ToString());
+                    Log.Main.Info?.Log(tag.ToString());
             }
 
             AllCSTags = CSTags.Values.ToList();

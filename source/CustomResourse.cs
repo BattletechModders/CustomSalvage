@@ -31,7 +31,7 @@ namespace CustomSalvage
                 }
                 catch (Exception e)
                 {
-                    Control.Instance.LogError($"Error reading {item.FilePath}", e);
+                    Log.Main.Error?.Log($"Error reading {item.FilePath}", e);
                 }
             }
             return result;

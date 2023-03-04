@@ -92,7 +92,7 @@ namespace CustomSalvage
             }
             catch (Exception e)
             {
-                Control.Instance.LogDebug("Error setting data for " + chassisDef.Description.Id, e);
+                Log.Main.Debug?.Log("Error setting data for " + chassisDef.Description.Id, e);
             }
         }
 

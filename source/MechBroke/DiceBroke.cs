@@ -76,16 +76,16 @@ namespace CustomSalvage.MechBroke
                 }
 
 
-            Control.Instance.LogDebug($"Breaking {mech.Description.Id}");
-            Control.Instance.LogDebug($"- roll: {roll} + {target - roll} = {target}");
-            Control.Instance.LogDebug($"- parts: {parts_to_remove} CT:{ct_remove}");
-            Control.Instance.LogDebug($"- break: {remove}");
+            Log.Main.Debug?.Log($"Breaking {mech.Description.Id}");
+            Log.Main.Debug?.Log($"- roll: {roll} + {target - roll} = {target}");
+            Log.Main.Debug?.Log($"- parts: {parts_to_remove} CT:{ct_remove}");
+            Log.Main.Debug?.Log($"- break: {remove}");
 
 
             foreach (var to_remove in all_parts)
             {
                 BrokeTools.BrokeLocation(mech, to_remove, remove.HasFlag(to_remove));
-                Control.Instance.LogDebug($"-- {to_remove}: {remove.HasFlag(to_remove)}");
+                Log.Main.Debug?.Log($"-- {to_remove}: {remove.HasFlag(to_remove)}");
             }
 
             var compchance = 1 - GetComp(mech, sim, other_parts, spare_parts);
@@ -171,7 +171,7 @@ namespace CustomSalvage.MechBroke
                 }
 
             }
-            Control.Instance.LogDebug("--");
+            Log.Main.Debug?.Log("--");
 
             void add_to_result(float pr, int pt)
             {
@@ -254,7 +254,7 @@ namespace CustomSalvage.MechBroke
 
             var items = sim.GetAllInventoryStrings();
 
-            Control.Instance.LogDebug("TechKits:");
+            Log.Main.Debug?.Log("TechKits:");
 
             if (items != null)
                 foreach (var item in items)
@@ -263,7 +263,7 @@ namespace CustomSalvage.MechBroke
                         var id = item.Substring(16);
                         var num = sim.CompanyStats.GetValue<int>(item);
                         bool comp = tech_kits.TryGetValue(id, out var kit) && num >= 1;
-                        Control.Instance.LogDebug($"- {id}: {num} {comp}");
+                        Log.Main.Debug?.Log($"- {id}: {num} {comp}");
                         if (comp)
                         {
                             CompatibleTechKits.Add(new(kit, num));

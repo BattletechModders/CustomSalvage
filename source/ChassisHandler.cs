@@ -82,8 +82,8 @@ namespace CustomSalvage
                         list.Add(mech);
                 }
 
-                Control.Instance.LogDebug($"Registring {mech.Description.Id}({mech.Description.UIName}) => {mech.ChassisID}");
-                Control.Instance.LogDebug($"-- PrefabID:{info.PrefabID} Exclude:{info.Excluded} MinParts:{info.MinParts} PriceMult:{info.PriceMult}");
+                Log.Main.Debug?.Log($"Registring {mech.Description.Id}({mech.Description.UIName}) => {mech.ChassisID}");
+                Log.Main.Debug?.Log($"-- PrefabID:{info.PrefabID} Exclude:{info.Excluded} MinParts:{info.MinParts} PriceMult:{info.PriceMult}");
 
 
                 Proccesed[id] = info;
@@ -194,26 +194,26 @@ namespace CustomSalvage
 
         public static void ShowInfo()
         {
-            Control.Instance.LogDebug("================= CHASSIS TO MECH ===================");
+            Log.Main.Debug?.Log("================= CHASSIS TO MECH ===================");
             foreach (var mechDef in ChassisToMech)
-                Control.Instance.LogDebug($"{mechDef.Key} => {mechDef.Value.Description.Id}");
+                Log.Main.Debug?.Log($"{mechDef.Key} => {mechDef.Value.Description.Id}");
 
-            Control.Instance.LogDebug("================= EXCLUDED ===================");
+            Log.Main.Debug?.Log("================= EXCLUDED ===================");
             foreach (var info in Proccesed.Where(i => i.Value.Excluded))
-                Control.Instance.LogDebug($"{info.Key}");
+                Log.Main.Debug?.Log($"{info.Key}");
 
-            Control.Instance.LogDebug("================= GROUPS ===================");
+            Log.Main.Debug?.Log("================= GROUPS ===================");
             foreach (var list in Compatible)
             {
-                Control.Instance.LogDebug($"{list.Key}");
+                Log.Main.Debug?.Log($"{list.Key}");
 
                 foreach (var item in list.Value)
-                    Control.Instance.LogDebug($"--- {item.Description.Id}");
+                    Log.Main.Debug?.Log($"--- {item.Description.Id}");
             }
-            Control.Instance.LogDebug("================= INVENTORY ===================");
+            Log.Main.Debug?.Log("================= INVENTORY ===================");
             foreach (var mechDef in PartCount)
-                Control.Instance.LogDebug($"{mechDef.Key}: [{mechDef.Value:00}]");
-            Control.Instance.LogDebug("============================================");
+                Log.Main.Debug?.Log($"{mechDef.Key}: [{mechDef.Value:00}]");
+            Log.Main.Debug?.Log("============================================");
         }
 
         public class parts_info
@@ -266,23 +266,23 @@ namespace CustomSalvage
         {
             try
             {
-                Control.Instance.LogDebug($"-- remove parts");
+                Log.Main.Debug?.Log($"-- remove parts");
                 RemoveMechPart(mech.Description.Id, chassis.MechPartMax);
                 infoWidget.SetData(mechBay, null);
-                Control.Instance.LogDebug($"-- making mech");
+                Log.Main.Debug?.Log($"-- making mech");
                 MakeMech(mechBay.Sim, 0);
-                Control.Instance.LogDebug($"-- refresh mechlab");
+                Log.Main.Debug?.Log($"-- refresh mechlab");
                 mechBay.RefreshData(false);
             }
             catch (Exception e)
             {
-                Control.Instance.LogError("Error in Complete Mech", e);
+                Log.Main.Error?.Log("Error in Complete Mech", e);
             }
         }
 
         private static void MakeMech(SimGameState sim, int other_parts)
         {
-            Control.Instance.LogDebug($"Mech Assembly started for {mech.Description.UIName}");
+            Log.Main.Debug?.Log($"Mech Assembly started for {mech.Description.UIName}");
             MechDef new_mech = new MechDef(mech, mechBay.Sim.GenerateSimGameUID(), true);
 
             try
@@ -293,7 +293,7 @@ namespace CustomSalvage
 
                 if (clear)
                 {
-                    Control.Instance.LogDebug($"-- Clear Inventory");
+                    Log.Main.Debug?.Log($"-- Clear Inventory");
 #if USE_CC
                     new_mech.SetInventory(DefaultHelper.ClearInventory(new_mech, mechBay.Sim));
 #else
@@ -303,7 +303,7 @@ namespace CustomSalvage
             }
             catch (Exception e)
             {
-                Control.Instance.LogError($"ERROR in ClearInventory", e);
+                Log.Main.Error?.Log($"ERROR in ClearInventory", e);
             }
 
             switch (Control.Instance.Settings.MechBrokeType)
@@ -318,14 +318,14 @@ namespace CustomSalvage
 
             try
             {
-                Control.Instance.LogDebug("-- Adding mech");
+                Log.Main.Debug?.Log("-- Adding mech");
                 mechBay.Sim.AddMech(0, new_mech, true, false, true, null);
-                Control.Instance.LogDebug("-- Posting Message");
+                Log.Main.Debug?.Log("-- Posting Message");
                 mechBay.Sim.MessageCenter.PublishMessage(new SimGameMechAddedMessage(new_mech, chassis.MechPartMax, true));
             }
             catch (Exception e)
             {
-                Control.Instance.LogError($"ERROR in MakeMech", e);
+                Log.Main.Error?.Log($"ERROR in MakeMech", e);
             }
 
         }
@@ -360,10 +360,8 @@ namespace CustomSalvage
                 var settings = Control.Instance.Settings;
 
                 float cb = settings.AdaptPartBaseCost * mech.Description.Cost / chassis.MechPartMax;
-                Control.Instance.LogDebug(
-                    $"base part price for {mech.Description.UIName}({mech.Description.Id}): {cb}. mechcost: {mech.Description.Cost} ");
-                Control.Instance.LogDebug(
-                    $"-- setting:{settings.AdaptPartBaseCost}, maxparts:{chassis.MechPartMax}, minparts:{info.MinParts}, pricemult: {info.PriceMult}");
+                Log.Main.Debug?.Log($"base part price for {mech.Description.UIName}({mech.Description.Id}): {cb}. mechcost: {mech.Description.Cost} ");
+                Log.Main.Debug?.Log($"-- setting:{settings.AdaptPartBaseCost}, maxparts:{chassis.MechPartMax}, minparts:{info.MinParts}, pricemult: {info.PriceMult}");
 
 
                 foreach (var mechDef in list)
@@ -399,8 +397,7 @@ namespace CustomSalvage
                         var price = (int)(cb * omnimod * mod * info.PriceMult *
                                            (settings.ApplyPartPriceMod ? info2.PriceMult : 1));
 
-                        Control.Instance.LogDebug(
-                            $"-- price for {mechDef.Description.UIName}({mechDef.Description.Id}) mechcost: {mechDef.Description.Cost}. price mod: {mod:0.000}, tag mod:{info2.PriceMult:0.000} omnimod:{omnimod:0.000} adopt price: {price}");
+                        Log.Main.Debug?.Log($"-- price for {mechDef.Description.UIName}({mechDef.Description.Id}) mechcost: {mechDef.Description.Cost}. price mod: {mod:0.000}, tag mod:{info2.PriceMult:0.000} omnimod:{omnimod:0.000} adopt price: {price}");
                         used_parts.Add(
                             new parts_info(num, 0, price, mechDef.Description.UIName, mechDef.Description.Id));
                     }
@@ -451,7 +448,7 @@ namespace CustomSalvage
             }
             catch (Exception e)
             {
-                Control.Instance.LogError(e);
+                Log.Main.Error?.Log(e);
             }
 
         }
@@ -556,7 +553,7 @@ namespace CustomSalvage
 
             void set_info(SGEventOption option, string text, UnityAction<SimGameEventOption> action)
             {
-                Traverse.Create(option).Field<TextMeshProUGUI>("description").Value.SetText(text);
+                option.description.SetText(text);
                 option.OptionSelected.RemoveAllListeners();
                 option.OptionSelected.AddListener(action);
             }
@@ -783,10 +780,10 @@ namespace CustomSalvage
         private static void CompeteMech()
         {
 
-            Control.Instance.LogDebug($"Compete mech {mech.Description.UIName}({mech.Description.Id})()");
+            Log.Main.Debug?.Log($"Compete mech {mech.Description.UIName}({mech.Description.Id})()");
             try
             {
-                Control.Instance.LogDebug($"-- remove parts");
+                Log.Main.Debug?.Log($"-- remove parts");
                 infoWidget.SetData(mechBay, null);
                 foreach (var info in used_parts)
                 {
@@ -798,20 +795,20 @@ namespace CustomSalvage
                 if(DiceBroke.SelectedTechKit != null)
                     mechBay.Sim.RemoveItemStat(DiceBroke.SelectedTechKit.Def.Description.Id, typeof(UpgradeDef), false);
 
-                Control.Instance.LogDebug($"-- take money {total}");
+                Log.Main.Debug?.Log($"-- take money {total}");
                 mechBay.Sim.AddFunds(-total);
                 //foreach (var item in used_parts)
                 //    Control.Instance.Log($"- {item.mechid}[{item.mechname}] {item.used}/{item.spare}/{item.count}");
                 var op = used_parts.Where(i => i.mechid != mech.Description.Id).Sum(i => i.used);
-                Control.Instance.LogDebug($"-- making mech other_parts:{op}");
+                Log.Main.Debug?.Log($"-- making mech other_parts:{op}");
                 MakeMech(mechBay.Sim, op);
                 used_parts.Clear();
-                Control.Instance.LogDebug($"-- refresh mechlab");
+                Log.Main.Debug?.Log($"-- refresh mechlab");
                 mechBay.RefreshData(false);
             }
             catch (Exception e)
             {
-                Control.Instance.LogError("Error in Complete Mech", e);
+                Log.Main.Error?.Log("Error in Complete Mech", e);
             }
         }
 
@@ -829,13 +826,13 @@ namespace CustomSalvage
 #if USE_CC
             if (mech.Chassis.Is<LootableMech>(out var lm))
             {
-                Control.Instance.LogDebug($"--- Mech Replacing with {lm.ReplaceID}");
+                Log.Main.Debug?.Log($"--- Mech Replacing with {lm.ReplaceID}");
                 try
                 {
                     result = UnityGameInstance.BattleTechGame.Simulation.DataManager.MechDefs.Get(lm.ReplaceID);
                     if (result == null)
                     {
-                        Control.Instance.LogError($"---unknown mech {lm.ReplaceID}, rollback");
+                        Log.Main.Error?.Log($"---unknown mech {lm.ReplaceID}, rollback");
                     }
                 }
                 catch
@@ -845,7 +842,7 @@ namespace CustomSalvage
 
                 if (result == null)
                 {
-                    Control.Instance.LogError($"---unknown mech {lm.ReplaceID}, rollback");
+                    Log.Main.Error?.Log($"---unknown mech {lm.ReplaceID}, rollback");
                     result = mech;
                 }
             }
@@ -933,7 +930,7 @@ namespace CustomSalvage
 #endif
                             }
 #if CCDEBUG
-                            Control.Instance.LogDebug(logstr);
+                            Log.Main.Debug?.Log(logstr);
 #endif
 
                         }
@@ -946,13 +943,13 @@ namespace CustomSalvage
                     if (numc > 0)
                         CompTP = sumc / numc;
 
-                    Control.Instance.LogDebug($"totals: base:{BaseTP}, limb:{LimbTP:0.000}, component:{CompTP:0.000}");
+                    Log.Main.Debug?.Log($"totals: base:{BaseTP}, limb:{LimbTP:0.000}, component:{CompTP:0.000}");
 
                     var tp = sim.MechTechSkill - BaseTP;
                     var ltp = Mathf.Clamp(tp * LimbTP, -settings.RepairTPMaxEffect, settings.RepairTPMaxEffect);
                     var ctp = Mathf.Clamp(tp * CompTP, -settings.RepairTPMaxEffect, settings.RepairTPMaxEffect);
 
-                    Control.Instance.LogDebug($"LeftTP: {tp} limb_change = {ltp:0.000} comp_change = {ctp * CompTP:0.000}");
+                    Log.Main.Debug?.Log($"LeftTP: {tp} limb_change = {ltp:0.000} comp_change = {ctp * CompTP:0.000}");
 #if CCDEBUG
                     var oLimbChance = LimbChance;
                     var oCompFChance = CompFChance;

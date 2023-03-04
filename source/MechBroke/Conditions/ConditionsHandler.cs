@@ -88,7 +88,7 @@ namespace CustomSalvage.MechBroke
                         }
                         else
                         {
-                            Control.Instance.LogError($"Not found handler for {condition.Type} condition");
+                            Log.Main.Error?.Log($"Not found handler for {condition.Type} condition");
                         }
                 }
 

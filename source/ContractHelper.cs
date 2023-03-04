@@ -13,62 +13,36 @@ namespace CustomSalvage
 
     public class ContractHelper
     {
-        private readonly Traverse main;
-
-        private readonly Traverse<List<SalvageDef>> salvaged_chassis;
-        private readonly Traverse<List<MechDef>> lost_mechs;
-        private readonly Traverse<List<SalvageDef>> salvage_results;
-        private readonly Traverse<int> salvage_count;
-        private readonly Traverse<int> prio_salvage_count;
-
-        private readonly MethodInfo filter_salvage;
-
-
         public List<SalvageDef> finalPotentialSalvage { get; private set; }
 
         public List<SalvageDef> SalvagedChassis
         {
-            get => salvaged_chassis.Value;
-            set => salvaged_chassis.Value = value;
+            get => Contract.SalvagedChassis;
+            set => Contract.SalvagedChassis = value;
         }
 
         public List<SalvageDef> SalvageResults
         {
-            get => salvage_results.Value;
-            set => salvage_results.Value = value;
+            get => Contract.SalvageResults;
+            set => Contract.SalvageResults = value;
         }
 
         public List<MechDef> LostMechs
         {
-            get => lost_mechs.Value;
-            set => lost_mechs.Value = value;
+            get => Contract.LostMechs;
+            set => Contract.LostMechs = value;
         }
 
-
-
-        public int FinalSalvageCount { get => salvage_count.Value; set => salvage_count.Value = value; }
-        public int FinalPrioritySalvageCount { get => prio_salvage_count.Value; set => prio_salvage_count.Value = value; }
+        public int FinalSalvageCount { get => Contract.FinalSalvageCount; set => Contract.FinalSalvageCount = value; }
+        public int FinalPrioritySalvageCount { get => Contract.FinalPrioritySalvageCount; set => Contract.FinalPrioritySalvageCount = value; }
 
         public Contract Contract { get; private set; }
 
         public ContractHelper(Contract contract, List<SalvageDef> finalPotentialSalvage)
         {
-
-            main = new Traverse(contract);
-            this.Contract = contract;
+            Contract = contract;
 
             this.finalPotentialSalvage = finalPotentialSalvage;
-            salvage_results = main.Property<List<SalvageDef>>("SalvageResults");
-            salvaged_chassis = main.Property<List<SalvageDef>>("SalvagedChassis");
-            lost_mechs = main.Property<List<MechDef>>("LostMechs");
-            salvage_count = main.Property<int>("FinalSalvageCount");
-            prio_salvage_count = main.Property<int>("FinalPrioritySalvageCount");
-
-            filter_salvage = contract.GetType().GetMethod("FilterPotentialSalvage", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if (filter_salvage == null)
-                Control.Instance.LogError("filter_salvage = null");
-
         }
 
 #if USE_CC
@@ -122,7 +96,7 @@ namespace CustomSalvage
             {
                 if(!Control.Instance.Settings.AllowDropBlackListed && def.ComponentTags.Contains("BLACKLISTED"))
                 {
-                    Control.Instance.LogDebug($"--- {def.Description.Id} is BLACKLISTED. skipped");
+                    Log.Main.Debug?.Log($"--- {def.Description.Id} is BLACKLISTED. skipped");
                     return;
                 }
 
@@ -153,7 +127,7 @@ namespace CustomSalvage
             {
                 if (!Control.Instance.Settings.AllowDropBlackListed && def.ComponentTags.Contains("BLACKLISTED"))
                 {
-                    Control.Instance.LogDebug($"--- {def.Description.Id} is BLACKLISTED. skipped");
+                    Log.Main.Debug?.Log($"--- {def.Description.Id} is BLACKLISTED. skipped");
                     return;
                 }
 
@@ -164,13 +138,13 @@ namespace CustomSalvage
 
                 if (replace == null)
                 {
-                    Control.Instance.LogDebug($"--- {def.Description.Id} is not lootable. skipped");
+                    Log.Main.Debug?.Log($"--- {def.Description.Id} is not lootable. skipped");
                     return;
                 }
 
                 if (replace != def)
                 {
-                    Control.Instance.LogDebug($"--- {def.Description.Id} replaced with {replace.Description.Id}");
+                    Log.Main.Debug?.Log($"--- {def.Description.Id} replaced with {replace.Description.Id}");
                     def = replace;
                 }
 #endif
@@ -202,7 +176,7 @@ namespace CustomSalvage
                                 weaponsByTypeAndRarityAndOwnership.Shuffle<WeaponDef_MDD>();
                                 WeaponDef_MDD weaponDef_MDD = weaponsByTypeAndRarityAndOwnership[0];
                                 weaponDef = UnityGameInstance.BattleTechGame.DataManager.WeaponDefs.Get(weaponDef_MDD.WeaponDefID);
-                                Control.Instance.LogDebug($"--- {def.Description.Id} upgraded to {weaponDef.Description.Id}");
+                                Log.Main.Debug?.Log($"--- {def.Description.Id} upgraded to {weaponDef.Description.Id}");
                                 def = weaponDef;
                             }
                         }
@@ -231,7 +205,7 @@ namespace CustomSalvage
                                 upgradesByRarityAndOwnership.Shuffle<UpgradeDef_MDD>();
                                 UpgradeDef_MDD upgradeDef_MDD = upgradesByRarityAndOwnership[0];
                                 mechComponentDef = UnityGameInstance.BattleTechGame.DataManager.UpgradeDefs.Get(upgradeDef_MDD.UpgradeDefID);
-                                Control.Instance.LogDebug($"--- {def.Description.Id} upgraded to {mechComponentDef.Description.Id}");
+                                Log.Main.Debug?.Log($"--- {def.Description.Id} upgraded to {mechComponentDef.Description.Id}");
                                 def = mechComponentDef;
                             }
                         }
@@ -249,7 +223,7 @@ namespace CustomSalvage
                 salvageDef.Weight = sc.Salvage.DefaultComponentWeight;
                 salvageDef.Count = 1;
                 this.finalPotentialSalvage.Add(salvageDef);
-                Control.Instance.LogDebug($"---- {def.Description.Id} added");
+                Log.Main.Debug?.Log($"---- {def.Description.Id} added");
             }
         }
 
@@ -278,7 +252,7 @@ namespace CustomSalvage
 
             if (!Control.Instance.Settings.AllowDropBlackListed &&  mech.MechTags.Contains("BLACKLISTED"))
             {
-                Control.Instance.LogDebug($"--- {mech.Description.Id} is BLACKLISTED. skipped");
+                Log.Main.Debug?.Log($"--- {mech.Description.Id} is BLACKLISTED. skipped");
                 return;
             }
 
@@ -289,7 +263,7 @@ namespace CustomSalvage
         {
             if (!Control.Instance.Settings.AllowDropBlackListed &&  mech.MechTags.Contains("BLACKLISTED"))
             {
-                Control.Instance.LogDebug($"--- {mech.Description.Id} is BLACKLISTED. skipped");
+                Log.Main.Debug?.Log($"--- {mech.Description.Id} is BLACKLISTED. skipped");
                 return;
             }
             add_parts(constants, mech, numparts, SalvageResults);
@@ -298,7 +272,7 @@ namespace CustomSalvage
 
         internal void FilterPotentialSalvage(List<SalvageDef> salvageDefs)
         {
-            filter_salvage.Invoke(Contract, new Object[] { salvageDefs });
+            Contract.FilterPotentialSalvage(salvageDefs);
         }
     }
 }

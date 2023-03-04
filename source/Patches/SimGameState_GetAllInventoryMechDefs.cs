@@ -44,7 +44,7 @@ namespace CustomSalvage
                                 ChassisHandler.RegisterMechDef(mech);
                             }
                             else
-                                Control.Instance.LogError($"ERROR: {cdef}/{mdef} not found");
+                                Log.Main.Error?.Log($"ERROR: {cdef}/{mdef} not found");
                         }
                     }
                     else
@@ -64,13 +64,13 @@ namespace CustomSalvage
                         }
                         else
                         {
-                            Control.Instance.LogError($"ERROR: {array[2]} not found");
+                            Log.Main.Error?.Log($"ERROR: {array[2]} not found");
                             if (show)
                             {
-                                Control.Instance.LogError($"AllMechDefs:");
+                                Log.Main.Error?.Log($"AllMechDefs:");
                                 foreach (var pair in __instance.DataManager.MechDefs)
                                 {
-                                    Control.Instance.LogError($"-- {pair.Key}: {(pair.Value == null ? "null" : "exist")}");
+                                    Log.Main.Error?.Log($"-- {pair.Key}: {(pair.Value == null ? "null" : "exist")}");
                                 }
 
                                 show = false;

@@ -11,7 +11,7 @@ namespace CustomSalvage
             var simgame = contract.Contract.BattleTechGame.Simulation;
             var chance = simgame.Constants.Salvage.DestroyedMechRecoveryChance;
             var mech = result.mech;
-            Control.Instance.LogDebug($"--- base chance: {chance:0.00}");
+            Log.Main.Debug?.Log($"--- base chance: {chance:0.00}");
 
             var settings = Control.Instance.Settings;
             chance -= mech.IsLocationDamaged(ChassisLocations.Head)
@@ -49,7 +49,7 @@ namespace CustomSalvage
             var num = simgame.NetworkRandom.Float(0f, 1f);
             var recover = chance > num;
 
-            Control.Instance.LogDebug(recover
+            Log.Main.Debug?.Log(recover
                 ? $"--- {num:0.00} vs {chance:0.00} - roll success, recovery"
                 : $"--- {num:0.00} vs {chance:0.00} - roll failed, no recovery");
 
@@ -60,13 +60,13 @@ namespace CustomSalvage
         {
             var mech = result.mech;
 
-            Control.Instance.LogDebug($"-- Recovery {mech.Name} vanila method");
+            Log.Main.Debug?.Log($"-- Recovery {mech.Name} vanila method");
             var simgame = contract.Contract.BattleTechGame.Simulation;
             float num = simgame.NetworkRandom.Float(0f, 1f);
 
             if (mech.IsLocationDestroyed(ChassisLocations.CenterTorso))
             {
-                Control.Instance.LogDebug($"--- CenterTorso Destroyed - no recovery");
+                Log.Main.Debug?.Log($"--- CenterTorso Destroyed - no recovery");
                 return false;
             }
             else
@@ -74,7 +74,7 @@ namespace CustomSalvage
                 var chance = simgame.Constants.Salvage.DestroyedMechRecoveryChance;
                 var recover = chance > num;
 
-                Control.Instance.LogDebug(recover
+                Log.Main.Debug?.Log(recover
                     ? $"--- {num:0.00} vs {chance:0.00} - roll success, recovery"
                     : $"--- {num:0.00} vs {chance:0.00} - roll failed, no recovery");
 
