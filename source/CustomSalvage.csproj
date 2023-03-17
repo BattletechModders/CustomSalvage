@@ -32,8 +32,8 @@
       <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(CustomSalvageModPath)" />
     </Target>
   <ItemGroup>
-    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.3.0">
-      <PrivateAssets>All</PrivateAssets>
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.0">
+      <PrivateAssets>all</PrivateAssets>
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
     <PackageReference Include="HarmonyX" Version="2.10.1">
