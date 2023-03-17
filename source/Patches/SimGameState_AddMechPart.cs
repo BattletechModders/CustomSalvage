@@ -6,11 +6,17 @@ namespace CustomSalvage
     public static class SimGameState_AddMechPart
     {
         [HarmonyPrefix]
+        [HarmonyWrapSafe]
         [HarmonyPriority(Priority.VeryHigh)]
-        public static bool AddMechPart(SimGameState __instance, string id)
+        public static void Prefix(ref bool __runOriginal, SimGameState __instance, string id)
         {
+            if (!__runOriginal)
+            {
+                return;
+            }
+
             __instance.AddItemStat(id, "MECHPART", false);
-            return false;
+            __runOriginal = false;
         }
     }
 }

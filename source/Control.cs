@@ -63,8 +63,7 @@ namespace CustomSalvage
 
                 Settings.Complete();
 
-                var harmony = HarmonyInstance.Create("io.github.denadan.CustomSalvage");
-                harmony.PatchAll(Assembly.GetExecutingAssembly());
+                Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), "io.github.denadan.CustomSalvage");
 
                 Log.Main.Info?.Log("Loaded CustomSalvageCC v1.0 for bt 1.9.1");
 

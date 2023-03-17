@@ -32,7 +32,8 @@ namespace CustomSalvage
     public static class SG_Stores_MultiPurchasePopup_Refresh
     {
         [HarmonyPostfix]
-        public static void ReplaceTitle(LocalizableText ___TitleText, LocalizableText ___DescriptionText,
+        [HarmonyWrapSafe]
+        public static void Postfix(LocalizableText ___TitleText, LocalizableText ___DescriptionText,
             string ___itemName, int ___costPerUnit, int ___quantityBeingSold, HBSDOTweenButton ___ConfirmButton)
         {
             if (!SG_Stores_MultiPurchasePopup_Handler.Replace)
@@ -50,7 +51,8 @@ namespace CustomSalvage
     public static class SG_Stores_MultiPurchasePopup_OnCancel
     {
         [HarmonyPostfix]
-        public static void HandleExit()
+        [HarmonyWrapSafe]
+        public static void Postfix()
         {
             if (!SG_Stores_MultiPurchasePopup_Handler.Replace)
                 return;
@@ -63,7 +65,8 @@ namespace CustomSalvage
     public static class SG_Stores_MultiPurchasePopup_OnConfirm
     {
         [HarmonyPostfix]
-        public static void HandleExit()
+        [HarmonyWrapSafe]
+        public static void Postfix()
         {
             if (!SG_Stores_MultiPurchasePopup_Handler.Replace)
                 return;

@@ -12,11 +12,20 @@ namespace CustomSalvage
     {
 
         [HarmonyPrefix]
-        public static bool OnReadyClicked(ChassisDef ___selectedChassis, MechBayPanel ___mechBay
+        [HarmonyWrapSafe]
+        public static void Prefix(ref bool __runOriginal, ChassisDef ___selectedChassis, MechBayPanel ___mechBay
             , MechBayChassisUnitElement ___chassisElement, MechBayChassisInfoWidget __instance)
         {
+            if (!__runOriginal)
+            {
+                return;
+            }
+
             if (___selectedChassis == null)
-                return false;
+            {
+                __runOriginal = false;
+                return;
+            }
 
             //foreach (var item in ___mechBay.Sim.CompanyStats)
             //{
@@ -85,13 +94,12 @@ namespace CustomSalvage
                         new Text(strs.ScrapMultyPartsDialogText, mech.Description.Name).ToString(),
                         num, value,
                         (n) => ScrapParts(n, ___selectedChassis, __instance, ___mechBay),
-                        () => { return; }, ___mechBay.Sim);
+                        () => { }, ___mechBay.Sim);
 
                 }
             }
 
-            return false;
-
+            __runOriginal = false;
         }
 
         private static void SplitToParts(ChassisDef chassisDef, int min, int max, MechBayPanel mechBay)

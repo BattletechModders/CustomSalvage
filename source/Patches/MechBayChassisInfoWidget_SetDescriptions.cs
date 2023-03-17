@@ -14,7 +14,8 @@ namespace CustomSalvage
     public static class MechBayChassisInfoWidget_SetDescriptions
     {
         [HarmonyPostfix]
-        public static void AddVariantsToDescriptions(
+        [HarmonyWrapSafe]
+        public static void Postfix(
             MechBayChassisInfoWidget __instance, ChassisDef ___selectedChassis,
             TextMeshProUGUI ___mechDetails, HBSTooltip ___chassisStorageTooltip,
             GameObject ___readyBtnObj, GameObject ___partsCountObj,

@@ -12,23 +12,15 @@ namespace CustomSalvage
     public static class SGEventPanel_SetEvent
     {
         [HarmonyPostfix]
-        public static void ModifyOptions(SimGameEventDef evt, SGEventPanel __instance,
+        [HarmonyWrapSafe]
+        public static void Postfix(SimGameEventDef evt, SGEventPanel __instance,
             TextMeshProUGUI ___eventDescription,
             DataManager ___dm, RectTransform ___optionParent, List<SGEventOption> ___optionsList)
         {
-            try
-            {
-                Log.Main.Debug?.Log("Started Event: " + evt.Description.Id);
-                if (evt.Description.Id != "CustomSalvageAssemblyEvent")
-                    return;
-                ChassisHandler.MakeOptions(___eventDescription, __instance, ___dm, ___optionParent, ___optionsList);
-
-            }
-            catch (Exception e)
-            {
-                Log.Main.Error?.Log("ModifyOptions error", e);
-                
-            }
+            Log.Main.Debug?.Log("Started Event: " + evt.Description.Id);
+            if (evt.Description.Id != "CustomSalvageAssemblyEvent")
+                return;
+            ChassisHandler.MakeOptions(___eventDescription, __instance, ___dm, ___optionParent, ___optionsList);
         }
     }
 }

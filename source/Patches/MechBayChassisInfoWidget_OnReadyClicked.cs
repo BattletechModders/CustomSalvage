@@ -11,19 +11,31 @@ namespace CustomSalvage
     {
 
         [HarmonyPrefix]
-        public static bool OnReadyClicked(ChassisDef ___selectedChassis, MechBayPanel ___mechBay
+        [HarmonyWrapSafe]
+        public static void Prefix(ref bool __runOriginal, ChassisDef ___selectedChassis, MechBayPanel ___mechBay
             , MechBayChassisUnitElement ___chassisElement, MechBayChassisInfoWidget __instance)
         {
+            if (!__runOriginal)
+            {
+                return;
+            }
+
             if (!Control.Instance.Settings.AssemblyVariants)
-                return true;
+            {
+                return;
+            }
 
             if (___selectedChassis == null)
-                return false;
+            {
+                __runOriginal = false;
+                return;
+            }
 
             if (___mechBay.Sim.GetFirstFreeMechBay() < 0)
             {
                 GenericPopupBuilder.Create("Cannot Ready 'Mech", "There are no available slots in the 'Mech Bay. You must move an active 'Mech into storage before readying this chassis.").AddFader(new UIColorRef?(LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PopupBackfill), 0f, true).Render();
-                return false;
+                __runOriginal = false;
+                return;
             }
 
             ChassisHandler.PreparePopup(___selectedChassis, ___mechBay, __instance, ___chassisElement);
@@ -43,7 +55,8 @@ namespace CustomSalvage
                             .PopupBackfill), 0f, true)
                     .CancelOnEscape()
                     .Render();
-                return false;
+                __runOriginal = false;
+                return;
             }
 
             if (___selectedChassis.MechPartCount >= ___selectedChassis.MechPartMax)
@@ -60,17 +73,18 @@ namespace CustomSalvage
                                 .PopupBackfill), 0f, true)
                         .CancelOnEscape()
                         .Render();
-                return false;
+                __runOriginal = false;
+                return;
             }
 
             if (!Control.Instance.Settings.AssemblyVariants)
-                return true;
-
+            {
+                return;
+            }
 
             ChassisHandler.StartDialog();
 
-            return false;
-
+            __runOriginal = false;
         }
 
     }

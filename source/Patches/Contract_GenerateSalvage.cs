@@ -12,126 +12,125 @@ namespace CustomSalvage
     public static class Contract_GenerateSalvage
     {
         [HarmonyPrefix]
+        [HarmonyWrapSafe]
         [HarmonyPriority(Priority.HigherThanNormal)]
-        public static bool GenerateSalvage(List<UnitResult> enemyMechs, List<VehicleDef> enemyVehicles,
+        public static void Prefix(ref bool __runOriginal, List<UnitResult> enemyMechs, List<VehicleDef> enemyVehicles,
             List<UnitResult> lostUnits, bool logResults,
             Contract __instance, ref List<SalvageDef> ___finalPotentialSalvage)
         {
-            try
+            if (!__runOriginal)
             {
-                Log.Main.Debug?.Log($"Start GenerateSalvage for {__instance.Name}");
-
-                ___finalPotentialSalvage = new List<SalvageDef>();
-                var Contract = new ContractHelper(__instance, ___finalPotentialSalvage)
-                {
-                    LostMechs = new List<MechDef>(),
-                    SalvageResults = new List<SalvageDef>(),
-                    SalvagedChassis = new List<SalvageDef>()
-                };
-
-
-                var simgame = __instance.BattleTechGame.Simulation;
-                if (simgame == null)
-                {
-                    Log.Main.Error?.Log("No simgame - cancel salvage");
-                    return false;
-                }
-
-                var Constants = simgame.Constants;
-
-                Log.Main.Debug?.Log("- Lost Units");
-                foreach (var unitResult in lostUnits)
-                {
-                    ProccessPlayerMech(unitResult, Contract);
-                }
-                Log.Main.Debug?.Log($"- Enemy Mechs {__instance.Name}");
-
-                foreach (var unit in enemyMechs)
-                {
-                    if (Control.Instance.IsDestroyed(unit) || unit.pilot.IsIncapacitated || unit.pilot.HasEjected)
-                        AddMechToSalvage(unit.mech, Contract, simgame, Constants, true);
-                    else
-                    {
-                        Log.Main.Debug?.Log($"-- Salvaging {unit.mech.Name}");
-                        Log.Main.Debug?.Log($"--- not destroyed, skipping");
-                    }
-                }
-
-                Log.Main.Debug?.Log($"- Enemy Vechicle {__instance.Name}");
-                var vehicles = Contract.Contract.BattleTechGame.Combat.AllEnemies.OfType<Vehicle>()
-                    .Where(i => i.IsDead);
-
-                foreach (var vehicle in vehicles)
-                {
-                    Log.Main.Debug?.Log($"-- Salvaging {vehicle?.VehicleDef?.Chassis?.Description?.Name}");
-                    var tag = Control.Instance.Settings.NoSalvageMechTag;
-                    if (!string.IsNullOrEmpty(tag) &&
-                        (vehicle.VehicleDef.VehicleTags != null &&
-                         vehicle.VehicleDef.VehicleTags.Contains(tag)))
-                    {
-                        Log.Main.Debug?.Log($"--- NOSALVAGE by tag, skipped");
-                    }
-                    else
-                        AddVechicleToSalvage(vehicle, Contract, simgame);
-                }
-                //foreach (var vechicle in enemyVehicles)
-                //{
-                //    Control.Instance.LogDebug($"-- Salvaging {vechicle?.Chassis?.Description?.Name}");
-                //    AddVechicleToSalvage(vechicle, Contract, simgame);
-                //}
-
-                if (Control.Instance.Settings.SalvageTurrets)
-                {
-                    Log.Main.Debug?.Log($"- Enemy Turret {__instance.Name}");
-                    var turrets = Contract.Contract.BattleTechGame.Combat.AllEnemies.OfType<Turret>()
-                        .Where(t => t.IsDead);
-
-                    foreach (var turret in turrets)
-                    {
-                        Log.Main.Debug?.Log($"-- Salvaging {turret?.TurretDef?.Description?.Name}");
-                        AddTurretToSalvage(turret, Contract, simgame);
-                    }
-                }
-
-                Control.Instance.CallForAdditionalSavage(Contract);
-
-                Contract.FilterPotentialSalvage(___finalPotentialSalvage);
-                int num2 = __instance.SalvagePotential;
-                float num3 = Constants.Salvage.VictorySalvageChance;
-                float num4 = Constants.Salvage.VictorySalvageLostPerMechDestroyed;
-                if (__instance.State == BattleTech.Contract.ContractState.Failed)
-                {
-                    num3 = Constants.Salvage.DefeatSalvageChance;
-                    num4 = Constants.Salvage.DefeatSalvageLostPerMechDestroyed;
-                }
-                else if (__instance.State == BattleTech.Contract.ContractState.Retreated)
-                {
-                    num3 = Constants.Salvage.RetreatSalvageChance;
-                    num4 = Constants.Salvage.RetreatSalvageLostPerMechDestroyed;
-                }
-                float num5 = num3;
-                float num6 = (float)num2 * __instance.PercentageContractSalvage;
-                if (num2 > 0)
-                {
-                    num6 += (float)Constants.Finances.ContractFloorSalvageBonus;
-                }
-                num3 = Mathf.Max(0f, num5 - num4 * (float)lostUnits.Count);
-                int num7 = Mathf.FloorToInt(num6 * num3);
-                if (num2 > 0)
-                {
-                    num2 += Constants.Finances.ContractFloorSalvageBonus;
-                }
-
-                Contract.FinalSalvageCount = num7;
-                Contract.FinalPrioritySalvageCount = Math.Min(7, Mathf.FloorToInt((float)num7 * Constants.Salvage.PrioritySalvageModifier));
-
-            }
-            catch (Exception e)
-            {
-                Log.Main.Error?.Log("Unhandled error in salvage", e);
+                return;
             }
 
-            return false;
+            __runOriginal = false;
+
+            Log.Main.Debug?.Log($"Start GenerateSalvage for {__instance.Name}");
+
+            ___finalPotentialSalvage = new List<SalvageDef>();
+            var Contract = new ContractHelper(__instance, ___finalPotentialSalvage)
+            {
+                LostMechs = new List<MechDef>(),
+                SalvageResults = new List<SalvageDef>(),
+                SalvagedChassis = new List<SalvageDef>()
+            };
+
+
+            var simgame = __instance.BattleTechGame.Simulation;
+            if (simgame == null)
+            {
+                Log.Main.Error?.Log("No simgame - cancel salvage");
+                __runOriginal = false;
+                return;
+            }
+
+            var Constants = simgame.Constants;
+
+            Log.Main.Debug?.Log("- Lost Units");
+            foreach (var unitResult in lostUnits)
+            {
+                ProccessPlayerMech(unitResult, Contract);
+            }
+            Log.Main.Debug?.Log($"- Enemy Mechs {__instance.Name}");
+
+            foreach (var unit in enemyMechs)
+            {
+                if (Control.Instance.IsDestroyed(unit) || unit.pilot.IsIncapacitated || unit.pilot.HasEjected)
+                    AddMechToSalvage(unit.mech, Contract, simgame, Constants, true);
+                else
+                {
+                    Log.Main.Debug?.Log($"-- Salvaging {unit.mech.Name}");
+                    Log.Main.Debug?.Log($"--- not destroyed, skipping");
+                }
+            }
+
+            Log.Main.Debug?.Log($"- Enemy Vechicle {__instance.Name}");
+            var vehicles = Contract.Contract.BattleTechGame.Combat.AllEnemies.OfType<Vehicle>()
+                .Where(i => i.IsDead);
+
+            foreach (var vehicle in vehicles)
+            {
+                Log.Main.Debug?.Log($"-- Salvaging {vehicle?.VehicleDef?.Chassis?.Description?.Name}");
+                var tag = Control.Instance.Settings.NoSalvageMechTag;
+                if (!string.IsNullOrEmpty(tag) &&
+                    (vehicle.VehicleDef.VehicleTags != null &&
+                     vehicle.VehicleDef.VehicleTags.Contains(tag)))
+                {
+                    Log.Main.Debug?.Log($"--- NOSALVAGE by tag, skipped");
+                }
+                else
+                    AddVechicleToSalvage(vehicle, Contract, simgame);
+            }
+            //foreach (var vechicle in enemyVehicles)
+            //{
+            //    Control.Instance.LogDebug($"-- Salvaging {vechicle?.Chassis?.Description?.Name}");
+            //    AddVechicleToSalvage(vechicle, Contract, simgame);
+            //}
+
+            if (Control.Instance.Settings.SalvageTurrets)
+            {
+                Log.Main.Debug?.Log($"- Enemy Turret {__instance.Name}");
+                var turrets = Contract.Contract.BattleTechGame.Combat.AllEnemies.OfType<Turret>()
+                    .Where(t => t.IsDead);
+
+                foreach (var turret in turrets)
+                {
+                    Log.Main.Debug?.Log($"-- Salvaging {turret?.TurretDef?.Description?.Name}");
+                    AddTurretToSalvage(turret, Contract, simgame);
+                }
+            }
+
+            Control.Instance.CallForAdditionalSavage(Contract);
+
+            Contract.FilterPotentialSalvage(___finalPotentialSalvage);
+            int num2 = __instance.SalvagePotential;
+            float num3 = Constants.Salvage.VictorySalvageChance;
+            float num4 = Constants.Salvage.VictorySalvageLostPerMechDestroyed;
+            if (__instance.State == BattleTech.Contract.ContractState.Failed)
+            {
+                num3 = Constants.Salvage.DefeatSalvageChance;
+                num4 = Constants.Salvage.DefeatSalvageLostPerMechDestroyed;
+            }
+            else if (__instance.State == BattleTech.Contract.ContractState.Retreated)
+            {
+                num3 = Constants.Salvage.RetreatSalvageChance;
+                num4 = Constants.Salvage.RetreatSalvageLostPerMechDestroyed;
+            }
+            float num5 = num3;
+            float num6 = (float)num2 * __instance.PercentageContractSalvage;
+            if (num2 > 0)
+            {
+                num6 += (float)Constants.Finances.ContractFloorSalvageBonus;
+            }
+            num3 = Mathf.Max(0f, num5 - num4 * (float)lostUnits.Count);
+            int num7 = Mathf.FloorToInt(num6 * num3);
+            if (num2 > 0)
+            {
+                num2 += Constants.Finances.ContractFloorSalvageBonus;
+            }
+
+            Contract.FinalSalvageCount = num7;
+            Contract.FinalPrioritySalvageCount = Math.Min(7, Mathf.FloorToInt((float)num7 * Constants.Salvage.PrioritySalvageModifier));
         }
 
         public static void ProccessPlayerMech(UnitResult unitResult, ContractHelper Contract)

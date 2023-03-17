@@ -12,8 +12,14 @@ namespace CustomSalvage
 
 
         [HarmonyPrefix]
-        public static bool GetAllChassis(bool showMechParts, ref List<ChassisDef> __result, SimGameState __instance)
+        [HarmonyWrapSafe]
+        public static void Prefix(ref bool __runOriginal, bool showMechParts, ref List<ChassisDef> __result, SimGameState __instance)
         {
+            if (!__runOriginal)
+            {
+                return;
+            }
+
             __result = new List<ChassisDef>();
             ChassisHandler.ClearParts();
             List<string> allInventoryStrings = __instance.GetAllInventoryStrings();
@@ -80,7 +86,7 @@ namespace CustomSalvage
             }
 
             //ChassisHandler.ShowInfo();
-            return false;
+            __runOriginal = false;
         }
     }
 }
