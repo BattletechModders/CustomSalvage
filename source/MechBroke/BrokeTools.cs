@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using BattleTech;
-using BattleTech.DataObjects;
-using Localize;
 using UnityEngine;
 using Random = UnityEngine.Random;
 

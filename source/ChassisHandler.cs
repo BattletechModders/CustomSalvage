@@ -7,10 +7,7 @@ using BattleTech;
 using BattleTech.Data;
 using BattleTech.UI;
 using CustomSalvage.MechBroke;
-#if USE_CC
 using CustomComponents;
-#endif
-using Harmony;
 using HBS.Collections;
 using Localize;
 using TMPro;
@@ -18,7 +15,6 @@ using UnityEngine;
 using UnityEngine.Events;
 
 using Object = System.Object;
-using Random = System.Random;
 
 namespace CustomSalvage
 {
@@ -95,21 +91,17 @@ namespace CustomSalvage
         {
             string id = mech.Description.Id;
             int max_parts = UnityGameInstance.BattleTechGame.Simulation.Constants.Story.DefaultMechPartMax;
-#if USE_CC
             var assembly = get_variant(mech);
-#endif
             var info = new mech_info();
             var tags = GetMechTags(mech);
             info.Omni = !String.IsNullOrEmpty(Control.Instance.Settings.OmniTechTag) && 
                 tags.Contains(Control.Instance.Settings.OmniTechTag);
 
-#if USE_CC
             if (assembly != null && assembly.Exclude)
                 info.Excluded = true;
             else if (assembly != null && assembly.Include)
                 info.Excluded = false;
             else
-#endif
             if (Control.Instance.Settings.ExcludeVariants.Contains(id))
                 info.Excluded = true;
             else if (Control.Instance.Settings.ExcludeTags.Any(extag => mech.MechTags.Contains(extag)))
@@ -131,7 +123,6 @@ namespace CustomSalvage
             if (info.Omni)
                 info.MinParts = 1;
 
-#if USE_CC
             if (assembly != null)
             {
                 if (assembly.ReplacePriceMult)
@@ -142,17 +133,14 @@ namespace CustomSalvage
                 if (assembly.PartsMin >= 0)
                     info.MinParts = Mathf.CeilToInt(max_parts * assembly.PartsMin);
             }
-#endif
             info.PrefabID = GetPrefabId(mech);
             return info;
         }
 
         public static string GetPrefabId(MechDef mech)
         {
-#if USE_CC
             if (mech.Chassis.Is<AssemblyVariant>(out var a) && !String.IsNullOrEmpty(a.PrefabID))
                 return a.PrefabID + mech.Chassis.Tonnage.ToString();
-#endif
             return mech.Chassis.PrefabIdentifier + mech.Chassis.Tonnage.ToString();
         }
 
@@ -294,11 +282,7 @@ namespace CustomSalvage
                 if (clear)
                 {
                     Log.Main.Debug?.Log($"-- Clear Inventory");
-#if USE_CC
                     new_mech.SetInventory(DefaultHelper.ClearInventory(new_mech, mechBay.Sim));
-#else
-                new_mech.SetInventory(new MechComponentRef[0]);
-#endif
                 }
             }
             catch (Exception e)
@@ -823,7 +807,6 @@ namespace CustomSalvage
                 return null;
             var result = mech;
 
-#if USE_CC
             if (mech.Chassis.Is<LootableMech>(out var lm))
             {
                 Log.Main.Debug?.Log($"--- Mech Replacing with {lm.ReplaceID}");
@@ -846,8 +829,6 @@ namespace CustomSalvage
                     result = mech;
                 }
             }
-
-#endif
 
             var id = GetMDefFromCDef(mech.ChassisID);
             return UnityGameInstance.BattleTechGame.DataManager.MechDefs.TryGet(id, out mech) ? result : null;

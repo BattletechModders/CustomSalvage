@@ -1,15 +1,9 @@
-﻿using Harmony;
-using System;
+﻿using System;
 using System.Reflection;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using BattleTech;
 using CustomSalvage.MechBroke;
-using HBS.Logging;
 using HBS.Util;
-using HoudiniEngineUnity;
 
 
 namespace CustomSalvage
@@ -72,11 +66,7 @@ namespace CustomSalvage
                 var harmony = HarmonyInstance.Create("io.github.denadan.CustomSalvage");
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-#if USE_CC
                 Log.Main.Info?.Log("Loaded CustomSalvageCC v1.0 for bt 1.9.1");
-#else
-                Log.Main.Info?.Log("Loaded CustomSalvageNonCC v1.0 for bt 1.9.1");
-#endif
 
                 switch (Settings.RecoveryType)
                 {
@@ -126,9 +116,7 @@ namespace CustomSalvage
                         GetNumParts = PartsNumCalculations.Vanila;
                         break;
                 }
-#if USE_CC
                 CustomComponents.Registry.RegisterSimpleCustomComponents(Assembly.GetExecutingAssembly());
-#endif
 
                 Log.Main.Debug?.Log("done");
                 if (Settings.DEBUG_ShowConfig)
@@ -142,22 +130,7 @@ namespace CustomSalvage
 
         public bool IsDestroyed(UnitResult lostUnit)
         {
-#if USE_CC
             return CustomComponents.Contract_GenerateSalvage.IsDestroyed(lostUnit.mech);
-#else
-
-
-            if (lostUnit.mech.IsDestroyed)
-                return true;
-
-            if (lostUnit.pilot.HasEjected || lostUnit.pilot.IsIncapacitated)
-                return true;
-
-            if (lostUnit.mech.Inventory.Any(i =>
-                    i.Def.CriticalComponent && i.DamageLevel == ComponentDamageLevel.Destroyed))
-                return true;
-            return false;
-#endif
         }
     }
 }

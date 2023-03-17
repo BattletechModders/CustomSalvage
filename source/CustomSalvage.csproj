@@ -19,7 +19,7 @@
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DefineConstants>TRACE;USE_CC</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <AssemblySearchPaths>
       $(ReferencePath);
       $(BattleTechGameDir)\BattleTech_Data\Managed\;
@@ -31,12 +31,6 @@
     <Target Name="CopyFilesToGame" AfterTargets="CopyFilesToOutputDirectory">
       <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(CustomSalvageModPath)" />
     </Target>
-  <ItemGroup Condition="$(DefineConstants.Contains('USE_CC'))">
-    <Reference Include="CustomComponents">
-      <HintPath>$(CustomSalvageModPath)\..\CustomComponents\CustomComponents.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.3.0">
       <PrivateAssets>All</PrivateAssets>
@@ -49,6 +43,10 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="CustomComponents">
+      <HintPath>$(CustomSalvageModPath)\..\CustomComponents\CustomComponents.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="CustomShops">

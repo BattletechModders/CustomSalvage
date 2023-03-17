@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using BattleTech;
 using BattleTech.UI;
 using CustomComponents;

@@ -1,11 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using BattleTech;
 using BattleTech.UI;
 using BattleTech.UI.Tooltips;
 using CustomSalvage.MechBroke;
-using Harmony;
-using HBS.Collections;
 using Localize;
 using TMPro;
 using UnityEngine;

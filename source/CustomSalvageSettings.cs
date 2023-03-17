@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using BattleTech;
-using BattleTech.Data;
-using BattleTech.UI;
-using Harmony;
-using HBS.Logging;
 using Newtonsoft.Json;
 using UnityEngine;
 

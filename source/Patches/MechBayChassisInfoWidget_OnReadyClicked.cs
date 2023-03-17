@@ -1,7 +1,5 @@
-﻿using System;
-using BattleTech;
+﻿using BattleTech;
 using BattleTech.UI;
-using Harmony;
 using HBS;
 using UnityEngine;
 

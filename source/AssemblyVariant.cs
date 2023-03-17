@@ -1,7 +1,4 @@
-﻿#if USE_CC
-using System;
-
-using CustomComponents;
+﻿using CustomComponents;
 
 namespace CustomSalvage
 {
@@ -28,5 +25,3 @@ namespace CustomSalvage
         public float PartsMin { get; set; } = -1;
     }
 }
-
-#endif

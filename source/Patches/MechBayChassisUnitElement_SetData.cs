@@ -3,7 +3,6 @@ using System.Linq;
 using BattleTech;
 using BattleTech.Data;
 using BattleTech.UI;
-using Harmony;
 using HBS.Collections;
 using TMPro;
 using UnityEngine;

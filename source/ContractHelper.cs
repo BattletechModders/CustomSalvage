@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using System.Collections.Generic;
 using BattleTech;
 using BattleTech.Data;
-#if USE_CC
 using CustomComponents;
-#endif
-using Harmony;
 
 namespace CustomSalvage
 {
@@ -45,8 +40,6 @@ namespace CustomSalvage
             this.finalPotentialSalvage = finalPotentialSalvage;
         }
 
-#if USE_CC
-        
         internal MechComponentDef CheckDefaults(MechComponentDef def)
         {
             if (!def.Is<Flags>(out var f) || !def.Flags<CCFlags>().NoSalvage) return def;
@@ -88,7 +81,6 @@ namespace CustomSalvage
             return component;
 
         }
-#endif
 
         public void AddComponentToFinalSalvage(MechComponentDef def)
         {
@@ -100,11 +92,9 @@ namespace CustomSalvage
                     return;
                 }
 
-#if USE_CC
                 def = CheckDefaults(def);
                 if (def == null)
                     return;
-#endif
 
                 var salvage = new SalvageDef()
                 {
@@ -132,7 +122,6 @@ namespace CustomSalvage
                 }
 
                 var sc = Contract.BattleTechGame.Simulation.Constants;
-#if USE_CC
 
                 var replace = CheckDefaults(def);
 
@@ -147,7 +136,6 @@ namespace CustomSalvage
                     Log.Main.Debug?.Log($"--- {def.Description.Id} replaced with {replace.Description.Id}");
                     def = replace;
                 }
-#endif
 
                 if (can_upgrade & Control.Instance.Settings.UpgradeSalvage)
                 {

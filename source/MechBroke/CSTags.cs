@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using BattleTech;
 using JetBrains.Annotations;
 using Localize;
-using UIWidgets;
 
 namespace CustomSalvage.MechBroke
 {

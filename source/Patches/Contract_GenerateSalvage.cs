@@ -2,11 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BattleTech;
-using Harmony;
 using UnityEngine;
-#if USE_CC
-using CustomComponents;
-#endif
 
 
 namespace CustomSalvage
