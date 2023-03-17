@@ -552,7 +552,7 @@ namespace CustomSalvage
                     if (left > 0)
                     {
                         if (info.cbills > 0)
-                            set_info(option, new Text(left == 1 ? str.ButtonAddPart : str.ButtonAddParts,
+                            set_info(option, new Text(left == 1 ? str.ButtonAddPartMoney : str.ButtonAddPartsMoney,
                                 info.mechname, SimGameState.GetCBillString(info.cbills), left).ToString(),
                                 arg =>
                                 {
