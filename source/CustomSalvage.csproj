@@ -14,7 +14,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net471</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <LangVersion>11</LangVersion>
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
