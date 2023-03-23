@@ -4,107 +4,121 @@ using BattleTech;
 using JetBrains.Annotations;
 using Localize;
 
-namespace CustomSalvage.MechBroke
+namespace CustomSalvage.MechBroke;
+
+public class Token
 {
+    public string Caption;
+    public int Value;
+    public Condition[] Conditions;
 
-    public class Token
+    public override string ToString()
     {
-        public string Caption;
-        public int Value;
-        public Condition[] Conditions;
-
-        public override string ToString()
-        {
-            return $"{Value,-4:+0;-#}" + new Text(Caption).ToString();
-        }
+        return $"{Value,-4:+0;-#}" + new Text(Caption).ToString();
     }
+}
 
-    public class CSTag : CustomResource
-    {
-        public enum CType { Sum, Min, Max }
-        public CType Type { get; set; }
-        public List<Token> Tokens { get; set; }
+public class CSTag : CustomResource
+{
+    public enum CType { Sum, Min, Max }
+    public CType Type { get; set; }
+    public List<Token> Tokens { get; set; }
         
-        public int GetValue(MechDef mech, HashSet<string> tags, SimGameState sim)
+    public int GetValue(MechDef mech, HashSet<string> tags, SimGameState sim)
+    {
+        var result = 0;
+        if (Tokens != null)
         {
-            var result = 0;
-            if (Tokens != null)
-                foreach (var token in Tokens)
-                {
-                    if (ConditionsHandler.Instance.CheckCondition(token.Conditions, mech))
-                        switch (Type)
-                        {
-                            case CType.Sum:
-                                result += token.Value;
-                                break;
-                            case CType.Min:
-                                if (result > token.Value || result == 0)
-                                    result = token.Value;
-                                break;
-                            case CType.Max:
-                                if (result < token.Value || result == 0)
-                                    result = token.Value;
-                                break;
-                        }
-                }
-
-            return result;
-        }
-
-        [CanBeNull]
-        public string GetString(MechDef mech, HashSet<string> tags, SimGameState sim)
-        {
-            var curvalue = 0;
-            string result = "";
-
-            if (Tokens != null)
-                foreach (var token in Tokens)
-                {
-                    if (ConditionsHandler.Instance.CheckCondition(token.Conditions, mech))
-                        switch (Type)
-                        {
-                            case CType.Sum:
-                                curvalue += token.Value;
-                                result += token.ToString() + "\n";
-                                break;
-                            case CType.Min:
-                                if (curvalue > token.Value || curvalue == 0)
-                                {
-                                    curvalue = token.Value;
-                                    result = token.ToString() + "\n";
-                                }
-
-                                break;
-                            case CType.Max:
-                                if (curvalue < token.Value || curvalue == 0)
-                                {
-                                    curvalue = token.Value;
-                                    result = token.ToString() + "\n";
-                                }
-                                break;
-                        }
-                }
-
-            return curvalue == 0 ? null : result;
-        }
-
-        public override string ToString()
-        {
-            var sb = new StringBuilder($"CSTag: ({Type}){ID}\n");
             foreach (var token in Tokens)
             {
-                sb.Append("- " + token.ToString() + "\n");
-                sb.Append("-- C: [\n");
-                if (token.Conditions != null && token.Conditions.Length > 0)
+                if (ConditionsHandler.Instance.CheckCondition(token.Conditions, mech))
                 {
-                    ConditionsHandler.Instance.PrintConditions(sb, token.Conditions);
-                    sb.Append("    ]\n");
-                }
-                else
-                    sb.Append(" ]\n");
-            }
+                    switch (Type)
+                    {
+                        case CType.Sum:
+                            result += token.Value;
+                            break;
+                        case CType.Min:
+                            if (result > token.Value || result == 0)
+                            {
+                                result = token.Value;
+                            }
 
-            return sb.ToString();
+                            break;
+                        case CType.Max:
+                            if (result < token.Value || result == 0)
+                            {
+                                result = token.Value;
+                            }
+
+                            break;
+                    }
+                }
+            }
         }
+
+        return result;
+    }
+
+    [CanBeNull]
+    public string GetString(MechDef mech, HashSet<string> tags, SimGameState sim)
+    {
+        var curvalue = 0;
+        string result = "";
+
+        if (Tokens != null)
+        {
+            foreach (var token in Tokens)
+            {
+                if (ConditionsHandler.Instance.CheckCondition(token.Conditions, mech))
+                {
+                    switch (Type)
+                    {
+                        case CType.Sum:
+                            curvalue += token.Value;
+                            result += token.ToString() + "\n";
+                            break;
+                        case CType.Min:
+                            if (curvalue > token.Value || curvalue == 0)
+                            {
+                                curvalue = token.Value;
+                                result = token.ToString() + "\n";
+                            }
+
+                            break;
+                        case CType.Max:
+                            if (curvalue < token.Value || curvalue == 0)
+                            {
+                                curvalue = token.Value;
+                                result = token.ToString() + "\n";
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+
+        return curvalue == 0 ? null : result;
+    }
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder($"CSTag: ({Type}){ID}\n");
+        foreach (var token in Tokens)
+        {
+            sb.Append("- " + token.ToString() + "\n");
+            sb.Append("-- C: [\n");
+            if (token.Conditions != null && token.Conditions.Length > 0)
+            {
+                ConditionsHandler.Instance.PrintConditions(sb, token.Conditions);
+                sb.Append("    ]\n");
+            }
+            else
+            {
+                sb.Append(" ]\n");
+            }
+        }
+
+        return sb.ToString();
     }
 }

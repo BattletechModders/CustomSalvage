@@ -3,43 +3,51 @@ using BattleTech;
 using BattleTech.UI;
 using CustomComponents;
 
-namespace CustomSalvage.MechBroke
+namespace CustomSalvage.MechBroke;
+
+[CustomComponent("TechKit")]
+public class TechKitCustom : SimpleCustomComponent, IMechLabFilter, IAfterLoad
 {
-    [CustomComponent("TechKit")]
-    public class TechKitCustom : SimpleCustomComponent, IMechLabFilter, IAfterLoad
+    public Condition[] Conditions;
+    public int Value = 0;
+    public float CompRepairAddBonus = 0;
+    public int CBill = 0;
+    public float CBIllMul = 1;
+
+    public bool CheckFilter(MechLabPanel panel)
     {
-        public Condition[] Conditions;
-        public int Value = 0;
-        public float CompRepairAddBonus = 0;
-        public int CBill = 0;
-        public float CBIllMul = 1;
+        return false;
+    }
 
-        public bool CheckFilter(MechLabPanel panel)
+    public void OnLoaded(Dictionary<string, object> values)
+    {
+        DiceBroke.AddKit(this);
+    }
+
+    public override string ToString()
+    {
+        var result = Def.Description.UIName;
+
+        if (Value != 0)
         {
-            return false;
+            result += "  Tech " + (-Value).ToString("-0;+#");
         }
 
-        public void OnLoaded(Dictionary<string, object> values)
+        if (CompRepairAddBonus != 0)
         {
-            DiceBroke.AddKit(this);
+            result += "  Comp " + (-((int)(CompRepairAddBonus * 1000)/10.0)).ToString("-0;+#") + "%";
         }
 
-        public override string ToString()
+        if (CBill != 0)
         {
-            var result = Def.Description.UIName;
-
-            if (Value != 0)
-                result += "  Tech " + (-Value).ToString("-0;+#");
-            if (CompRepairAddBonus != 0)
-                result += "  Comp " + (-((int)(CompRepairAddBonus * 1000)/10.0)).ToString("-0;+#") + "%";
-
-            if (CBill != 0)
-                result += "  Cost " + SimGameState.GetCBillString(CBill);
-
-            if (CBIllMul != 1)
-                result += "  Cost x" + CBIllMul.ToString();
-
-            return result;
+            result += "  Cost " + SimGameState.GetCBillString(CBill);
         }
+
+        if (CBIllMul != 1)
+        {
+            result += "  Cost x" + CBIllMul.ToString();
+        }
+
+        return result;
     }
 }

@@ -1,6 +1,5 @@
-﻿namespace CustomSalvage.MechBroke
+﻿namespace CustomSalvage.MechBroke;
+
+public interface IBrokeMech
 {
-    public interface IBrokeMech
-    {
-    }
 }

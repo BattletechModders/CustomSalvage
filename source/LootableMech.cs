@@ -1,11 +1,10 @@
 ﻿using CustomComponents;
 
-namespace CustomSalvage
-{
-    [CustomComponent("LootableMech")]
+namespace CustomSalvage;
 
-    public class LootableMech : SimpleCustomChassis
-    {
-        public string ReplaceID { get; set; }
-    }
+[CustomComponent("LootableMech")]
+
+public class LootableMech : SimpleCustomChassis
+{
+    public string ReplaceID { get; set; }
 }
