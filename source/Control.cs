@@ -8,10 +8,9 @@ using HBS.Util;
 
 namespace CustomSalvage
 {
+    internal delegate void AdditionalSalvageStep(ContractHelper contract);
 
-    public delegate void AdditionalSalvageStep(ContractHelper contract);
-
-    public class Control
+    internal class Control
     {
         public static Control Instance { get; } = new();
 

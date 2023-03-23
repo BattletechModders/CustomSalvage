@@ -9,7 +9,7 @@ namespace CustomSalvage
 {
     [HarmonyPatch(typeof(Contract), "GenerateSalvage")]
     [HarmonyPriority(Priority.HigherThanNormal)]
-    public static class Contract_GenerateSalvage
+    internal static class Contract_GenerateSalvage
     {
         [HarmonyPrefix]
         [HarmonyWrapSafe]
@@ -28,12 +28,7 @@ namespace CustomSalvage
             Log.Main.Debug?.Log($"Start GenerateSalvage for {__instance.Name}");
 
             ___finalPotentialSalvage = new List<SalvageDef>();
-            var Contract = new ContractHelper(__instance, ___finalPotentialSalvage)
-            {
-                LostMechs = new List<MechDef>(),
-                SalvageResults = new List<SalvageDef>(),
-                SalvagedChassis = new List<SalvageDef>()
-            };
+            var Contract = new ContractHelper(__instance, ___finalPotentialSalvage);
 
 
             var simgame = __instance.BattleTechGame.Simulation;
@@ -129,8 +124,8 @@ namespace CustomSalvage
                 num2 += Constants.Finances.ContractFloorSalvageBonus;
             }
 
-            Contract.FinalSalvageCount = num7;
-            Contract.FinalPrioritySalvageCount = Math.Min(7, Mathf.FloorToInt((float)num7 * Constants.Salvage.PrioritySalvageModifier));
+            Contract.Contract.FinalSalvageCount = num7;
+            Contract.Contract.FinalPrioritySalvageCount = Math.Min(7, Mathf.FloorToInt((float)num7 * Constants.Salvage.PrioritySalvageModifier));
         }
 
         public static void ProccessPlayerMech(UnitResult unitResult, ContractHelper Contract)

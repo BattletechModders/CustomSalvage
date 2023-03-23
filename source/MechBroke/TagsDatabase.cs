@@ -25,7 +25,7 @@ namespace CustomSalvage.MechBroke
         {
             if(tags == null)
                 return;
-            
+
             foreach (var tag in tags)
             {
                 CSTags[tag.ID] = tag;

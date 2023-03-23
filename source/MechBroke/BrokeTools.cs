@@ -13,7 +13,7 @@ namespace CustomSalvage.MechBroke
             if (broke)
                 loc.CurrentInternalStructure = 0;
             else if (Control.Instance.Settings.RandomStructureOnRepairedLimbs)
-                loc.CurrentInternalStructure *= Mathf.Ceil(Math.Min(Control.Instance.Settings.MinStructure, UnityEngine.Random.Range(0f,1f)));
+                loc.CurrentInternalStructure *= Mathf.Ceil(Math.Min(Control.Instance.Settings.MinStructure, Random.Range(0f,1f)));
         }
 
         public static void BrokeLocation(MechDef mech, ChassisLocations location, bool broke)

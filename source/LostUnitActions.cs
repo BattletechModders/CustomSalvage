@@ -3,9 +3,9 @@ using BattleTech;
 
 namespace CustomSalvage
 {
-    public delegate void LostUnitActionDelegate(UnitResult unit, ContractHelper contract);
+    internal delegate void LostUnitActionDelegate(UnitResult unit, ContractHelper contract);
 
-    public static class LostUnitActions
+    internal static class LostUnitActions
     {
         public static void SalvageItems(UnitResult unit, ContractHelper contract)
         {

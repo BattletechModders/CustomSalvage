@@ -94,7 +94,7 @@ namespace CustomSalvage
             var assembly = get_variant(mech);
             var info = new mech_info();
             var tags = GetMechTags(mech);
-            info.Omni = !String.IsNullOrEmpty(Control.Instance.Settings.OmniTechTag) && 
+            info.Omni = !String.IsNullOrEmpty(Control.Instance.Settings.OmniTechTag) &&
                 tags.Contains(Control.Instance.Settings.OmniTechTag);
 
             if (assembly != null && assembly.Exclude)
@@ -585,7 +585,7 @@ namespace CustomSalvage
                     var left = info.count - info.used - info.spare;
                     if (left > 0)
                         set_info(option,
-                            new Text( left == 1 ? str.ButtonAddPart : str.ButtonAddParts, info.mechname, left).ToString(), 
+                            new Text( left == 1 ? str.ButtonAddPart : str.ButtonAddParts, info.mechname, left).ToString(),
                             arg =>
                             {
                                 info.spare += 1;
@@ -596,7 +596,7 @@ namespace CustomSalvage
                             });
                     else
                         set_info(option,
-                            new Text(str.ButtonAllPartsUsed, info.mechname).ToString(), 
+                            new Text(str.ButtonAllPartsUsed, info.mechname).ToString(),
                             arg => { });
                 }
                 else if (num == used_parts.Count)

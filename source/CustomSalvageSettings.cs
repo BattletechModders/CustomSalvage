@@ -340,9 +340,9 @@ namespace CustomSalvage
                     colordef.Complete();
 
             color_ready = ColorUtility.TryParseHtmlString(ReadyColor, out var c) ? c : new Color(50, 205, 50);
-            color_variant = ColorUtility.TryParseHtmlString(VariantsColor, out c) ? c : UnityEngine.Color.yellow;
-            color_stored = ColorUtility.TryParseHtmlString(StoredMechColor, out c) ? c : UnityEngine.Color.white;
-            color_notready = ColorUtility.TryParseHtmlString(NotReadyColor, out c) ? c : UnityEngine.Color.grey;
+            color_variant = ColorUtility.TryParseHtmlString(VariantsColor, out c) ? c : Color.yellow;
+            color_stored = ColorUtility.TryParseHtmlString(StoredMechColor, out c) ? c : Color.white;
+            color_notready = ColorUtility.TryParseHtmlString(NotReadyColor, out c) ? c : Color.grey;
             color_exclude = ColorUtility.TryParseHtmlString(ExcludedColor, out c) ? c : new Color(127, 255, 212);
 
             PartPenalty = new Dictionary<int, float>()

@@ -28,9 +28,12 @@
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <Nullable>disable</Nullable>
   </PropertyGroup>
-    <Target Name="CopyFilesToGame" AfterTargets="CopyFilesToOutputDirectory">
-      <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(CustomSalvageModPath)" />
-    </Target>
+  <ItemGroup>
+    <InternalsVisibleTo Include="LewdableTanks" />
+  </ItemGroup>
+  <Target Name="CopyFilesToGame" AfterTargets="CopyFilesToOutputDirectory">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(CustomSalvageModPath)" />
+  </Target>
   <ItemGroup>
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.0">
       <PrivateAssets>all</PrivateAssets>

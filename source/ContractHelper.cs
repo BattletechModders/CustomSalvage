@@ -5,44 +5,24 @@ using CustomComponents;
 
 namespace CustomSalvage
 {
-
-    public class ContractHelper
+    internal class ContractHelper
     {
-        public List<SalvageDef> finalPotentialSalvage { get; private set; }
-
-        public List<SalvageDef> SalvagedChassis
-        {
-            get => Contract.SalvagedChassis;
-            set => Contract.SalvagedChassis = value;
-        }
-
-        public List<SalvageDef> SalvageResults
-        {
-            get => Contract.SalvageResults;
-            set => Contract.SalvageResults = value;
-        }
-
-        public List<MechDef> LostMechs
-        {
-            get => Contract.LostMechs;
-            set => Contract.LostMechs = value;
-        }
-
-        public int FinalSalvageCount { get => Contract.FinalSalvageCount; set => Contract.FinalSalvageCount = value; }
-        public int FinalPrioritySalvageCount { get => Contract.FinalPrioritySalvageCount; set => Contract.FinalPrioritySalvageCount = value; }
-
-        public Contract Contract { get; private set; }
+        public Contract Contract { get; }
+        private List<SalvageDef> FinalPotentialSalvage { get; }
 
         public ContractHelper(Contract contract, List<SalvageDef> finalPotentialSalvage)
         {
             Contract = contract;
+            FinalPotentialSalvage = finalPotentialSalvage;
 
-            this.finalPotentialSalvage = finalPotentialSalvage;
+            Contract.LostMechs = new();
+            Contract.SalvageResults = new();
+            Contract.SalvagedChassis = new();
         }
 
-        internal MechComponentDef CheckDefaults(MechComponentDef def)
+        private MechComponentDef CheckDefaults(MechComponentDef def)
         {
-            if (!def.Is<Flags>(out var f) || !def.Flags<CCFlags>().NoSalvage) return def;
+            if (!def.Is<CCFlags>(out var flags) || !flags.NoSalvage) return def;
 
             if (!def.Is<LootableDefault>(out var lootable)) return null;
 
@@ -107,7 +87,7 @@ namespace CustomSalvage
                     Count = 1
                 };
 
-                SalvageResults.Add(salvage);
+                Contract.SalvageResults.Add(salvage);
             }
         }
         public void AddComponentToPotentialSalvage(MechComponentDef def, ComponentDamageLevel damageLevel,
@@ -210,7 +190,7 @@ namespace CustomSalvage
                 salvageDef.Damaged = false;
                 salvageDef.Weight = sc.Salvage.DefaultComponentWeight;
                 salvageDef.Count = 1;
-                this.finalPotentialSalvage.Add(salvageDef);
+                FinalPotentialSalvage.Add(salvageDef);
                 Log.Main.Debug?.Log($"---- {def.Description.Id} added");
             }
         }
@@ -244,7 +224,7 @@ namespace CustomSalvage
                 return;
             }
 
-            add_parts(constants, mech, numparts, finalPotentialSalvage);
+            add_parts(constants, mech, numparts, FinalPotentialSalvage);
         }
 
         public void AddMechPartsToFinalSalvage(SimGameConstants constants, MechDef mech, int numparts)
@@ -254,7 +234,7 @@ namespace CustomSalvage
                 Log.Main.Debug?.Log($"--- {mech.Description.Id} is BLACKLISTED. skipped");
                 return;
             }
-            add_parts(constants, mech, numparts, SalvageResults);
+            add_parts(constants, mech, numparts, Contract.SalvageResults);
         }
 
 

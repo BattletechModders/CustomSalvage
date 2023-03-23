@@ -140,7 +140,7 @@ namespace CustomSalvage
                         break;
                     case BrokeType.Normalized:
                         ConditionsHandler.Instance.PrepareCheck(mech, UnityGameInstance.BattleTechGame.Simulation);
-                        broke_chance += "Total TechBonus: " + MechBroke.DiceBroke
+                        broke_chance += "Total TechBonus: " + DiceBroke
                             .GetBonus(mech, UnityGameInstance.BattleTechGame.Simulation, 0, 0)
                             .ToString("+0;-#");
                         break;

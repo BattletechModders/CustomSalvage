@@ -2,9 +2,9 @@
 
 namespace CustomSalvage
 {
-    public delegate bool RecoveryDelegate(UnitResult result, ContractHelper contract);
+    internal delegate bool RecoveryDelegate(UnitResult result, ContractHelper contract);
 
-    public static class RecoveryDelegates
+    internal static class RecoveryDelegates
     {
         public static bool PartDestroyed(UnitResult result, ContractHelper contract)
         {
