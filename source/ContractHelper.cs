@@ -22,7 +22,7 @@ internal class ContractHelper
 
     private MechComponentDef CheckDefaults(MechComponentDef def)
     {
-        if (!def.Is<CCFlags>(out var flags) || !flags.NoSalvage)
+        if (!def.Flags<CCFlags>().NoSalvage)
         {
             return def;
         }
