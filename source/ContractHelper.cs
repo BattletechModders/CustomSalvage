@@ -22,7 +22,7 @@ internal class ContractHelper
 
     private MechComponentDef CheckDefaults(MechComponentDef def)
     {
-        if (!def.Flags<CCFlags>().NoSalvage)
+        if (!def.CCFlags().NoSalvage)
         {
             return def;
         }
@@ -38,7 +38,7 @@ internal class ContractHelper
             return null;
         }
 
-        if (lootableDef.Flags<CCFlags>().NoSalvage)
+        if (lootableDef.CCFlags().NoSalvage)
         {
             return null;
         }
