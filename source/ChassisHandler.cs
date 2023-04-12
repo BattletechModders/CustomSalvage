@@ -16,6 +16,7 @@ using UnityEngine.Events;
 
 using Object = System.Object;
 using Newtonsoft.Json;
+using static BinkPlugin.Bink;
 
 namespace CustomSalvage;
 
@@ -434,7 +435,7 @@ public static partial class ChassisHandler
             foreach (var mechDef in list)
             {
                 int num = GetCount(mechDef.Description.Id);
-                int empty = GetEmptyPartsCount(mech.Description.Id);
+                int empty = GetEmptyPartsCount(mechDef.Description.Id);
                 if (num == 0)
                 {
                     continue;
@@ -548,16 +549,18 @@ public static partial class ChassisHandler
         var result = $"Assembling <b><color=#20ff20>" + text.ToString() + $"</color></b> Using {mech_type} Parts:\n";
         int total_parts = 0;
         int empty_parts = 0;
-
+        Log.Main.Debug?.Log($"GetCurrentDescription {text}");
         foreach (var info in used_parts)
         {
             int use = info.used + info.spare;
-            if(use > 0)
+            Log.Main.Debug?.Log($" - {info.mechid} used:{info.used} spare:{info.spare} count:{info.count} empty:{info.empty}");
+            if (use > 0)
             {
                 total_parts += use;
                 int empty = use - (info.count - info.empty);
                 if (empty < 0) { empty = 0; }
                 empty_parts += empty;
+                Log.Main.Debug?.Log($"  - {empty}");
             }
             if (info.used > 0 || info.spare > 0)
             {
@@ -587,6 +590,7 @@ public static partial class ChassisHandler
 
         var parts = used_parts.Sum(i => i.used) - used_parts[0].used;
         var spare = used_parts.Sum(i => i.spare);
+        Log.Main.Debug?.Log($" - other parts:{parts} spare:{spare} total:{total_parts} empty:{empty_parts}");
         if (Control.Instance.Settings.MechBrokeType == BrokeType.Normalized)
         {
             result += "\n\n";
@@ -1145,7 +1149,8 @@ public class AssemblyChancesResult
                 CompFChance = Mathf.Clamp(CompFChance + ctp, settings.ComponentMinChance, settings.ComponentMaxChance);
                 CompNFChance = Mathf.Clamp(CompNFChance + ctp, CompFChance, settings.ComponentMaxChance);
                 if (used_parts > 0) {
-                    float mod = Mathf.Clamp(0f, ((used_parts - used_empty_parts) / (used_parts)), 1f);
+                    float mod = Mathf.Clamp((((float)used_parts - (float)used_empty_parts) / ((float)used_parts)), 0f, 1f);
+                    Log.Main.Debug?.Log($"empty parts mod {mod}");
                     CompFChance *= mod;
                     CompNFChance *= mod;
                 }
