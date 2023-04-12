@@ -137,7 +137,7 @@ public static class MechBayChassisInfoWidget_SetDescriptions
                 case BrokeType.Random:
                     var chances =
                         new AssemblyChancesResult(mech, UnityGameInstance.BattleTechGame.Simulation,
-                            0);
+                            0, 0, 0);
 
                     broke_chance += $"Base Tech: {chances.BaseTP}";
                     broke_chance += $"\nLimb Repair: {(int)(chances.LimbChance * 100)}%";

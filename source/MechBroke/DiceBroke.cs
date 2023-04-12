@@ -46,10 +46,10 @@ public static class DiceBroke
         2.77f
     };
 
-    public static (int roll, int total) BrokeMech(MechDef mech, SimGameState sim, int other_parts, int spare_parts)
+    public static (int roll, int total) BrokeMech(MechDef mech, SimGameState sim, int other_parts, int spare_parts, int all_used_parts, int used_empty_parts)
     {
         var target = GetBonus(mech, sim, other_parts, spare_parts);
-        var roll = Random.Range(1, 7) + Random.Range(1, 7);
+        var roll = BrokeTools.rnd.Next(1, 7) + BrokeTools.rnd.Next(1, 7);
         target += roll;
 
         var parts = locs.ToList();
@@ -75,7 +75,7 @@ public static class DiceBroke
         {
             for (int i = 0; i < parts_to_remove && parts.Count > 0; i++)
             {
-                int n = Random.Range(0, parts.Count);
+                int n = BrokeTools.rnd.Next(0, parts.Count);
                 remove = remove.Set(parts[n]);
                 parts.RemoveAt(n);
             }
@@ -94,7 +94,7 @@ public static class DiceBroke
             Log.Main.Debug?.Log($"-- {to_remove}: {remove.HasFlag(to_remove)}");
         }
 
-        var compchance = 1 - GetComp(mech, sim, other_parts, spare_parts);
+        var compchance = 1 - GetComp(mech, sim, other_parts, spare_parts, all_used_parts, used_empty_parts);
 
         BrokeTools.BrokeEquipment(mech, compchance, compchance);
 
@@ -156,6 +156,25 @@ public static class DiceBroke
         }
 
 
+        return result;
+    }
+    public static float GetComp(MechDef mech, SimGameState sim, int other_parts, int spare_parts, int all_used_parts, int used_empty_parts)
+    {
+        var s = Control.Instance.Settings;
+
+        float result = s.ComponentDamageBase;
+        result += sim.MechTechSkill * s.ComponentChancePerTp;
+        Log.Main.Debug?.Log($"GetComp {mech.Description.Id} other:{other_parts} spare:{spare_parts} used:{all_used_parts} empty:{used_empty_parts}");
+        result += other_parts * s.ComponentDamageFranken;
+        result += spare_parts * s.ComponentDamageSpare;
+
+        if (SelectedTechKit != null)
+        {
+            result -= SelectedTechKit.CompRepairAddBonus;
+        }
+        if (all_used_parts > 0) {
+          result = 1f - ((all_used_parts - used_empty_parts) / (all_used_parts)) * (1f - result);
+        }
         return result;
     }
 

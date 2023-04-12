@@ -5,9 +5,35 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace CustomSalvage.MechBroke;
+public class BrokeRandimizeData
+{
+    private List<float> rnd { get; set; } = new List<float>();
+    private int used { get; set; } = 0;
+    public void InitNew()
+    {
+        rnd.Clear();
+        used = 0;
+        for(int t = 0; t < 1000; ++t)
+        {
+            rnd.Add(Random.Range(0f,1f));
+        }
+    }
+    public float Next()
+    {
+        if (rnd.Count == 0) { InitNew(); }
+        if (used >= rnd.Count) { used = 0; }
+        return rnd[++used];
+    }
+    public int Next(int index0, int index1)
+    {
+        return Mathf.RoundToInt(this.Next() * (index1 - index0 - 1)) + index0;
+    }
+}
 
 public static class BrokeTools
 {
+    public static BrokeRandimizeData rnd { get; set; } = new BrokeRandimizeData();
+    public static readonly string BROKE_RANDOM_DATA_STAT_NAME = "broke_random_data";
     private static void BrokeLimb(LocationLoadoutDef loc, bool broke)
     {
         if (broke)
@@ -16,7 +42,7 @@ public static class BrokeTools
         }
         else if (Control.Instance.Settings.RandomStructureOnRepairedLimbs)
         {
-            loc.CurrentInternalStructure *= Mathf.Ceil(Math.Min(Control.Instance.Settings.MinStructure, Random.Range(0f,1f)));
+            loc.CurrentInternalStructure *= Mathf.Ceil(Math.Min(Control.Instance.Settings.MinStructure, rnd.Next()));
         }
     }
 
@@ -75,7 +101,7 @@ public static class BrokeTools
             }
             else if (Control.Instance.Settings.RepairMechComponents)
             {
-                var roll = Random.Range(0f, 1f);
+                var roll = BrokeTools.rnd.Next();
 
                 if (roll < repaired)
                 {
@@ -121,8 +147,8 @@ public static class BrokeTools
 
         for (int i = 0; i < list.Count; i++)
         {
-            var n1 = Random.Range(0, list.Count);
-            var n2 = Random.Range(0, list.Count);
+            var n1 = BrokeTools.rnd.Next(0, list.Count);
+            var n2 = BrokeTools.rnd.Next(0, list.Count);
 
             var t = list[n1];
             list[n1] = list[n2];
@@ -147,7 +173,7 @@ public static class BrokeTools
             }
             else if(i == nrep)
             {
-                if (Random.Range(0f, 1f) < prep)
+                if (BrokeTools.rnd.Next() < prep)
                 {
                     Log.Main.Debug?.Log($"---- {cref.ComponentDefID} - repaired");
                     cref.DamageLevel = ComponentDamageLevel.Functional;
@@ -170,7 +196,7 @@ public static class BrokeTools
             }
             else if (i == ndam)
             {
-                if (Random.Range(0f, 1f) < pdam)
+                if (BrokeTools.rnd.Next() < pdam)
                 {
                     Log.Main.Debug?.Log($"---- {cref.ComponentDefID} - damaged");
                     cref.DamageLevel = ComponentDamageLevel.NonFunctional;

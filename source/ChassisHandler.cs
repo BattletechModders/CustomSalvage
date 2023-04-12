@@ -15,6 +15,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 using Object = System.Object;
+using Newtonsoft.Json;
 
 namespace CustomSalvage;
 
@@ -42,13 +43,51 @@ public static partial class ChassisHandler
         }
     }
 
-
+    public class EmptyPartsInfo
+    {
+        public Dictionary<string, int> EmptyPartsCount { get; set; } = new Dictionary<string, int>();
+    }
+    private static EmptyPartsInfo emptyPartsInfo = new EmptyPartsInfo();
+    private static readonly string EMPTY_PARTS_INFO_STAT_NAME = "empty_parts_info";
     private static Dictionary<string, MechDef> ChassisToMech = new Dictionary<string, MechDef>();
     private static Dictionary<string, int> PartCount = new Dictionary<string, int>();
     public static Dictionary<string, List<MechDef>> Compatible = new Dictionary<string, List<MechDef>>();
 
     public static Dictionary<string, mech_info> Proccesed = new Dictionary<string, mech_info>();
 
+    public static void SaveEmptyPartsInfo(SimGameState simGameState)
+    {
+        Statistic stat = simGameState.CompanyStats.GetStatistic(EMPTY_PARTS_INFO_STAT_NAME);
+        if (stat == null) {
+            stat = simGameState.CompanyStats.AddStatistic(EMPTY_PARTS_INFO_STAT_NAME, "{}");
+        }
+        stat.SetValue<string>(JsonConvert.SerializeObject(emptyPartsInfo));
+    }
+    public static void LoadEmptyPartsInfo(SimGameState simGameState)
+    {
+        Statistic stat = simGameState.CompanyStats.GetStatistic(EMPTY_PARTS_INFO_STAT_NAME);
+        if (stat == null)
+        {
+            stat = simGameState.CompanyStats.AddStatistic(EMPTY_PARTS_INFO_STAT_NAME, "{}");
+        }
+        emptyPartsInfo = JsonConvert.DeserializeObject<EmptyPartsInfo>(stat.Value<string>());
+    }
+    public static int GetEmptyPartsCount(string id)
+    {
+        if (emptyPartsInfo.EmptyPartsCount.TryGetValue(id, out var result)) { return result; }
+        return 0;
+    }
+    public static void AddEmptyPartsCount(string id, int value)
+    {
+        if (emptyPartsInfo.EmptyPartsCount.ContainsKey(id) == false) { emptyPartsInfo.EmptyPartsCount[id] = 0; }
+        emptyPartsInfo.EmptyPartsCount[id] += value;
+    }
+    public static void DelEmptyPartsCount(string id, int value)
+    {
+        if (emptyPartsInfo.EmptyPartsCount.ContainsKey(id) == false) { emptyPartsInfo.EmptyPartsCount[id] = 0; return; }
+        emptyPartsInfo.EmptyPartsCount[id] += value;
+        if (emptyPartsInfo.EmptyPartsCount[id] < 0) { emptyPartsInfo.EmptyPartsCount[id] = 0; }
+    }
     public static void RegisterMechDef(MechDef mech, int part_count = 0)
     {
         int max_parts = UnityGameInstance.BattleTechGame.Simulation.Constants.Story.DefaultMechPartMax;
@@ -244,16 +283,20 @@ public static partial class ChassisHandler
     public class parts_info
     {
         public int count;
+        public int empty;
         public int used;
         public int spare;
         public int cbills;
+        public bool prime;
         public string mechname;
         public string mechid;
 
-        public parts_info(int c, int u, int cb, string mn, string mi)
+        public parts_info(int c, int e, bool p, int u, int cb, string mn, string mi)
         {
             count = c;
+            empty = e;
             used = u;
+            prime = p;
             cbills = cb;
             mechname = new Text(mn).ToString();
             mechid = mi;
@@ -291,11 +334,14 @@ public static partial class ChassisHandler
     {
         try
         {
-            Log.Main.Debug?.Log($"-- remove parts");
+            int used_empty_parts = chassis.MechPartMax - (GetCount(mech.Description.Id) - GetEmptyPartsCount(mech.Description.Id));
+            if (used_empty_parts < 0) { used_empty_parts = 0; }
+            Log.Main.Debug?.Log($"-- remove parts {chassis.MechPartMax} used empty:{used_empty_parts}");
+            DelEmptyPartsCount(mech.Description.Id, used_empty_parts);
             RemoveMechPart(mech.Description.Id, chassis.MechPartMax);
             infoWidget.SetData(mechBay, null);
             Log.Main.Debug?.Log($"-- making mech");
-            MakeMech(mechBay.Sim, 0);
+            MakeMech(mechBay.Sim, 0, chassis.MechPartMax, used_empty_parts);
             Log.Main.Debug?.Log($"-- refresh mechlab");
             mechBay.RefreshData(false);
         }
@@ -305,7 +351,7 @@ public static partial class ChassisHandler
         }
     }
 
-    private static void MakeMech(SimGameState sim, int other_parts)
+    private static void MakeMech(SimGameState sim, int other_parts, int all_used_parts, int used_empty_parts)
     {
         Log.Main.Debug?.Log($"Mech Assembly started for {mech.Description.UIName}");
         MechDef new_mech = new MechDef(mech, mechBay.Sim.GenerateSimGameUID(), true);
@@ -330,10 +376,10 @@ public static partial class ChassisHandler
         switch (Control.Instance.Settings.MechBrokeType)
         {
             case BrokeType.Random:
-                RandomBroke.BrokeMech(new_mech, sim, other_parts);
+                RandomBroke.BrokeMech(new_mech, sim, other_parts, all_used_parts, used_empty_parts);
                 break;
             case BrokeType.Normalized:
-                DiceBroke.BrokeMech(new_mech, sim, other_parts, used_parts.Sum(i => i.spare));
+                DiceBroke.BrokeMech(new_mech, sim, other_parts, used_parts.Sum(i => i.spare), all_used_parts, used_empty_parts);
                 break;
         }
 
@@ -373,8 +419,8 @@ public static partial class ChassisHandler
             var list = GetCompatible(chassis.Description.Id);
             used_parts = new List<parts_info>();
             int c = GetCount(mech.Description.Id);
-
-            used_parts.Add(new parts_info(c, c > chassis.MechPartMax ? chassis.MechPartMax : c, 0,
+            int e = GetEmptyPartsCount(mech.Description.Id);
+            used_parts.Add(new parts_info(c, e, true, c > chassis.MechPartMax ? chassis.MechPartMax : c, 0,
                 mech.Description.UIName, mech.Description.Id));
             var info = Proccesed[mech.Description.Id];
 
@@ -388,6 +434,7 @@ public static partial class ChassisHandler
             foreach (var mechDef in list)
             {
                 int num = GetCount(mechDef.Description.Id);
+                int empty = GetEmptyPartsCount(mech.Description.Id);
                 if (num == 0)
                 {
                     continue;
@@ -434,7 +481,7 @@ public static partial class ChassisHandler
 
                     Log.Main.Debug?.Log($"-- price for {mechDef.Description.UIName}({mechDef.Description.Id}) mechcost: {mechDef.Description.Cost}. price mod: {mod:0.000}, tag mod:{info2.PriceMult:0.000} omnimod:{omnimod:0.000} adopt price: {price}");
                     used_parts.Add(
-                        new parts_info(num, 0, price, mechDef.Description.UIName, mechDef.Description.Id));
+                        new parts_info(num, empty, false, 0, price, mechDef.Description.UIName, mechDef.Description.Id));
                 }
             }
 
@@ -499,9 +546,19 @@ public static partial class ChassisHandler
         var strs = Control.Instance.Settings.Strings;
         var text = new Text(mech.Description.UIName);
         var result = $"Assembling <b><color=#20ff20>" + text.ToString() + $"</color></b> Using {mech_type} Parts:\n";
+        int total_parts = 0;
+        int empty_parts = 0;
 
         foreach (var info in used_parts)
         {
+            int use = info.used + info.spare;
+            if(use > 0)
+            {
+                total_parts += use;
+                int empty = use - (info.count - info.empty);
+                if (empty < 0) { empty = 0; }
+                empty_parts += empty;
+            }
             if (info.used > 0 || info.spare > 0)
             {
                 if (info.spare == 0)
@@ -528,11 +585,11 @@ public static partial class ChassisHandler
             }
         }
 
+        var parts = used_parts.Sum(i => i.used) - used_parts[0].used;
+        var spare = used_parts.Sum(i => i.spare);
         if (Control.Instance.Settings.MechBrokeType == BrokeType.Normalized)
         {
             result += "\n\n";
-            var parts = used_parts.Sum(i => i.used) - used_parts[0].used;
-            var spare = used_parts.Sum(i => i.spare);
 
             //Control.Instance.Log("1");
 
@@ -555,7 +612,20 @@ public static partial class ChassisHandler
             {
                 result += "\n\n";
                 result += DiceBroke.GetResultString(total);
-                result += $"\nComponent damage chance: {Mathf.RoundToInt(100 * DiceBroke.GetComp(mech, UnityGameInstance.BattleTechGame.Simulation, parts, spare))}%";
+                //result += $"\nComponent damage chance: {Mathf.RoundToInt(100 * DiceBroke.GetComp(mech, UnityGameInstance.BattleTechGame.Simulation, parts, spare))}%";
+                result += $"\nComponent damage chance: {Mathf.RoundToInt(100 * DiceBroke.GetComp(mech, UnityGameInstance.BattleTechGame.Simulation, parts, spare, total_parts, empty_parts))}%";
+            }
+        }
+        else
+        {
+            if (Control.Instance.Settings.ShowBrokeChances)
+            {
+                var chances = new AssemblyChancesResult(mech, UnityGameInstance.BattleTechGame.Simulation, parts, total_parts, empty_parts);
+                result += "\n\n";
+                //result += $"\nComponent damage chance: {Mathf.RoundToInt(100 * DiceBroke.GetComp(mech, UnityGameInstance.BattleTechGame.Simulation, parts, spare))}%";
+                result += $"\nLimb Repair: {(int)(chances.LimbChance * 100)}%";
+                result += $"\nItem Recovered: {(int)(chances.CompNFChance * 100)}%";
+                result += $"\nItem Repair: {(int)(chances.CompFChance * 100)}%";
             }
         }
 
@@ -878,11 +948,18 @@ public static partial class ChassisHandler
         {
             Log.Main.Debug?.Log($"-- remove parts");
             infoWidget.SetData(mechBay, null);
+            int used_empty_parts = 0;
+            int all_parts = 0;
             foreach (var info in used_parts)
             {
-                if (info.used > 0)
+                if ((info.used > 0)||(info.spare > 0))
                 {
                     RemoveMechPart(info.mechid, info.used + info.spare);
+                    int use = info.used + info.spare;
+                    int empty = use - (info.count - info.empty);
+                    if (empty < 0) { empty = 0; }
+                    all_parts += (use);
+                    used_empty_parts += empty;
                 }
             }
 
@@ -894,11 +971,11 @@ public static partial class ChassisHandler
 
             Log.Main.Debug?.Log($"-- take money {total}");
             mechBay.Sim.AddFunds(-total);
-            //foreach (var item in used_parts)
-            //    Control.Instance.Log($"- {item.mechid}[{item.mechname}] {item.used}/{item.spare}/{item.count}");
+            foreach (var item in used_parts)
+                Log.Main.Debug?.Log($"- {item.mechid}[{item.mechname}] {item.used}/{item.spare}/{item.count}");
             var op = used_parts.Where(i => i.mechid != mech.Description.Id).Sum(i => i.used);
-            Log.Main.Debug?.Log($"-- making mech other_parts:{op}");
-            MakeMech(mechBay.Sim, op);
+            Log.Main.Debug?.Log($"-- making mech other_parts:{op} total used {all_parts}/{used_empty_parts}");
+            MakeMech(mechBay.Sim, op, all_parts, used_empty_parts);
             used_parts.Clear();
             Log.Main.Debug?.Log($"-- refresh mechlab");
             mechBay.RefreshData(false);
@@ -983,7 +1060,7 @@ public class AssemblyChancesResult
 #if CCDEBUG
         public string DEBUGText { get; private set; } = "";
 #endif
-    public AssemblyChancesResult(MechDef mech, SimGameState sim, int other_parts)
+    public AssemblyChancesResult(MechDef mech, SimGameState sim, int other_parts, int used_parts, int used_empty_parts)
     {
         var settings = Control.Instance.Settings;
         if (settings.RepairChanceByTP)
@@ -1067,7 +1144,11 @@ public class AssemblyChancesResult
                 LimbChance = Mathf.Clamp(LimbChance + ltp, settings.LimbMinChance, settings.LimbMaxChance);
                 CompFChance = Mathf.Clamp(CompFChance + ctp, settings.ComponentMinChance, settings.ComponentMaxChance);
                 CompNFChance = Mathf.Clamp(CompNFChance + ctp, CompFChance, settings.ComponentMaxChance);
-
+                if (used_parts > 0) {
+                    float mod = Mathf.Clamp(0f, ((used_parts - used_empty_parts) / (used_parts)), 1f);
+                    CompFChance *= mod;
+                    CompNFChance *= mod;
+                }
 #if CCDEBUG
                     DEBUGText = $"\nLTP : {LimbTP:0.000}/{ltp:0.000}/{(int)(oLimbChance * 100)}%";
                     DEBUGText = $"\nCTP : {CompTP:0.000}/{ctp:0.000}/{(int)(oCompFChance * 100)}%/{(int)(oCompNFChance * 100)}%";

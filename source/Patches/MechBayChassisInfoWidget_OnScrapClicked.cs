@@ -1,5 +1,6 @@
 ﻿using BattleTech;
 using BattleTech.UI;
+using CustomSalvage.MechBroke;
 using HBS;
 using Localize;
 using UnityEngine;
@@ -104,7 +105,7 @@ public static class MechBayChassisInfoWidget_OnScrapClicked
 
     private static void SplitToParts(ChassisDef chassisDef, int min, int max, MechBayPanel mechBay)
     {
-        int k = mechBay.Sim.NetworkRandom.Int(min, max+1);
+        int k = BrokeTools.rnd.Next(min, max+1);
         if (Control.Instance.Settings.DEBUG_LOTOFPARTS)
         {
             k = 20;
@@ -116,6 +117,7 @@ public static class MechBayChassisInfoWidget_OnScrapClicked
         {
             mechBay.Sim.AddMechPart(mech.Description.Id);
         }
+        ChassisHandler.AddEmptyPartsCount(mech.Description.Id, k);
 
         mechBay.RefreshData(false);
         mechBay.SelectChassis(null);
