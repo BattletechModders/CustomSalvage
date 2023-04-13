@@ -6,6 +6,7 @@ log.txt
 /*.dll
 
 # User-specific files
+Directory.Build.props 
 *.suo
 *.user
 *.userosscache
@@ -264,6 +265,3 @@ paket-files/
 __pycache__/
 *.pyc
 /readme_images
-
-# Ignore the VS Directory.build.props file
-Directory.Build.props 
