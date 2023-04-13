@@ -6,6 +6,7 @@ log.txt
 /*.dll
 
 # User-specific files
+Directory.Build.props 
 *.suo
 *.user
 *.userosscache
