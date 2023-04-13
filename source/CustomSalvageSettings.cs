@@ -170,6 +170,7 @@ public class Settings
     public string NoSalvageMechTag = "NOSALVAGE";
     public string NoSalvageVehicleTag = "NOSALVAGE";
 
+
     public float RecoveryMod = 1;
     public float LimbRecoveryPenalty = 0.05f;
     public float TorsoRecoveryPenalty = 0.1f;
@@ -282,7 +283,7 @@ public class Settings
     public bool ShowBrokeChances = true;
     public bool ShowBrokeChancesFirst = true;
 
-
+    public bool ShowSalvageFloaties = false;
 
     public float[,] PartCountPenalty = new float[,]
     {
