@@ -30,7 +30,7 @@ public static class MechBayChassisUnitElement_SetData
         if (partsCount != 0)
         {
             ___partsLabelText.SetText("Parts");
-            ___partsText.SetText($"{ChassisHandler.GetEmptyPartsCount(ChassisHandler.GetMech(chassisDef.Description.Id).Description.Id)}/{partsCount}/{partsMax}");
+            ___partsText.SetText( Control.Instance.Settings.AllowScrapToParts ? $"{ChassisHandler.GetEmptyPartsCount(ChassisHandler.GetMech(chassisDef.Description.Id).Description.Id)}/{partsCount}/{partsMax}" : $"{partsCount}/{partsMax}");
 
             if (partsCount >= partsMax)
             {
