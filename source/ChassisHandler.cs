@@ -406,12 +406,10 @@ public static partial class ChassisHandler
 
     private static void RemoveMechPart(string id, int count)
     {
-        var method = mechBay.Sim.GetType()
-            .GetMethod("RemoveItemStat", BindingFlags.NonPublic | BindingFlags.Instance);
-
         for (int i = 0; i < count; i++)
         {
-            method.Invoke(mechBay.Sim, new Object[] { id, "MECHPART", false });
+            //method.Invoke(mechBay.Sim, new Object[] { id, "MECHPART", false });
+            mechBay.Sim.RemoveItemStat(id, "MECHPART", false);
         }
     }
 
