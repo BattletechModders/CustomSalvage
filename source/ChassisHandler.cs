@@ -78,6 +78,10 @@ public static partial class ChassisHandler
         if (emptyPartsInfo.EmptyPartsCount.TryGetValue(id, out var result)) { return result; }
         return 0;
     }
+    public static void ResetEmptyPartsCount(string id)
+    {
+        emptyPartsInfo.EmptyPartsCount[id] = 0;
+    }
     public static void AddEmptyPartsCount(string id, int value)
     {
         if (emptyPartsInfo.EmptyPartsCount.ContainsKey(id) == false) { emptyPartsInfo.EmptyPartsCount[id] = 0; }
