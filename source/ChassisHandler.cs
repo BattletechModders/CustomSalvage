@@ -86,7 +86,7 @@ public static partial class ChassisHandler
     public static void DelEmptyPartsCount(string id, int value)
     {
         if (emptyPartsInfo.EmptyPartsCount.ContainsKey(id) == false) { emptyPartsInfo.EmptyPartsCount[id] = 0; return; }
-        emptyPartsInfo.EmptyPartsCount[id] += value;
+        emptyPartsInfo.EmptyPartsCount[id] -= value;
         if (emptyPartsInfo.EmptyPartsCount[id] < 0) { emptyPartsInfo.EmptyPartsCount[id] = 0; }
     }
     public static void RegisterMechDef(MechDef mech, int part_count = 0)
@@ -341,10 +341,12 @@ public static partial class ChassisHandler
             DelEmptyPartsCount(mech.Description.Id, used_empty_parts);
             RemoveMechPart(mech.Description.Id, chassis.MechPartMax);
             infoWidget.SetData(mechBay, null);
-            Log.Main.Debug?.Log($"-- making mech");
+            Log.Main.Debug?.Log($"-- making mech {mech.Description.Id} {chassis.Description.Id}");
             MakeMech(mechBay.Sim, 0, chassis.MechPartMax, used_empty_parts);
             Log.Main.Debug?.Log($"-- refresh mechlab");
             mechBay.RefreshData(false);
+            Log.Main.Debug?.Log($"-- rest parts {mech.Description.Id} {chassis.Description.Id} {chassis.MechPartCount}");
+            Log.Main.Debug?.Log($"-- widget {(infoWidget.selectedChassis == null?"null": infoWidget.selectedChassis.Description.Id)}");
         }
         catch (Exception e)
         {
@@ -962,6 +964,7 @@ public static partial class ChassisHandler
                     int use = info.used + info.spare;
                     int empty = use - (info.count - info.empty);
                     if (empty < 0) { empty = 0; }
+                    DelEmptyPartsCount(info.mechid, empty);
                     all_parts += (use);
                     used_empty_parts += empty;
                 }
