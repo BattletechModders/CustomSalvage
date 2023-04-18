@@ -130,14 +130,17 @@ public static class MechBayChassisInfoWidget_OnScrapClicked
     }
 
 
-    private static void ScrapParts(int num, ChassisDef mech, MechBayChassisInfoWidget widget, MechBayPanel mechBay)
+    private static void ScrapParts(int num, ChassisDef chassis, MechBayChassisInfoWidget widget, MechBayPanel mechBay)
     {
+        MechDef mech = ChassisHandler.GetMech(chassis.Description.Id);
+        Log.Main.Debug?.Log($"ScrapingParts {mech.Description.Id} {ChassisHandler.GetEmptyPartsCount(mech.Description.Id)}");
         for (int i = 0; i < num; i++)
         {
-            UnityGameInstance.BattleTechGame.Simulation.ScrapMechPart(mech.Description.Id, 1,
+            UnityGameInstance.BattleTechGame.Simulation.ScrapMechPart(chassis.Description.Id, 1,
                 UnityGameInstance.BattleTechGame.Simulation.Constants.Story.DefaultMechPartMax, true);
             ChassisHandler.DelEmptyPartsCount(mech.Description.Id, 1);
         }
+        Log.Main.Debug?.Log($"ScrapedParts {mech.Description.Id} {ChassisHandler.GetEmptyPartsCount(chassis.Description.Id)}");
 
         widget.SetData(mechBay, null);
         mechBay.RefreshData(false);
