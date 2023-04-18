@@ -136,6 +136,7 @@ public static class MechBayChassisInfoWidget_OnScrapClicked
         {
             UnityGameInstance.BattleTechGame.Simulation.ScrapMechPart(mech.Description.Id, 1,
                 UnityGameInstance.BattleTechGame.Simulation.Constants.Story.DefaultMechPartMax, true);
+            ChassisHandler.DelEmptyPartsCount(mech.Description.Id, 1);
         }
 
         widget.SetData(mechBay, null);
