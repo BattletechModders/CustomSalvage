@@ -160,11 +160,21 @@ public class Settings
     public bool DEBUG_ShowLoadingTags = false;
     public bool DEBUG_LOTOFPARTS = false;
     public bool DEBUG_ShowConfig = true;
+    public bool DEBUG_AllMechsSalvage = false;
 
     public RecoveryCalculationType RecoveryType = RecoveryCalculationType.PartDestroyed;
     public PartCalculationType PartCountType = PartCalculationType.PartDestroyedIgnoreCT;
     public LostMechActionType LostMechAction = LostMechActionType.ReturnItemsToPlayer;
     public BrokeType MechBrokeType = BrokeType.Random;
+
+    public bool FullEnemyUnitSalvage = true;
+    public int MaxFullUnitsInSalvage = 1;
+    public string FullUnitInfoIcon = "icons8-info";
+    public float FullUnitRandomSalvageSlotUsingMod = 1f;
+    public bool FullUnitUsedAllRandomSalvageSlots = true;
+    public bool SquadDisassembleComponents = false;
+    public bool VehicleDisassembleComponents = false;
+    public bool VehicleAlwaysDisassembled = false;
 
     public bool AllowDropBlackListed = false;
     public string NoSalvageMechTag = "NOSALVAGE";

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using BattleTech;
+using CustomUnits;
 using UnityEngine;
-
 
 namespace CustomSalvage;
 
@@ -16,7 +17,7 @@ internal static class Contract_GenerateSalvage
     [HarmonyPriority(Priority.HigherThanNormal)]
     public static void Prefix(ref bool __runOriginal, List<UnitResult> enemyMechs, List<VehicleDef> enemyVehicles,
         List<UnitResult> lostUnits, bool logResults,
-        Contract __instance, ref List<SalvageDef> ___finalPotentialSalvage)
+        Contract __instance)
     {
         if (!__runOriginal)
         {
@@ -26,9 +27,25 @@ internal static class Contract_GenerateSalvage
         __runOriginal = false;
 
         Log.Main.Debug?.Log($"Start GenerateSalvage for {__instance.Name}");
-
-        ___finalPotentialSalvage = new List<SalvageDef>();
-        var Contract = new ContractHelper(__instance, ___finalPotentialSalvage);
+        if (Control.Instance.Settings.DEBUG_AllMechsSalvage)
+        {
+            CombatGameState combat = __instance.BattleTechGame.Combat;
+            List<Mech> allMechs = combat.AllMechs;
+            for (int index = 0; index < allMechs.Count; ++index)
+            {
+                Mech mech = allMechs[index];
+                if (combat.HostilityMatrix.IsEnemy(combat.LocalPlayerTeam, mech.team))
+                {
+                    if(mech.IsDead == false)
+                    {
+                        UnitResult unitResult = new UnitResult(mech.ToMechDef(), Pilot.MakeDumbClone(mech.GetPilot()));
+                        enemyMechs.Add(unitResult);
+                    }
+                }
+            }
+        }
+        __instance.finalPotentialSalvage = new List<SalvageDef>();
+        var Contract = new ContractHelper(__instance, true);
 
 
         var simgame = __instance.BattleTechGame.Simulation;
@@ -46,13 +63,24 @@ internal static class Contract_GenerateSalvage
         {
             ProccessPlayerMech(unitResult, Contract);
         }
-        Log.Main.Debug?.Log($"- Enemy Mechs {__instance.Name}");
+        Log.Main.Debug?.Log($"- Enemy Mechs {__instance.contractTypeID}:{__instance.OverrideID}");
 
         foreach (var unit in enemyMechs)
         {
-            if (Control.Instance.IsDestroyed(unit) || unit.pilot.IsIncapacitated || unit.pilot.HasEjected)
+            if(unit.mech == null)
             {
-                AddMechToSalvage(unit.mech, Contract, simgame, Constants, true);
+                Log.Main.Debug?.Log($"-- warning null mech in salvage");
+                continue;
+            }
+            if (Control.Instance.IsDestroyed(unit) || unit.pilot.IsIncapacitated || unit.pilot.HasEjected || Control.Instance.Settings.DEBUG_AllMechsSalvage)
+            {
+                try
+                {
+                    AddMechToSalvage(unit.mech, Contract, simgame, Constants, true, false);
+                }catch(Exception e)
+                {
+                    Log.Main.Error?.Log(e.ToString());
+                }
             }
             else
             {
@@ -101,7 +129,7 @@ internal static class Contract_GenerateSalvage
 
         Control.Instance.CallForAdditionalSavage(Contract);
 
-        Contract.FilterPotentialSalvage(___finalPotentialSalvage);
+        Contract.FilterPotentialSalvage(__instance.finalPotentialSalvage);
         int num2 = __instance.SalvagePotential;
         float num3 = Constants.Salvage.VictorySalvageChance;
         float num4 = Constants.Salvage.VictorySalvageLostPerMechDestroyed;
@@ -146,7 +174,7 @@ internal static class Contract_GenerateSalvage
 
         unitResult.mechLost = !Control.Instance.NeedRecovery(unitResult, Contract);
 
-        if(unitResult.mechLost)
+        if (unitResult.mechLost)
         {
             Control.Instance.LostUnitAction(unitResult, Contract);
         }
@@ -180,7 +208,7 @@ internal static class Contract_GenerateSalvage
             Log.Main.Debug?.Log($"-- NoSalvage - skipped");
             return;
         }
-            
+
         foreach (var component in vechicle.VehicleDef.Inventory)
         {
             if (component.DamageLevel != ComponentDamageLevel.Destroyed)
@@ -190,16 +218,32 @@ internal static class Contract_GenerateSalvage
         }
     }
 
-    private static void AddMechToSalvage(MechDef mech, ContractHelper contract, SimGameState simgame, SimGameConstants constants, bool can_upgrade)
+    public static void AddMechToSalvage(MechDef mech, ContractHelper contract, SimGameState simgame, SimGameConstants constants, bool can_upgrade, bool force_disassemble)
     {
-        Log.Main.Debug?.Log($"-- Salvaging {mech.Name}");
-
+        Log.Main.Debug?.Log($"--- Salvaging mech {mech.Description.Id}");
         int numparts = Control.Instance.GetNumParts(mech);
-
+        bool full_mech_salvage = Control.Instance.Settings.FullEnemyUnitSalvage;
+        if (force_disassemble) { full_mech_salvage = false; }
+        if ((mech.IsVehicle() == false) && (mech.IsSquad() == false)) {
+            if (mech.IsLocationDestroyed(ChassisLocations.CenterTorso)) {
+                full_mech_salvage = false;
+            }
+        }
+        if (mech.IsSquad())
+        {
+            full_mech_salvage = false;
+        }
+        if(mech.IsVehicle() && Control.Instance.Settings.VehicleAlwaysDisassembled)
+        {
+            full_mech_salvage = false;
+        }
         try
         {
             var mech_to_salvage = ChassisHandler.FindMechReplace(mech);
-
+            if (mech != mech_to_salvage) {
+                Log.Main.Debug?.Log($"--- mech has salvage replacement {mech.Description.Id} -> {mech_to_salvage.Description.Id}");
+                full_mech_salvage = false; 
+            }
             if (mech_to_salvage == null || mech_to_salvage.MechTags.Contains(Control.Instance.Settings.NoSalvageMechTag) ||
                 mech_to_salvage.Chassis.ChassisTags.Contains(Control.Instance.Settings.NoSalvageMechTag))
             {
@@ -207,11 +251,18 @@ internal static class Contract_GenerateSalvage
             }
             else
             {
-                Log.Main.Debug?.Log($"--- Adding {numparts} parts");
-                contract.AddMechPartsToPotentialSalvage(constants, mech_to_salvage, numparts);
+                if (full_mech_salvage == false)
+                {
+                    Log.Main.Debug?.Log($"--- Adding {numparts} parts");
+                    contract.AddMechPartsToPotentialSalvage(constants, mech_to_salvage, numparts);
+                }
+                else
+                {
+                    Log.Main.Debug?.Log($"--- Adding full");
+                    contract.AddMechToPotentialSalvage(constants, mech_to_salvage);
+                }
             }
         }
-
         catch (Exception e)
         {
             Log.Main.Error?.Log("Error in adding parts", e);
@@ -220,17 +271,24 @@ internal static class Contract_GenerateSalvage
         try
         {
 
-            foreach (var component in mech.Inventory.Where(item =>
-                         !mech.IsLocationDestroyed(item.MountedLocation) &&
-                         item.DamageLevel != ComponentDamageLevel.Destroyed))
+            if (full_mech_salvage == false)
             {
-                contract.AddComponentToPotentialSalvage(component.Def, ComponentDamageLevel.Functional, can_upgrade);
+                if (((mech.IsVehicle() == false) && (mech.IsSquad() == false))||(mech.IsVehicle() && Control.Instance.Settings.VehicleDisassembleComponents) || (mech.IsSquad() && Control.Instance.Settings.SquadDisassembleComponents))
+                {
+                    foreach (var component in mech.Inventory.Where(item =>
+                                 !mech.IsLocationDestroyed(item.MountedLocation) &&
+                                 item.DamageLevel != ComponentDamageLevel.Destroyed))
+                    {
+                        contract.AddComponentToPotentialSalvage(component.Def, ComponentDamageLevel.Functional, can_upgrade);
+                    }
+                }
             }
         }
         catch (Exception e)
         {
             Log.Main.Error?.Log("Error in adding component", e);
         }
+
     }
 
 

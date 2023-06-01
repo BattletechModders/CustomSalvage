@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2000
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CustomSalvage", "CustomSalvage.csproj", "{7E755F55-106A-4F0D-A970-0BA7FC6C5662}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SalvageDefInjector", "..\Injectors\SalvageDefInjector\SalvageDefInjector.csproj", "{D47B7820-0BA7-47FB-800B-48F3AC7A8FBB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,14 @@ Global
 		{7E755F55-106A-4F0D-A970-0BA7FC6C5662}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7E755F55-106A-4F0D-A970-0BA7FC6C5662}.ReleaseNonCC|Any CPU.ActiveCfg = Release|Any CPU
 		{7E755F55-106A-4F0D-A970-0BA7FC6C5662}.ReleaseNonCC|Any CPU.Build.0 = Release|Any CPU
+		{D47B7820-0BA7-47FB-800B-48F3AC7A8FBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D47B7820-0BA7-47FB-800B-48F3AC7A8FBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D47B7820-0BA7-47FB-800B-48F3AC7A8FBB}.DebugNonCC|Any CPU.ActiveCfg = Debug|Any CPU
+		{D47B7820-0BA7-47FB-800B-48F3AC7A8FBB}.DebugNonCC|Any CPU.Build.0 = Debug|Any CPU
+		{D47B7820-0BA7-47FB-800B-48F3AC7A8FBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D47B7820-0BA7-47FB-800B-48F3AC7A8FBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D47B7820-0BA7-47FB-800B-48F3AC7A8FBB}.ReleaseNonCC|Any CPU.ActiveCfg = Release|Any CPU
+		{D47B7820-0BA7-47FB-800B-48F3AC7A8FBB}.ReleaseNonCC|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

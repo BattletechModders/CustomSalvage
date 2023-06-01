@@ -18,28 +18,28 @@ public static class MechBayChassisUnitElement_SetData
 
     [HarmonyPostfix]
     [HarmonyWrapSafe]
-    public static void Postfix(MechBayChassisUnitElement __instance, Image ___mechImage, TextMeshProUGUI ___partsText, TextMeshProUGUI ___partsLabelText,
+    public static void Postfix(MechBayChassisUnitElement __instance,
         ChassisDef chassisDef, DataManager dataManager, int partsCount, int partsMax, int chassisQuantity)
     {
         var settings = Control.Instance.Settings;
         if (DefaultSprite == null)
         {
-            DefaultSprite = ___mechImage.sprite;
+            DefaultSprite = __instance.mechImage.sprite;
         }
 
         if (partsCount != 0)
         {
-            ___partsLabelText.SetText("Parts");
+            __instance.partsLabelText.SetText("Parts");
             int empty_parts = ChassisHandler.GetEmptyPartsCount(ChassisHandler.GetMech(chassisDef.Description.Id).Description.Id);
             if (partsCount < empty_parts) {
                 ChassisHandler.ResetEmptyPartsCount(ChassisHandler.GetMech(chassisDef.Description.Id).Description.Id);
                 empty_parts = 0;
             }
-            ___partsText.SetText( Control.Instance.Settings.AllowScrapToParts ? $"<size=80%>({empty_parts}){partsCount}/{partsMax}</size>" : $"{partsCount}/{partsMax}");
+            __instance.partsText.SetText( Control.Instance.Settings.AllowScrapToParts ? $"<size=80%>({empty_parts}){partsCount}/{partsMax}</size>" : $"{partsCount}/{partsMax}");
 
             if (partsCount >= partsMax)
             {
-                ___mechImage.color = settings.color_ready;
+                __instance.mechImage.color = settings.color_ready;
             }
             else
             {
@@ -47,21 +47,21 @@ public static class MechBayChassisUnitElement_SetData
                 var list = ChassisHandler.GetCompatible(chassisDef.Description.Id);
                 if (list == null)
                 {
-                    ___mechImage.color = settings.color_exclude;
+                    __instance.mechImage.color = settings.color_exclude;
                 }
                 else if (list.Sum(i => ChassisHandler.GetCount(i.Description.Id)) >= partsMax && chassisDef.MechPartCount >= min)
                 {
-                    ___mechImage.color = settings.color_variant;
+                    __instance.mechImage.color = settings.color_variant;
                 }
                 else
                 {
-                    ___mechImage.color = settings.color_notready;
+                    __instance.mechImage.color = settings.color_notready;
                 }
             }
         }
         else
         {
-            ___mechImage.color = settings.color_stored;
+            __instance.mechImage.color = settings.color_stored;
         }
 
         var go = __instance.transform.Find("Representation/contents/storage_OverlayBars");

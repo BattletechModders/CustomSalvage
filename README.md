@@ -68,6 +68,17 @@ Defines what to do with your lost mech
 - `bool SalvageTurrets = true` - add turrets to salvage
 - `bool UpgradeSalvage = false` - salavaged items have chance to upgrade to "+" variants(not span into player lost mech items if they go to salvage)
 - `float SalvageTurretsComponentChance = 0.33f` - in vanila game turret components dont broke, and usually turret have a lot of weapon. so this modifier give less salvage for balance
+
+#### full units salvage
+- `bool FullEnemyUnitSalvage = true` - allow to salvage units without dissassemling to part and components. If enabled units apears in salvage in state they been killed. If you killed mech by destroying legs it appers in salvage with destroyed legs. Same rule for its components destroyed in battle. For mechs there is special rule - if center torso is destroyed it will be dissasembled to parts anyway
+- `int MaxFullUnitsInSalvage = 1` - maximum amount of full units in priority salvage. Full units can never apper in random salvage.
+- `string FullUnitInfoIcon = "icons8-info"` - if FullEnemyUnitSalvage enabled, you can see actual unit state by clicking its icon in salvage slot. While cursor is hover over unit's icon its actual icon is replaced to this to point active cotrol.
+- `float FullUnitRandomSalvageSlotUsingMod = 1f` - if full unit is selected for priority salvage random salvage amount is redused to (DefaultMechPartMax \* FullUnitRandomSalvageSlotUsingMod - 1).
+- `bool FullUnitUsedAllRandomSalvageSlots = true` - if enabled any full unit added to priority salvage reduce random salvage amount to 0. Eg. you will only able to get priority salvage. 
+- `bool SquadDisassembleComponents = false` - by current rules BA squads are always dissassembled to parts in salvage. If this option enabled its components goes to possible salvage.
+- `bool VehicleDisassembleComponents = false` - If this option enabled vehicle components goes to possible salvage if dissasembled to parts. If disabled only vehicle parts will be result of dissassemling.
+- `bool VehicleAlwaysDisassembled = false` - If this option enabled vehicles goes to salvage in dissasembled state, otherwise they always go in full state (vehciles have no CT).
+
 ## Assembly options
 
 ### recoloring mech icons in storage

@@ -8,16 +8,18 @@ namespace CustomSalvage;
 internal class ContractHelper
 {
     public Contract Contract { get; }
-    private List<SalvageDef> FinalPotentialSalvage { get; }
+    public List<SalvageDef> FinalPotentialSalvage { get; }
 
-    public ContractHelper(Contract contract, List<SalvageDef> finalPotentialSalvage)
+    public ContractHelper(Contract contract, bool reset)
     {
         Contract = contract;
-        FinalPotentialSalvage = finalPotentialSalvage;
-
-        Contract.LostMechs = new();
-        Contract.SalvageResults = new();
-        Contract.SalvagedChassis = new();
+        FinalPotentialSalvage = contract.finalPotentialSalvage;
+        if (reset)
+        {
+            Contract.LostMechs = new();
+            Contract.SalvageResults = new();
+            Contract.SalvagedChassis = new();
+        }
     }
 
     private MechComponentDef CheckDefaults(MechComponentDef def)
@@ -200,6 +202,19 @@ internal class ContractHelper
             salvagelist.Add(salvageDef);
         }
     }
+    private void add_mech(SimGameConstants sc, MechDef mech, List<SalvageDef> salvagelist)
+    {
+        var salvageDef = new SalvageDef();
+        salvageDef.Type = SalvageDef.SalvageType.MECH;
+        salvageDef.ComponentType = ComponentType.MechFull;
+        salvageDef.Count = 1;
+        salvageDef.Weight = sc.Salvage.DefaultChassisWeight;
+        salvageDef.Description = new DescriptionDef(mech.Description);
+        salvageDef.RewardID = Contract.GenerateRewardUID();
+        salvageDef.mechDef = mech;
+        salvageDef.MechComponentDef = new MechComponentDef(ComponentType.MechFull, MechComponentType.NotSet, new EffectData[] { }, mech.MechTags, mech.Description);
+        salvagelist.Add(salvageDef);
+    }
 
     public void AddMechPartsToPotentialSalvage(SimGameConstants constants, MechDef mech, int numparts)
     {
@@ -212,6 +227,17 @@ internal class ContractHelper
         }
 
         add_parts(constants, mech, numparts, FinalPotentialSalvage);
+    }
+    public void AddMechToPotentialSalvage(SimGameConstants constants, MechDef mech)
+    {
+
+        if (!Control.Instance.Settings.AllowDropBlackListed && mech.MechTags.Contains("BLACKLISTED"))
+        {
+            Log.Main.Debug?.Log($"--- {mech.Description.Id} is BLACKLISTED. skipped");
+            return;
+        }
+
+        add_mech(constants, mech, FinalPotentialSalvage);
     }
 
     public void AddMechPartsToFinalSalvage(SimGameConstants constants, MechDef mech, int numparts)
