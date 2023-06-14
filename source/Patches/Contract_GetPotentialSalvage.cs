@@ -186,7 +186,7 @@ internal static class Contract_ResolveCompleteContract
 [HarmonyPatch(new Type[] { typeof(MechDef) })]
 internal static class Contract_CreateMechPlacementPopup
 {
-    public static void Prefix(SimGameState __instance, ref MechDef m)
+    public static void Prefix(ref bool __runOriginal, SimGameState __instance, ref MechDef m)
     {
         Log.Main.Debug?.Log("SimGameState.CreateMechPlacementPopup");
         if (Thread.CurrentThread.isFlagSet("IN_ResolveCompleteContract") == false)
@@ -219,7 +219,17 @@ internal static class Contract_CreateMechPlacementPopup
                 m = salvageResult.mechDef;
                 m.SetGuid(__instance.GenerateSimGameUID());
                 Log.Main.Debug?.Log($"   -- replacing bare chassis to real mech {m.Description.Id}:{m.GUID}");
-                Log.Main.Debug?.Log(m.ToJSON());
+                //Log.Main.Debug?.Log(m.ToJSON());
+                Thread.CurrentThread.ClearFlag("IN_ResolveCompleteContract");
+                try
+                {
+                    __instance.AddMech(-1, m, true, false, true, "Unit salvaged");
+                }catch(Exception ex)
+                {
+                    SimGameState.logger.LogException(ex);
+                }
+                Thread.CurrentThread.SetFlag("IN_ResolveCompleteContract");
+                __runOriginal = false;
             }
         }catch(Exception e)
         {
