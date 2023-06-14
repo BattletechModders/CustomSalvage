@@ -13,6 +13,25 @@ namespace CustomSalvage;
 [HarmonyPriority(Priority.HigherThanNormal)]
 internal static class Contract_FinalizeSalvage
 {
+    public static int RandomSlotsUsing(this MechDef def, SimGameConstants constants)
+    {
+        int result = constants.Story.DefaultMechPartMax;
+        if (Control.Instance.Settings.FullUnitUsedAmountOfLootableComponents)
+        {
+            foreach(var component in def.inventory)
+            {
+                if (component == null) { continue; }
+                if (component.Def == null) { continue; }
+                if (def.IsLocationDestroyed(component.MountedLocation)) { continue; }
+                if (component.DamageLevel >= ComponentDamageLevel.Destroyed) { continue; }
+                if (component.Def.ComponentTags.Contains("BLACKLISTED")) { continue; }
+                if (ContractHelper.isSalvagable(component.Def) == false) { continue; }
+                ++result;
+            }
+        }
+        result = Mathf.CeilToInt(result * Control.Instance.Settings.FullUnitRandomSalvageSlotUsingMod) - 1;
+        return result;
+    }
     public static int GetFinalSalvageCount(this Contract contract, List<SalvageDef> priorityItems)
     {
         int result = contract.FinalSalvageCount;
@@ -20,7 +39,7 @@ internal static class Contract_FinalizeSalvage
         {
             if (salvageDef.Type != SalvageDef.SalvageType.MECH) { continue; }
             if (Control.Instance.Settings.FullUnitUsedAllRandomSalvageSlots) { return contract.FinalPrioritySalvageCount; }
-            result -= (Mathf.FloorToInt(contract.BattleTechGame.Simulation.Constants.Story.DefaultMechPartMax * Control.Instance.Settings.FullUnitRandomSalvageSlotUsingMod)-1);
+            result -=  salvageDef.mechDef.RandomSlotsUsing(contract.BattleTechGame.Simulation.Constants);
         }
         return result;
     }
@@ -34,7 +53,7 @@ internal static class Contract_FinalizeSalvage
             if (controller.salvageDef == null) { continue; }
             if (controller.salvageDef.Type != SalvageDef.SalvageType.MECH) { continue; }
             if (Control.Instance.Settings.FullUnitUsedAllRandomSalvageSlots) { return contract.FinalPrioritySalvageCount; }
-            result -= (Mathf.FloorToInt(contract.BattleTechGame.Simulation.Constants.Story.DefaultMechPartMax * Control.Instance.Settings.FullUnitRandomSalvageSlotUsingMod) - 1);
+            result -= controller.salvageDef.mechDef.RandomSlotsUsing(contract.BattleTechGame.Simulation.Constants);
         }
         return result;
     }

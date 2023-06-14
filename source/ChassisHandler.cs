@@ -1159,6 +1159,11 @@ public class AssemblyChancesResult
                     CompFChance *= mod;
                     CompNFChance *= mod;
                 }
+                if (Control.Instance.Settings.FullEnemyUnitSalvage)
+                {
+                    CompFChance = 0f;
+                    CompNFChance = 0f;
+                }
 #if CCDEBUG
                     DEBUGText = $"\nLTP : {LimbTP:0.000}/{ltp:0.000}/{(int)(oLimbChance * 100)}%";
                     DEBUGText = $"\nCTP : {CompTP:0.000}/{ctp:0.000}/{(int)(oCompFChance * 100)}%/{(int)(oCompNFChance * 100)}%";

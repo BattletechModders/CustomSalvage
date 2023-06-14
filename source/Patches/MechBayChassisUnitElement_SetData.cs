@@ -30,13 +30,20 @@ public static class MechBayChassisUnitElement_SetData
         if (partsCount != 0)
         {
             __instance.partsLabelText.SetText("Parts");
-            int empty_parts = ChassisHandler.GetEmptyPartsCount(ChassisHandler.GetMech(chassisDef.Description.Id).Description.Id);
-            if (partsCount < empty_parts) {
-                ChassisHandler.ResetEmptyPartsCount(ChassisHandler.GetMech(chassisDef.Description.Id).Description.Id);
-                empty_parts = 0;
+            if (Control.Instance.Settings.FullEnemyUnitSalvage == false)
+            {
+                int empty_parts = ChassisHandler.GetEmptyPartsCount(ChassisHandler.GetMech(chassisDef.Description.Id).Description.Id);
+                if (partsCount < empty_parts)
+                {
+                    ChassisHandler.ResetEmptyPartsCount(ChassisHandler.GetMech(chassisDef.Description.Id).Description.Id);
+                    empty_parts = 0;
+                }
+                __instance.partsText.SetText(Control.Instance.Settings.AllowScrapToParts ? $"<size=80%>({empty_parts}){partsCount}/{partsMax}</size>" : $"{partsCount}/{partsMax}");
             }
-            __instance.partsText.SetText( Control.Instance.Settings.AllowScrapToParts ? $"<size=80%>({empty_parts}){partsCount}/{partsMax}</size>" : $"{partsCount}/{partsMax}");
-
+            else
+            {
+                __instance.partsText.SetText($"{partsCount}/{partsMax}");
+            }
             if (partsCount >= partsMax)
             {
                 __instance.mechImage.color = settings.color_ready;

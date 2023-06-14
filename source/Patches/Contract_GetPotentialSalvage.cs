@@ -9,6 +9,7 @@ using UnityEngine;
 using System.Threading;
 using IRBTModUtils;
 using BattleTech.Data;
+using BattleTech.UI.TMProWrapper;
 
 namespace CustomSalvage;
 
@@ -304,6 +305,30 @@ internal static class ListElementController_SalvageFullMech_NotListView_GetCBill
     }
 }
 
+[HarmonyPatch(typeof(ListElementController_SalvageFullMech_NotListView), "RefreshInfoOnWidget")]
+internal static class ListElementController_SalvageFullMech_NotListView_RefreshInfoOnWidget
+{
+    public static void Postfix(ListElementController_SalvageFullMech_NotListView __instance, InventoryItemElement_NotListView theWidget)
+    {
+        var texts = theWidget.mechPartsNumbersText.transform.parent.gameObject.GetComponentsInChildren<LocalizableText>(true);
+        LocalizableText count_label = null;
+        foreach(var text in texts)
+        {
+            if (text.transform.name == "parts_Label") {
+                count_label = text;
+                break; 
+            }
+        }
+        if (count_label != null) { count_label.SetText("You Have:"); }
+        if (UnityGameInstance.BattleTechGame.Simulation == null) { return; }
+        if (__instance.salvageDef.Type != SalvageDef.SalvageType.MECH) { return; }
+        if (__instance.salvageDef.ComponentType != ComponentType.MechFull) { return; }
+        if (__instance.salvageDef.mechDef == null) { return; }
+        if (count_label != null) { count_label.SetText("Need slots:"); }
+        theWidget.mechPartsNumbersText.SetText("{0}", __instance.salvageDef.mechDef.RandomSlotsUsing(UnityGameInstance.BattleTechGame.Simulation.Constants) + 1);
+    }
+}
+
 [HarmonyPatch(typeof(AAR_SalvageChosen), "OnAddItem")]
 internal static class AAR_SalvageChosen_OnAddItem
 {
@@ -328,16 +353,16 @@ internal static class AAR_SalvageChosen_OnAddItem
                 return;
             }
         }
-        if (Control.Instance.Settings.FullUnitUsedAllRandomSalvageSlots == false)
+        //if (Control.Instance.Settings.FullUnitUsedAllRandomSalvageSlots == false)
+        //{
+        int restSlots = __instance.contract.GetFinalSalvageCount(__instance.PriorityInventory);
+        if (restSlots < controller.salvageDef.mechDef.RandomSlotsUsing(__instance.Sim.Constants))
         {
-            int restSlots = __instance.contract.GetFinalSalvageCount(__instance.PriorityInventory);
-            if (restSlots < (Mathf.FloorToInt(__instance.contract.BattleTechGame.Simulation.Constants.Story.DefaultMechPartMax * Control.Instance.Settings.FullUnitRandomSalvageSlotUsingMod) - 1))
-            {
-                __runOriginal = false;
-                __result = false;
-                return;
-            }
+            __runOriginal = false;
+            __result = false;
+            return;
         }
+        //}
     }
     public static void Postfix(AAR_SalvageChosen __instance, IMechLabDraggableItem item, bool __result)
     {

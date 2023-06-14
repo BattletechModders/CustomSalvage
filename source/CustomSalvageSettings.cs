@@ -171,7 +171,9 @@ public class Settings
     public int MaxFullUnitsInSalvage = 1;
     public string FullUnitInfoIcon = "icons8-info";
     public float FullUnitRandomSalvageSlotUsingMod = 1f;
-    public bool FullUnitUsedAllRandomSalvageSlots = true;
+    public float FullUnitStructurePersentage = 0.5f;
+    public bool FullUnitUsedAmountOfLootableComponents = true;
+    public bool FullUnitUsedAllRandomSalvageSlots = false;
     public bool SquadDisassembleComponents = false;
     public bool VehicleDisassembleComponents = false;
     public bool VehicleAlwaysDisassembled = false;

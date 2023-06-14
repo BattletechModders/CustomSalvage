@@ -217,24 +217,46 @@ internal static class Contract_GenerateSalvage
             }
         }
     }
-
+    public static float GetStructurePersantage(this MechDef mech)
+    {
+        float allStructure = 0f;
+        float availStructure = 0f;
+        foreach(var locationDef in mech.Chassis.Locations)
+        {
+            if ((locationDef.InternalStructure <= 1f) && (locationDef.MaxArmor <= 0f)) { continue; }
+            allStructure += locationDef.InternalStructure;
+            var location = mech.GetLocationLoadoutDef(locationDef.Location);
+            if (location.DamageLevel >= LocationDamageLevel.Destroyed) { continue; }
+            availStructure += location.CurrentInternalStructure;
+        }
+        return allStructure > 0.01f ? (availStructure / allStructure) : 0f;
+    }
     public static void AddMechToSalvage(MechDef mech, ContractHelper contract, SimGameState simgame, SimGameConstants constants, bool can_upgrade, bool force_disassemble)
     {
         Log.Main.Debug?.Log($"--- Salvaging mech {mech.Description.Id}");
         int numparts = Control.Instance.GetNumParts(mech);
         bool full_mech_salvage = Control.Instance.Settings.FullEnemyUnitSalvage;
         if (force_disassemble) { full_mech_salvage = false; }
-        if ((mech.IsVehicle() == false) && (mech.IsSquad() == false)) {
+        if ((full_mech_salvage) && (mech.IsVehicle() == false) && (mech.IsSquad() == false)) {
             if (mech.IsLocationDestroyed(ChassisLocations.CenterTorso)) {
+                Log.Main.Debug?.Log($" unit is regular mech and CT is destroyed");
                 full_mech_salvage = false;
             }
         }
-        if (mech.IsSquad())
+        if ((full_mech_salvage) && mech.IsSquad())
         {
+            Log.Main.Debug?.Log($" unit is squad");
             full_mech_salvage = false;
         }
-        if(mech.IsVehicle() && Control.Instance.Settings.VehicleAlwaysDisassembled)
+        if((full_mech_salvage) && mech.IsVehicle() && Control.Instance.Settings.VehicleAlwaysDisassembled)
         {
+            Log.Main.Debug?.Log($" unit is vehcile and VehicleAlwaysDisassembled is set");
+            full_mech_salvage = false;
+        }
+        float structAvail = GetStructurePersantage(mech);
+        if (full_mech_salvage && (Control.Instance.Settings.FullUnitStructurePersentage > 0f) && (structAvail < Control.Instance.Settings.FullUnitStructurePersentage))
+        {
+            Log.Main.Debug?.Log($" unit rest structure persentage {structAvail}");
             full_mech_salvage = false;
         }
         try

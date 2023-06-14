@@ -175,6 +175,10 @@ public static class DiceBroke
         if (all_used_parts > 0) {
           result = 1f - ((all_used_parts - used_empty_parts) / (all_used_parts)) * (1f - result);
         }
+        if (Control.Instance.Settings.FullEnemyUnitSalvage)
+        {
+            result = 0f;
+        }
         return result;
     }
 
