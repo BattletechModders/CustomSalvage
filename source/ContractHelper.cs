@@ -1,9 +1,43 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using BattleTech;
 using BattleTech.Data;
 using CustomComponents;
 
 namespace CustomSalvage;
+
+public static class FullUnitSalvageHelper
+{
+    public class SlotsCountDelegates
+    {
+        Func<MechDef, int> chassisSlotsCountDelegate { get; set; } = null;
+        Func<List<MechComponentDef>, int> inventorySlotsCountDelegate { get; set; } = null;
+        public SlotsCountDelegates(Func<MechDef, int> chassis, Func<List<MechComponentDef>, int> inventory)
+        {
+            chassisSlotsCountDelegate = chassis;
+            inventorySlotsCountDelegate = inventory;
+        }
+        public int count(MechDef mech, List<MechComponentDef> inventory)
+        {
+            return (chassisSlotsCountDelegate == null ? 0 : chassisSlotsCountDelegate.Invoke(mech)) + (inventorySlotsCountDelegate == null ? 0 : inventorySlotsCountDelegate.Invoke(inventory));
+        }
+    }
+    internal static Dictionary<string, SlotsCountDelegates> salvageSlotsDelegates = new Dictionary<string, SlotsCountDelegates>();
+    public static void RegisterDelegates(string name, Func<MechDef, int> chassis, Func<List<MechComponentDef>, int> inventory)
+    {
+        salvageSlotsDelegates[name] = new SlotsCountDelegates(chassis, inventory);
+    }
+    public static int count(MechDef mech, List<MechComponentDef> inventory, int internalSlotsCount)
+    {
+        int result = internalSlotsCount;
+        foreach(var dl in salvageSlotsDelegates)
+        {
+            int r = dl.Value.count(mech, inventory);
+            if (r < result) { result = r; }
+        }
+        return result;
+    }
+}
 
 internal class ContractHelper
 {

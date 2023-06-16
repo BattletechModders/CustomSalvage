@@ -177,6 +177,7 @@ public class Settings
     public bool SquadDisassembleComponents = false;
     public bool VehicleDisassembleComponents = false;
     public bool VehicleAlwaysDisassembled = false;
+    public bool VehicleAddSanitize = true;
 
     public bool AllowDropBlackListed = false;
     public string NoSalvageMechTag = "NOSALVAGE";

@@ -13,9 +13,18 @@ namespace CustomSalvage;
 [HarmonyPriority(Priority.HigherThanNormal)]
 internal static class Contract_FinalizeSalvage
 {
+    private static Dictionary<int, int> RandomSlotsUsing_cache = new Dictionary<int, int>();
     public static int RandomSlotsUsing(this MechDef def, SimGameConstants constants)
     {
-        int result = constants.Story.DefaultMechPartMax;
+        if(RandomSlotsUsing_cache.TryGetValue(def.GetHashCode(), out int result))
+        {
+            return result;
+        }
+        Log.Main.Debug?.Log($"--- RandomSlotsUsing {def.Description.Id} hash:{def.GetHashCode()}");
+        result = Mathf.CeilToInt(constants.Story.DefaultMechPartMax * def.GetStructurePersantage());
+        Log.Main.Debug?.Log($" rest parts:{result}");
+        List<MechComponentDef> inventory = new List<MechComponentDef>();
+        Log.Main.Debug?.Log($" components:");
         if (Control.Instance.Settings.FullUnitUsedAmountOfLootableComponents)
         {
             foreach(var component in def.inventory)
@@ -26,10 +35,16 @@ internal static class Contract_FinalizeSalvage
                 if (component.DamageLevel >= ComponentDamageLevel.Destroyed) { continue; }
                 if (component.Def.ComponentTags.Contains("BLACKLISTED")) { continue; }
                 if (ContractHelper.isSalvagable(component.Def) == false) { continue; }
-                ++result;
+                Log.Main.Debug?.Log($"  {component.Def.Description.Id}");
+                inventory.Add(component.Def);
+                result += 1;
             }
         }
-        result = Mathf.CeilToInt(result * Control.Instance.Settings.FullUnitRandomSalvageSlotUsingMod) - 1;
+        Log.Main.Debug?.Log($" raw result:{result}");
+        result = FullUnitSalvageHelper.count(def, inventory, result);
+        result = Mathf.RoundToInt(result * Control.Instance.Settings.FullUnitRandomSalvageSlotUsingMod) - 1;
+        Log.Main.Debug?.Log($" final result:{result}");
+        RandomSlotsUsing_cache.Add(def.GetHashCode(), result);
         return result;
     }
     public static int GetFinalSalvageCount(this Contract contract, List<SalvageDef> priorityItems)

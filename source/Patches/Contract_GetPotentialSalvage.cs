@@ -10,6 +10,9 @@ using System.Threading;
 using IRBTModUtils;
 using BattleTech.Data;
 using BattleTech.UI.TMProWrapper;
+using CustomUnits;
+using BattleTech.Save.SaveGameStructure;
+using HBS;
 
 namespace CustomSalvage;
 
@@ -75,6 +78,21 @@ internal static class Contract_IsSalvageInContent
         {
             Log.Main.Error?.Log(e.ToString());
         }
+    }
+}
+
+[HarmonyPatch(typeof(AAR_SalvageScreen), "InitializeData")]
+[HarmonyPriority(Priority.HigherThanNormal)]
+internal static class AAR_SalvageScreen_InitializeData
+{
+    [HarmonyPrefix]
+    [HarmonyWrapSafe]
+    [HarmonyPriority(Priority.HigherThanNormal)]
+    public static void Prefix(AAR_SalvageScreen __instance)
+    {
+        //GameInstance game = SceneSingletonBehavior<UnityGameInstance>.Instance.Game;
+        //game.Combat.ActiveContract.FinalPrioritySalvageCount = 7;
+        //game.Combat.ActiveContract.FinalSalvageCount = 28;
     }
 }
 
@@ -219,6 +237,20 @@ internal static class Contract_CreateMechPlacementPopup
                 m = salvageResult.mechDef;
                 m.SetGuid(__instance.GenerateSimGameUID());
                 Log.Main.Debug?.Log($"   -- replacing bare chassis to real mech {m.Description.Id}:{m.GUID}");
+                if (Control.Instance.Settings.VehicleAddSanitize)
+                {
+                    if (m.IsVehicle())
+                    {
+                        foreach(var component in m.inventory)
+                        {
+                            if (component.DamageLevel >= ComponentDamageLevel.Destroyed) { component.DamageLevel = ComponentDamageLevel.NonFunctional; }
+                        }
+                        foreach(var location in m.Locations)
+                        {
+                            location.CurrentArmor = location.AssignedArmor;
+                        }
+                    }
+                }
                 //Log.Main.Debug?.Log(m.ToJSON());
                 Thread.CurrentThread.ClearFlag("IN_ResolveCompleteContract");
                 try
@@ -335,7 +367,7 @@ internal static class ListElementController_SalvageFullMech_NotListView_RefreshI
         if (__instance.salvageDef.ComponentType != ComponentType.MechFull) { return; }
         if (__instance.salvageDef.mechDef == null) { return; }
         if (count_label != null) { count_label.SetText("Need slots:"); }
-        theWidget.mechPartsNumbersText.SetText("{0}", __instance.salvageDef.mechDef.RandomSlotsUsing(UnityGameInstance.BattleTechGame.Simulation.Constants) + 1);
+        theWidget.mechPartsNumbersText.SetText("{0}+{1}",1, __instance.salvageDef.mechDef.RandomSlotsUsing(UnityGameInstance.BattleTechGame.Simulation.Constants));
     }
 }
 
@@ -359,29 +391,96 @@ internal static class AAR_SalvageChosen_OnAddItem
             }
             if (fullunits >= Control.Instance.Settings.MaxFullUnitsInSalvage) {
                 __runOriginal = false;
+                GenericPopupBuilder.Create("UNABLE TO COMPLY",$"You can only have up to {Control.Instance.Settings.MaxFullUnitsInSalvage} units in priority salvage").CancelOnEscape().Render();
                 __result = false;
                 return;
             }
         }
         //if (Control.Instance.Settings.FullUnitUsedAllRandomSalvageSlots == false)
         //{
-        int restSlots = __instance.contract.GetFinalSalvageCount(__instance.PriorityInventory);
-        if (restSlots < controller.salvageDef.mechDef.RandomSlotsUsing(__instance.Sim.Constants))
+        int restSlots = __instance.contract.GetFinalSalvageCount(__instance.PriorityInventory) - __instance.PriorityInventory.Count;
+        int neededSlots = controller.salvageDef.mechDef.RandomSlotsUsing(__instance.Sim.Constants) + 1;
+        if (restSlots < neededSlots)
         {
             __runOriginal = false;
+            GenericPopupBuilder.Create("UNABLE TO COMPLY", $"You have only {restSlots} of salvage. But to get this unit you need {neededSlots}").CancelOnEscape().Render();
             __result = false;
             return;
         }
         //}
+    }
+    private static int real_FinalPrioritySalvageCount = 0;
+    private static int ContractHash = 0;
+    public static void InitRealFinalPrioritySalvageCount(this Contract contract)
+    {
+        if (contract.GetHashCode() != ContractHash) {
+            real_FinalPrioritySalvageCount = contract.FinalPrioritySalvageCount;
+            ContractHash = contract.GetHashCode();
+        }
+    }
+    public static int RealFinalPrioritySalvageCount(this Contract contract)
+    {
+        if (contract.GetHashCode() != ContractHash)
+        {
+            real_FinalPrioritySalvageCount = contract.FinalPrioritySalvageCount;
+            ContractHash = contract.GetHashCode();
+        }
+        return real_FinalPrioritySalvageCount;
+    }
+    public static void ReconsiderPrioritySalvage(this AAR_SalvageScreen salvageScreen)
+    {
+        Log.Main.Debug?.Log($"ReconsiderPrioritySalvage");
+        int restSlots = salvageScreen.contract.GetFinalSalvageCount(salvageScreen.salvageChosen.PriorityInventory);
+        salvageScreen.contract.InitRealFinalPrioritySalvageCount();
+        int neededPrioritySalvageCount = salvageScreen.contract.FinalPrioritySalvageCount;
+        if(restSlots < salvageScreen.contract.FinalPrioritySalvageCount)
+        {
+            neededPrioritySalvageCount = restSlots;
+        }
+        if((restSlots > salvageScreen.contract.FinalPrioritySalvageCount) && (salvageScreen.contract.RealFinalPrioritySalvageCount() != salvageScreen.contract.FinalPrioritySalvageCount))
+        {
+            neededPrioritySalvageCount = restSlots;
+            if (neededPrioritySalvageCount > salvageScreen.contract.RealFinalPrioritySalvageCount()) {
+                neededPrioritySalvageCount = salvageScreen.contract.RealFinalPrioritySalvageCount();
+            }
+        }
+        Log.Main.Debug?.Log($" rest slots:{restSlots} final salvage:{salvageScreen.contract.FinalPrioritySalvageCount} neededPrioritySalvage:{neededPrioritySalvageCount} real final salvage:{salvageScreen.contract.RealFinalPrioritySalvageCount()}");
+        if (neededPrioritySalvageCount != salvageScreen.contract.FinalPrioritySalvageCount) {
+            salvageScreen.contract.FinalPrioritySalvageCount = neededPrioritySalvageCount;
+            int num1 = salvageScreen.contract.FinalPrioritySalvageCount;
+            int num2 = salvageScreen.contract.FinalSalvageCount - num1;
+            int salvageMadeAvailable = salvageScreen.TotalSalvageMadeAvailable;
+            if (num1 > salvageMadeAvailable)
+                num1 = salvageMadeAvailable;
+            if (num2 > salvageMadeAvailable - num1)
+                num2 = salvageMadeAvailable - num1;
+            salvageScreen.salvageChosen.selectNumberText.SetText("SELECT {0} ITEMS", (object)num1);
+            salvageScreen.salvageChosen.leftoversText.SetText("AFTER CHOOSING PRIORITY ITEMS YOU WILL RECEIVE UP TO {0} ADDITIONAL PIECES OF SALVAGE", (object)num2);
+            int holdingSpaces = salvageScreen.contract.FinalPrioritySalvageCount - salvageScreen.salvageChosen.PriorityInventory.Count;
+            for (int index = 0; index < salvageScreen.salvageChosen.tempHoldingGridSpaces.Count; ++index)
+            {
+                if (index < holdingSpaces)
+                    salvageScreen.salvageChosen.tempHoldingGridSpaces[index].SetActive(true);
+                else
+                    salvageScreen.salvageChosen.tempHoldingGridSpaces[index].SetActive(false);
+            }
+            salvageScreen.salvageChosen.TestHaveAllPriority();
+            salvageScreen.salvageChosen.ForceRefreshImmediate();
+            salvageScreen.salvageAgreement.FillInData();
+        }
     }
     public static void Postfix(AAR_SalvageChosen __instance, IMechLabDraggableItem item, bool __result)
     {
         if (__result == false) { return; }
         InventoryItemElement_NotListView elementNotListView = item as InventoryItemElement_NotListView;
         FullMechSalvageInfo info = elementNotListView.gameObject.GetComponentInChildren<FullMechSalvageInfo>(true);
-        if (info != null) { info.allowDisassemble = false; }
+        if (info != null) { 
+            info.allowDisassemble = false;
+            __instance.parent.ReconsiderPrioritySalvage();
+        }
         AAR_ScreenFullMechHelper helper = __instance.parent.gameObject.GetComponent<AAR_ScreenFullMechHelper>();
         helper?.CheckDisassemble();
+        int restSlots = __instance.contract.GetFinalSalvageCount(__instance.PriorityInventory);
     }
 }
 
@@ -392,7 +491,10 @@ internal static class AAR_SalvageChosen_OnRemoveItem
     {
         InventoryItemElement_NotListView elementNotListView = item as InventoryItemElement_NotListView;
         FullMechSalvageInfo info = elementNotListView.gameObject.GetComponentInChildren<FullMechSalvageInfo>(true);
-        if (info != null) { info.allowDisassemble = true; }
+        if (info != null) { 
+            info.allowDisassemble = true;
+            __instance.parent.ReconsiderPrioritySalvage();
+        }
     }
 }
 
