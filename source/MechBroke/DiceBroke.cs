@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using BattleTech;
+using CustomUnits;
 using FluffyUnderware.DevTools.Extensions;
 using Localize;
 using UnityEngine;
@@ -172,10 +173,10 @@ public static class DiceBroke
         {
             result -= SelectedTechKit.CompRepairAddBonus;
         }
-        if (all_used_parts > 0) {
+        if ((all_used_parts > 0)&&(Control.Instance.Settings.FullEnemyUnitSalvage == false)) {
           result = 1f - ((all_used_parts - used_empty_parts) / (all_used_parts)) * (1f - result);
         }
-        if (Control.Instance.Settings.FullEnemyUnitSalvage)
+        if (Control.Instance.Settings.FullEnemyUnitSalvage && (mech.IsSquad() == false))
         {
             result = 0f;
         }

@@ -91,6 +91,36 @@ namespace CustomSalvage
                     salvageDef.Count = 1;
                 }
             }
+            foreach (SalvageDef salvageDef in list)
+            {
+                switch (salvageDef.Type)
+                {
+                    case SalvageDef.SalvageType.COMPONENT: {
+                            if (salvageDef.MechComponentDef == null) {
+                                Log.Main.Debug?.Log($" -- WARNING {salvageDef.Description.Id}:{salvageDef.RewardID} without component definition");
+                                continue; 
+                            }
+                            if(salvageDef.MechComponentDef.Description.Cost != salvageDef.Description.Cost)
+                            {
+                                Log.Main.Debug?.Log($" -- Salvage component {salvageDef.Description.Id}:{salvageDef.RewardID} set cost to {salvageDef.MechComponentDef.Description.Cost}");
+                                salvageDef.Description.Cost = salvageDef.MechComponentDef.Description.Cost;
+                            }
+                        }; break;
+                    case SalvageDef.SalvageType.MECH_PART:
+                        {
+                            MechDef mechDef = sim.DataManager.mechDefs.Get(salvageDef.Description.Id);
+                            if (mechDef == null) {
+                                Log.Main.Debug?.Log($" -- WARNING {salvageDef.Description.Id}:{salvageDef.RewardID} can't find mechdef");
+                                continue;
+                            }
+                            if (mechDef.Description.Cost != salvageDef.Description.Cost)
+                            {
+                                Log.Main.Debug?.Log($" -- Salvage mech part {salvageDef.Description.Id}:{salvageDef.RewardID} set cost to {mechDef.Description.Cost}");
+                                salvageDef.Description.Cost = mechDef.Description.Cost;
+                            }
+                        }; break;
+                }
+            }
         }
     }
     public class FullMechSalvageInfo : EventTrigger

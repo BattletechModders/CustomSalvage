@@ -21,7 +21,7 @@ internal static class Contract_FinalizeSalvage
             return result;
         }
         Log.Main.Debug?.Log($"--- RandomSlotsUsing {def.Description.Id} hash:{def.GetHashCode()}");
-        result = Mathf.CeilToInt(constants.Story.DefaultMechPartMax * def.GetStructurePersantage());
+        result = constants.Story.DefaultMechPartMax;
         Log.Main.Debug?.Log($" rest parts:{result}");
         List<MechComponentDef> inventory = new List<MechComponentDef>();
         Log.Main.Debug?.Log($" components:");

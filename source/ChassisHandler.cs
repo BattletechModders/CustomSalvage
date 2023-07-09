@@ -17,6 +17,7 @@ using UnityEngine.Events;
 using Object = System.Object;
 using Newtonsoft.Json;
 using static BinkPlugin.Bink;
+using CustomUnits;
 
 namespace CustomSalvage;
 
@@ -1153,13 +1154,14 @@ public class AssemblyChancesResult
                 LimbChance = Mathf.Clamp(LimbChance + ltp, settings.LimbMinChance, settings.LimbMaxChance);
                 CompFChance = Mathf.Clamp(CompFChance + ctp, settings.ComponentMinChance, settings.ComponentMaxChance);
                 CompNFChance = Mathf.Clamp(CompNFChance + ctp, CompFChance, settings.ComponentMaxChance);
-                if (used_parts > 0) {
+                if ((used_parts > 0) && (Control.Instance.Settings.FullEnemyUnitSalvage == false)) {
                     float mod = Mathf.Clamp((((float)used_parts - (float)used_empty_parts) / ((float)used_parts)), 0f, 1f);
                     Log.Main.Debug?.Log($"empty parts mod {mod}");
                     CompFChance *= mod;
                     CompNFChance *= mod;
                 }
-                if (Control.Instance.Settings.FullEnemyUnitSalvage)
+                if (Control.Instance.Settings.FullEnemyUnitSalvage 
+                    &&(mech.IsSquad() == false) )
                 {
                     CompFChance = 0f;
                     CompNFChance = 0f;
