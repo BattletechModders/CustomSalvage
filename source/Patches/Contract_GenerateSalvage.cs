@@ -270,6 +270,7 @@ internal static class Contract_GenerateSalvage
                 mech_to_salvage.Chassis.ChassisTags.Contains(Control.Instance.Settings.NoSalvageMechTag))
             {
                 Log.Main.Debug?.Log($"--- {Control.Instance.Settings.NoSalvageMechTag} mech, no parts");
+                full_mech_salvage = false;
             }
             else
             {
