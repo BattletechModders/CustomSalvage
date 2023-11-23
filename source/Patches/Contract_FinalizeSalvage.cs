@@ -72,6 +72,21 @@ internal static class Contract_FinalizeSalvage
         }
         return result;
     }
+    public static int GetSalvageWeight(this Contract contract, List<InventoryItemElement_NotListView> PriorityInventory)
+    {
+        int result = 0;
+        foreach (var elementNotListView in PriorityInventory)
+        {
+            ListElementController_BASE_NotListView controller = elementNotListView.controller;
+            if (controller == null) { continue; }
+            if (controller.salvageDef == null) { continue; }
+            result += 1;
+            if (controller.salvageDef.Type != SalvageDef.SalvageType.MECH) { continue; }
+            if (Control.Instance.Settings.FullUnitUsedAllRandomSalvageSlots) { result += (contract.FinalSalvageCount - contract.FinalPrioritySalvageCount - 1); continue; }
+            result += controller.salvageDef.mechDef.RandomSlotsUsing(contract.BattleTechGame.Simulation.Constants);
+        }
+        return result;
+    }
     [HarmonyPrefix]
     [HarmonyWrapSafe]
     [HarmonyPriority(Priority.HigherThanNormal)]

@@ -193,6 +193,7 @@ namespace CustomSalvage
             try
             {
                 GenericPopupBuilder builder = GenericPopupBuilder.Create("UNIT INFO", "PLACEHOLDER");
+                builder.SetAlwaysOnTop();
                 builder.AddButton("Close", new Action(this.OnInfoClose), false);
                 AAR_SalvageChosen choosen = this.owner.ItemWidget.gameObject.GetComponentInParent<AAR_SalvageChosen>();
                 if(choosen == null) builder.AddButton("Disassemble", new Action(this.OnDisassemble), false);
@@ -317,6 +318,14 @@ namespace CustomSalvage
                     }
                 }
                 helper?.CheckDisassemble();
+                AAR_SalvageChosenCustom choosenCustom = helper.parent.salvageChosen.gameObject.GetComponent<AAR_SalvageChosenCustom>();
+                if (choosenCustom != null)
+                {
+                    choosenCustom.Refresh();
+                }
+                else{
+                    Log.Main.Warning?.Log($"can't find AAR_SalvageChosenCustom component on {helper.parent.salvageChosen.gameObject.name}");
+                }
             }
             catch (Exception e)
             {
@@ -369,64 +378,70 @@ namespace CustomSalvage
         //}
         public void OnClicked()
         {
-            List<InventoryItemElement_NotListView> PriorityInventory = new List<InventoryItemElement_NotListView>(parent.salvageChosen.PriorityInventory);
-            List<SalvageDef> chosenSalvage = new List<SalvageDef>();
-            foreach (var salvage in PriorityInventory)
-            {
-                chosenSalvage.Add(salvage.controller.salvageDef);
-                parent.salvageChosen.OnRemoveItem(salvage, true);
-                parent.AllSalvageControllers.Remove(salvage.controller);
-                var controller = salvage.controller;
-                controller.Pool();
-            }
-            List<ListElementController_BASE_NotListView> notselectedSalvage = new List<ListElementController_BASE_NotListView>();
-            foreach (var pSalvage in parent.salvageSelection.GetSalvageInventory())
-            {
-                notselectedSalvage.Add(pSalvage.controller);
-            }
-            foreach (var salvage in notselectedSalvage)
-            {
-                parent.RemoveFromInventoryList(salvage.ItemWidget);
-                parent.AllSalvageControllers.Remove(salvage);
-                salvage.Pool();
-            }
-            //this.WriteSalvage(parent.contract.finalPotentialSalvage);
-            List<SalvageDef> toDisassemble = new List<SalvageDef>();
-            for(int t = 0; t < parent.contract.finalPotentialSalvage.Count;)
-            {
-                SalvageDef salvageDef = parent.contract.finalPotentialSalvage[t];
-                if (salvageDef.Type != SalvageDef.SalvageType.MECH) { ++t; continue; }
-                if (salvageDef.ComponentType != ComponentType.MechFull) { ++t; continue; }
-                SalvageDef chosen = chosenSalvage.Find((x) => x.Type == SalvageDef.SalvageType.MECH && x.ComponentType == ComponentType.MechFull && x.mechDef == salvageDef.mechDef);
-                if (chosen != null) { ++t; continue; }
-                toDisassemble.Add(salvageDef);
-                parent.contract.finalPotentialSalvage.RemoveAt(t);
-            }
-            ContractHelper contract = new ContractHelper(parent.contract, false);
-            foreach(var salvageDef in toDisassemble)
-            {
-                Contract_GenerateSalvage.AddMechToSalvage(salvageDef.mechDef, contract, parent.simState, parent.simState.Constants, true, true);
-            }
-            Thread.CurrentThread.SetFlag("LootMagnet_supress_dialog");
             try
             {
-                parent.simState.SanitizeLootMagnetStacking(parent.contract.finalPotentialSalvage);
-                parent.CalculateAndAddAvailableSalvage();
-            }
-            catch (Exception e)
+                List<InventoryItemElement_NotListView> PriorityInventory = new List<InventoryItemElement_NotListView>(parent.salvageChosen.PriorityInventory);
+                List<SalvageDef> chosenSalvage = new List<SalvageDef>();
+                foreach (var salvage in PriorityInventory)
+                {
+                    chosenSalvage.Add(salvage.controller.salvageDef);
+                    parent.salvageChosen.OnRemoveItem(salvage, true);
+                    parent.AllSalvageControllers.Remove(salvage.controller);
+                    var controller = salvage.controller;
+                    controller.Pool();
+                }
+                List<ListElementController_BASE_NotListView> notselectedSalvage = new List<ListElementController_BASE_NotListView>();
+                foreach (var pSalvage in parent.salvageSelection.GetSalvageInventory())
+                {
+                    notselectedSalvage.Add(pSalvage.controller);
+                }
+                foreach (var salvage in notselectedSalvage)
+                {
+                    parent.RemoveFromInventoryList(salvage.ItemWidget);
+                    parent.AllSalvageControllers.Remove(salvage);
+                    salvage.Pool();
+                }
+                //this.WriteSalvage(parent.contract.finalPotentialSalvage);
+                List<SalvageDef> toDisassemble = new List<SalvageDef>();
+                for (int t = 0; t < parent.contract.finalPotentialSalvage.Count;)
+                {
+                    SalvageDef salvageDef = parent.contract.finalPotentialSalvage[t];
+                    if (salvageDef.Type != SalvageDef.SalvageType.MECH) { ++t; continue; }
+                    if (salvageDef.ComponentType != ComponentType.MechFull) { ++t; continue; }
+                    SalvageDef chosen = chosenSalvage.Find((x) => x.Type == SalvageDef.SalvageType.MECH && x.ComponentType == ComponentType.MechFull && x.mechDef == salvageDef.mechDef);
+                    if (chosen != null) { ++t; continue; }
+                    toDisassemble.Add(salvageDef);
+                    parent.contract.finalPotentialSalvage.RemoveAt(t);
+                }
+                ContractHelper contract = new ContractHelper(parent.contract, false);
+                foreach (var salvageDef in toDisassemble)
+                {
+                    Contract_GenerateSalvage.AddMechToSalvage(salvageDef.mechDef, contract, parent.simState, parent.simState.Constants, true, true);
+                }
+                Thread.CurrentThread.SetFlag("LootMagnet_supress_dialog");
+                try
+                {
+                    parent.simState.SanitizeLootMagnetStacking(parent.contract.finalPotentialSalvage);
+                    parent.CalculateAndAddAvailableSalvage();
+                }
+                catch (Exception e)
+                {
+                    UIManager.logger.LogException(e);
+                }
+                if (Thread.CurrentThread.isFlagSet("LootMagnet_supress_dialog")) { Thread.CurrentThread.ClearFlag("LootMagnet_supress_dialog"); }
+                foreach (var salvage in chosenSalvage)
+                {
+                    InventoryItemElement_NotListView item = parent.salvageSelection.GetSalvageInventory().Find((x) => x.controller.salvageDef.Type == salvage.Type && x.controller.salvageDef.ComponentType == salvage.ComponentType && x.controller.salvageDef.mechDef == salvage.mechDef && x.controller.salvageDef.Description.Id == salvage.Description.Id);
+                    if (item != null)
+                    {
+                        parent.salvageChosen.OnAddItem(item, true);
+                    }
+                }
+                this.CheckDisassemble();
+            }catch(Exception e)
             {
                 UIManager.logger.LogException(e);
             }
-            if (Thread.CurrentThread.isFlagSet("LootMagnet_supress_dialog")) { Thread.CurrentThread.ClearFlag("LootMagnet_supress_dialog"); }
-            foreach (var salvage in chosenSalvage)
-            {
-                InventoryItemElement_NotListView item = parent.salvageSelection.GetSalvageInventory().Find((x) => x.controller.salvageDef.Type == salvage.Type && x.controller.salvageDef.ComponentType == salvage.ComponentType && x.controller.salvageDef.mechDef == salvage.mechDef && x.controller.salvageDef.Description.Id == salvage.Description.Id);
-                if (item != null)
-                {
-                    parent.salvageChosen.OnAddItem(item, true);
-                }
-            }
-            this.CheckDisassemble();
         }
         public bool CheckDisassemble()
         {
