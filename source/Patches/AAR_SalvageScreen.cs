@@ -30,7 +30,7 @@ internal static class AAR_SalvageScreen_SalvageConfirmed
             if (helper != null) { needDisassemble = helper.CheckDisassemble(); }
             if (needDisassemble) {
                 __runOriginal = false;
-                GenericPopupBuilder.Create("WARNING","Units not choosed as priority need to be disassembled.\nThan you need to confirm your salvage choice again").AddButton("Cancel", null, true).AddButton("OK", () => { helper.OnClicked(); }, true).SetAlwaysOnTop().CancelOnEscape().Render();
+                GenericPopupBuilder.Create("WARNING","Units not choosed as priority salvage need to be disassembled.\nThan you need to confirm your salvage choice again").AddButton("Cancel", null, true).AddButton("OK", () => { helper.OnClicked(); }, true).SetAlwaysOnTop().CancelOnEscape().Render();
             }
         }
         catch (Exception e)
