@@ -134,8 +134,13 @@ internal static class AAR_SalvageChosen_OnAddItem
                 __result = false;
                 return;
             }
-main_process:
+        main_process:
             Log.Main.Debug?.Log($"AAR_SalvageChosen.OnAddItem");
+            if (__instance.tempHoldingGridSpaces[0].activeSelf == false) {
+                __runOriginal = false;
+                __result = false;
+                return;
+            }
             __instance.PriorityInventory.Add(elementNotListView);
             __instance.parent.RemoveFromInventoryList(elementNotListView);
             elementNotListView.DropParent = (IMechLabDropTarget)__instance;
