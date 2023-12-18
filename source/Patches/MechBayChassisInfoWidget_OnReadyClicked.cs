@@ -1,5 +1,6 @@
 ﻿using BattleTech;
 using BattleTech.UI;
+using CustomComponents;
 using HarmonyLib;
 using HBS;
 using UnityEngine;
@@ -11,10 +12,42 @@ namespace CustomSalvage;
 public static class MechBayChassisInfoWidget_OnReadyClicked
 {
 
+    public static void SetItemCount(this SimGameState sim, string id, System.Type type, SimGameState.ItemCountType outputType, int count)
+    {
+        string statid = sim.GetItemStatID(id, type);
+        if (outputType == SimGameState.ItemCountType.DAMAGED_ONLY)
+        {
+            id += string.Format(".{0}", (object)"DAMAGED");
+        }
+        var stat = sim.CompanyStats.GetStatistic(statid);
+        if (stat != null)
+        {
+            if (count != 0) { stat.SetValue<int>(count); } else { sim.CompanyStats.RemoveStatistic(id); }
+        }
+        else
+        {
+            if (count != 0) { sim.CompanyStats.AddStatistic<int>(id, 0).SetValue<int>(count); }
+        }
+    }
+    public static void SetItemCount(this SimGameState sim, string id, string type, SimGameState.ItemCountType outputType, int count)
+    {
+        string statid = sim.GetItemStatID(id, type);
+        if (outputType == SimGameState.ItemCountType.DAMAGED_ONLY)
+        {
+            id += string.Format(".{0}", (object)"DAMAGED");
+        }
+        var stat = sim.CompanyStats.GetStatistic(statid);
+        if (stat != null) {
+            if (count != 0) { stat.SetValue<int>(count); } else { sim.CompanyStats.RemoveStatistic(id); }
+        }
+        else
+        {
+            sim.CompanyStats.AddStatistic<int>(id, 0).SetValue<int>(count);
+        }
+    }
     [HarmonyPrefix]
     [HarmonyWrapSafe]
-    public static void Prefix(ref bool __runOriginal, ChassisDef ___selectedChassis, MechBayPanel ___mechBay
-        , MechBayChassisUnitElement ___chassisElement, MechBayChassisInfoWidget __instance)
+    public static void Prefix(ref bool __runOriginal, MechBayChassisInfoWidget __instance)
     {
         if (!__runOriginal)
         {
@@ -26,25 +59,51 @@ public static class MechBayChassisInfoWidget_OnReadyClicked
             return;
         }
 
-        if (___selectedChassis == null)
+        if (__instance.selectedChassis == null)
         {
             __runOriginal = false;
             return;
         }
 
-
-
-        if (___mechBay.Sim.GetFirstFreeMechBay() < 0)
+        if (__instance.mechBay.Sim.GetFirstFreeMechBay() < 0)
         {
-            GenericPopupBuilder.Create("Cannot Ready 'Mech", "There are no available slots in the 'Mech Bay. You must move an active 'Mech into storage before readying this chassis.").AddFader(new UIColorRef?(LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PopupBackfill), 0f, true).Render();
+            GenericPopupBuilder.Create("Cannot Ready 'Unit", "There are no available slots in the 'Unit's Bay. You must move an active 'Units into storage before readying this chassis.").AddFader(new UIColorRef?(LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PopupBackfill), 0f, true).Render();
             __runOriginal = false;
             return;
         }
 
-        ChassisHandler.PreparePopup(___selectedChassis, ___mechBay, __instance, ___chassisElement);
+        int chassisQuantity = 0;
+        if (__instance.selectedChassis.Is<LootableUniqueMech>(out var ulm) && __instance.mechBay.Sim.IsHaveActiveChassis(__instance.selectedChassis.Description.Id))
+        {
+            if (__instance.mechBay.Sim.DataManager.ChassisDefs.TryGet(ulm.ReplaceID, out var replaceChassis))
+            {
+                chassisQuantity = __instance.mechBay.Sim.GetItemCount(__instance.selectedChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY);
+                __instance.mechBay.Sim.SetItemCount(__instance.selectedChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY, 0);
+                chassisQuantity += __instance.mechBay.Sim.GetItemCount(replaceChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY);
+                __instance.mechBay.Sim.SetItemCount(replaceChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY, chassisQuantity);
+                replaceChassis.MechPartCount += __instance.selectedChassis.MechPartCount;
+                __instance.selectedChassis.MechPartCount = 0;
+                __instance.chassisElement.chassisDef = replaceChassis;
+                __instance.chassisElement.partsCount = replaceChassis.MechPartCount;
+                __instance.mechBay.Sim.SetItemCount(replaceChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY, chassisQuantity);
+                var replaceMechId = ChassisHandler.GetMDefFromCDef(replaceChassis.Description.Id);
+                var currentMechId = ChassisHandler.GetMDefFromCDef(__instance.selectedChassis.Description.Id);
+                __instance.selectedChassis = replaceChassis;
+                if ((string.IsNullOrEmpty(replaceMechId) == false)&&(string.IsNullOrEmpty(currentMechId) == false)
+                    &&(__instance.mechBay.Sim.DataManager.ChassisDefs.TryGet(replaceMechId, out var replacemech))
+                    && (__instance.mechBay.Sim.DataManager.ChassisDefs.TryGet(currentMechId, out var currentmech)))
+                {
+                    var mechPartsCount = __instance.mechBay.Sim.GetItemCount(currentMechId, "MECHPART", SimGameState.ItemCountType.UNDAMAGED_ONLY);
+                    mechPartsCount += __instance.mechBay.Sim.GetItemCount(replaceMechId, "MECHPART", SimGameState.ItemCountType.UNDAMAGED_ONLY);
+                    __instance.mechBay.Sim.SetItemCount(replaceMechId, "MECHPART", SimGameState.ItemCountType.UNDAMAGED_ONLY, mechPartsCount);
+                    __instance.mechBay.Sim.SetItemCount(currentMechId, "MECHPART", SimGameState.ItemCountType.UNDAMAGED_ONLY, 0);
+                }
+            }
+        }
+        ChassisHandler.PreparePopup(__instance.selectedChassis, __instance.mechBay, __instance, __instance.chassisElement);
 
-        int chassisQuantity = ___mechBay.Sim.GetItemCount(___selectedChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY);
-        if (___selectedChassis.MechPartCount == 0)
+        chassisQuantity = __instance.mechBay.Sim.GetItemCount(__instance.selectedChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY);
+        if (__instance.selectedChassis.MechPartCount == 0)
         {
             if(chassisQuantity <= 0)
             {
@@ -59,8 +118,8 @@ public static class MechBayChassisInfoWidget_OnReadyClicked
                 __runOriginal = false;
                 return;
             }
-            int num2 = Mathf.CeilToInt((float)___mechBay.Sim.Constants.Story.MechReadyTime /
-                                       (float)___mechBay.Sim.MechTechSkill);
+            int num2 = Mathf.CeilToInt((float)__instance.mechBay.Sim.Constants.Story.MechReadyTime /
+                                       (float)__instance.mechBay.Sim.MechTechSkill);
 
             GenericPopupBuilder.Create("Ready 'Unit?",
                     $"It will take {num2} day(s) to ready this BattleMech chassis for combat.")
@@ -75,7 +134,7 @@ public static class MechBayChassisInfoWidget_OnReadyClicked
             return;
         }
         //int mechPartCount = ChassisHandler.GetCount(ChassisHandler.GetMech(___selectedChassis.Description.Id).Description.Id);
-        if (___selectedChassis.MechPartCount >= ___selectedChassis.MechPartMax)
+        if (__instance.selectedChassis.MechPartCount >= __instance.selectedChassis.MechPartMax)
         {
             if (Control.Instance.Settings.MechBrokeType == BrokeType.Normalized)
             {
@@ -84,7 +143,7 @@ public static class MechBayChassisInfoWidget_OnReadyClicked
             else
             {
                 GenericPopupBuilder.Create("Assembly 'Unit?",
-                        $"It will take {___selectedChassis.MechPartMax} parts from storage.")
+                        $"It will take {__instance.selectedChassis.MechPartMax} parts from storage.")
                     .AddButton("Cancel", null, true, null)
                     .AddButton("Ready", ChassisHandler.OnPartsAssembly, true, null)
                     .AddFader(

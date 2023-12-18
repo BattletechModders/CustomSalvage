@@ -39,7 +39,7 @@ public static class FullUnitSalvageHelper
     }
 }
 
-internal class ContractHelper
+public class ContractHelper
 {
     public Contract Contract { get; }
     public List<SalvageDef> FinalPotentialSalvage { get; }
@@ -269,6 +269,18 @@ internal class ContractHelper
         }
 
         add_parts(constants, mech, numparts, FinalPotentialSalvage);
+    }
+    public bool IsChassisExistsFinalPotentialSalvage(string chassisId)
+    {
+        foreach (var salvageDef in FinalPotentialSalvage)
+        {
+            if (salvageDef.Type != SalvageDef.SalvageType.MECH) { continue; }
+            if (salvageDef.ComponentType != ComponentType.MechFull) { continue; }
+            if (salvageDef.mechDef == null) { continue; }
+            if (salvageDef.mechDef.chassisID != chassisId) { continue; }
+            return true;
+        }
+        return false;
     }
     public void AddMechToPotentialSalvage(SimGameConstants constants, MechDef mech)
     {

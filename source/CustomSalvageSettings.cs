@@ -182,6 +182,7 @@ public class Settings
     public bool AllowDropBlackListed = false;
     public string NoSalvageMechTag = "NOSALVAGE";
     public string NoSalvageVehicleTag = "NOSALVAGE";
+    public string UniqieUnitTag = "UNIQUE";
 
 
     public float RecoveryMod = 1;

@@ -20,6 +20,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using static CustomComponents.WorkOrderCosts;
+using static Org.BouncyCastle.Crypto.Tls.SessionParameters;
 using static RootMotion.FinalIK.Grounding;
 
 namespace CustomSalvage
@@ -123,16 +124,123 @@ namespace CustomSalvage
             }
         }
     }
-    public class FullMechSalvageInfo : EventTrigger
+    public class FullMechSalvageInfoPopup: MonoBehaviour
     {
-        public static readonly string FULL_MECH_SUFFIX = "_FULL_MECH";
-        public ListElementController_SalvageFullMech_NotListView owner = null;
-        public AAR_SalvageScreen salvageScreen = null;
         public GenericPopup popup = null;
         public MechBayMechInfoWidget info = null;
         public GameObject info_paintSelector = null;
         public GameObject info_refitBtn = null;
         public GameObject info_optionBtn = null;
+        public FullMechSalvageInfo salvageItem = null;
+        private static FullMechSalvageInfoPopup instance = null;
+        public static void OnInfoClose()
+        {
+            try
+            {
+                if (instance == null) { instance = UIManager.Instance.popupNode.gameObject.GetComponentInChildren<FullMechSalvageInfoPopup>(true); }
+                if (instance == null) { return; }
+                if (instance.popup == null) { return; }
+                instance.salvageItem = null;
+                instance.popup.EndFader();
+                instance.popup.Visible = false;
+                GenericPopup.PopupVisible = false;
+            }catch(Exception e)
+            {
+                UIManager.logger.LogException(e);
+            }
+        }
+        public static void OnDisassemble()
+        {
+            try
+            {
+                if (instance == null) { instance = UIManager.Instance.popupNode.gameObject.GetComponentInChildren<FullMechSalvageInfoPopup>(true); }
+                if (instance == null) { return; }
+                if (instance.popup != null) {
+                    instance.popup.EndFader();
+                    instance.popup.Visible = false; 
+                    GenericPopup.PopupVisible = false; 
+                }
+                try
+                {
+                    instance.salvageItem?.OnDisassemble();
+                }
+                catch(Exception ex)
+                {
+                    UIManager.logger.LogException(ex);
+                }
+                instance.salvageItem = null;
+            }
+            catch (Exception e)
+            {
+                UIManager.logger.LogException(e);
+            }
+        }
+        public FullMechSalvageInfoPopup SetData(FullMechSalvageInfo info)
+        {
+            if (info == null) { return null; }
+            this.salvageItem = info;
+            this.info.SetData(this.salvageItem.owner.salvageDef, this.salvageItem.owner.simState);
+            AAR_SalvageChosen choosen = this.salvageItem.owner.ItemWidget.gameObject.GetComponentInParent<AAR_SalvageChosen>();
+            if (choosen != null) { this.popup.buttons[1].SetState(ButtonState.Disabled, true); } else { this.popup.buttons[1].SetState(ButtonState.Enabled, true); }
+            return this;
+        }
+        public void Show()
+        {
+            if (this.popup != null) {
+                instance.popup.StartFader();
+                this.popup.Visible = true; 
+                GenericPopup.PopupVisible = true; 
+            }
+        }
+        public static void Instantine()
+        {
+            if (FullMechSalvageInfoPopup.instance != null) { return; }
+            GenericPopupBuilder builder = GenericPopupBuilder.Create("UNIT INFO", "PLACEHOLDER");
+            builder.SetAlwaysOnTop();
+            builder.AddFader();
+            builder.AddButton("Close", new Action(FullMechSalvageInfoPopup.OnInfoClose), false);
+            builder.AddButton("Disassemble", new Action(FullMechSalvageInfoPopup.OnDisassemble), false);
+            builder.SetOnClose(new Action(FullMechSalvageInfoPopup.OnInfoClose));
+            var popup = builder.CancelOnEscape().Render();
+            popup.gameObject.name = "uixPrfPanl_SIM_salvageUnitInfo-Widget";
+            FullMechSalvageInfoPopup.instance = popup.gameObject.GetComponent<FullMechSalvageInfoPopup>();
+            if (instance == null) { instance = popup.gameObject.AddComponent<FullMechSalvageInfoPopup>(); }
+            instance.popup = popup;
+            popup._contentText.gameObject.SetActive(false);
+            instance.info = UIManager.Instance.dataManager.PooledInstantiate("uixPrfPanl_SIM_mechBayUnitInfo-Widget", BattleTech.BattleTechResourceType.UIModulePrefabs).GetComponent<MechBayMechInfoWidget>();
+            instance.info.gameObject.transform.SetParent(popup._contentText.transform.parent);
+            instance.info.gameObject.transform.SetSiblingIndex(popup._contentText.transform.GetSiblingIndex() + 1);
+            //instance.info.SetData(this.owner.salvageDef, this.owner.simState);
+            Transform[] trs = instance.info.gameObject.GetComponentsInChildren<Transform>(false);
+            instance.info_paintSelector = instance.info.gameObject.GetComponentInChildren<MechPaintPatternSelectorWidget>().gameObject;
+            instance.info_paintSelector.SetActive(false);
+            foreach (Transform tr in trs)
+            {
+                if (tr.parent != instance.info.rootInfoObj.transform) { continue; }
+                if (tr.name == "layout_actionRefit-Repair") { instance.info_refitBtn = tr.gameObject; }
+                else
+                if (tr.name == "layout_optionButtons") { instance.info_optionBtn = tr.gameObject; }
+            }
+            instance.info_refitBtn.SetActive(false);
+            instance.info_optionBtn.SetActive(false);
+        }
+        public static FullMechSalvageInfoPopup Instance
+        {
+            get
+            {
+                if (instance != null) { return instance; }
+                instance = UIManager.Instance.popupNode.gameObject.GetComponentInChildren<FullMechSalvageInfoPopup>(true);
+                if (instance != null) { return instance; }
+                FullMechSalvageInfoPopup.Instantine();
+                return instance;
+            }
+        }
+    }
+    public class FullMechSalvageInfo : EventTrigger
+    {
+        public static readonly string FULL_MECH_SUFFIX = "_FULL_MECH";
+        public ListElementController_SalvageFullMech_NotListView owner = null;
+        public AAR_SalvageScreen salvageScreen = null;
         public bool allowDisassemble { get; set; } = true;
         public void Init(ListElementController_SalvageFullMech_NotListView owner, AAR_SalvageScreen salvageScreen)
         {
@@ -141,7 +249,6 @@ namespace CustomSalvage
         }
         public void Pool()
         {
-            this.OnInfoClose();
             salvageScreen = null;
             this.owner = null;
         }
@@ -192,29 +299,7 @@ namespace CustomSalvage
             Log.Main.Debug?.Log($"FullMechSalvageInfo.OnPointerClick");
             try
             {
-                GenericPopupBuilder builder = GenericPopupBuilder.Create("UNIT INFO", "PLACEHOLDER");
-                builder.SetAlwaysOnTop();
-                builder.AddButton("Close", new Action(this.OnInfoClose), false);
-                AAR_SalvageChosen choosen = this.owner.ItemWidget.gameObject.GetComponentInParent<AAR_SalvageChosen>();
-                if(choosen == null) builder.AddButton("Disassemble", new Action(this.OnDisassemble), false);
-                this.popup = builder.CancelOnEscape().Render();
-                popup._contentText.gameObject.SetActive(false);
-                this.popup.gameObject.name = "uixPrfPanl_SIM_salvageUnitInfo-Widget";
-                this.info = UIManager.Instance.dataManager.PooledInstantiate("uixPrfPanl_SIM_mechBayUnitInfo-Widget", BattleTech.BattleTechResourceType.UIModulePrefabs).GetComponent<MechBayMechInfoWidget>();
-                this.info.gameObject.transform.SetParent(popup._contentText.transform.parent);
-                this.info.gameObject.transform.SetSiblingIndex(popup._contentText.transform.GetSiblingIndex() + 1);
-                this.info.SetData(this.owner.salvageDef, this.owner.simState);
-                Transform[] trs = this.info.gameObject.GetComponentsInChildren<Transform>(false);
-                this.info_paintSelector = this.info.gameObject.GetComponentInChildren<MechPaintPatternSelectorWidget>().gameObject;
-                this.info_paintSelector.SetActive(false);
-                foreach(Transform tr in trs)
-                {
-                    if (tr.parent != this.info.rootInfoObj.transform) { continue; }
-                    if (tr.name == "layout_actionRefit-Repair") { this.info_refitBtn = tr.gameObject; }else
-                    if (tr.name == "layout_optionButtons") { this.info_optionBtn = tr.gameObject; }
-                }
-                this.info_refitBtn.SetActive(false);
-                this.info_optionBtn.SetActive(false);
+                FullMechSalvageInfoPopup.Instance?.SetData(this)?.Show();
             }
             catch (Exception e)
             {
@@ -222,32 +307,14 @@ namespace CustomSalvage
             }
         }
 
-        public void OnInfoClose()
-        {
-            if(this.info != null)
-            {
-                this.info_refitBtn?.SetActive(true);
-                this.info_optionBtn?.SetActive(true);
-                this.info_paintSelector?.SetActive(true);
-                this.info_refitBtn = null;
-                this.info_optionBtn = null;
-                this.info_paintSelector = null;
-                UIManager.Instance.dataManager.PoolGameObject("uixPrfPanl_SIM_mechBayUnitInfo-Widget", this.info.gameObject);
-                this.info = null;
-            }
-            if (this.popup != null)
-            {
-                this.popup._contentText.gameObject.SetActive(true);
-                this.popup.Pool();
-                this.popup = null;
-            }
-        }
 
         public void OnDisassemble()
         {
             try
             {
-                this.OnInfoClose();
+                //this.OnInfoClose();
+                AAR_SalvageChosen choosen = this.owner.ItemWidget.gameObject.GetComponentInParent<AAR_SalvageChosen>();
+                if (choosen != null) { return; }
                 Log.Main.Debug?.Log($"FullMechSalvageInfo.OnDisassemble {this.owner.mechDef.Description.Id}");
                 AAR_SalvageScreen i_salvageScreen = this.salvageScreen;
                 AAR_SalvageSelection i_salvageSelection = this.salvageScreen.salvageSelection;
