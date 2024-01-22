@@ -261,7 +261,7 @@ internal static class Contract_GenerateSalvage
         }
         try
         {
-            var mech_to_salvage = ChassisHandler.FindMechReplace(mech);
+            var mech_to_salvage = ChassisHandler.FindMechReplace(simgame, contract, mech);
             if (mech != mech_to_salvage) {
                 Log.Main.Debug?.Log($"--- mech has salvage replacement {mech.Description.Id} -> {mech_to_salvage.Description.Id}");
                 full_mech_salvage = false; 

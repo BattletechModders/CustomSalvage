@@ -1000,8 +1000,35 @@ public static partial class ChassisHandler
     {
         return cdefid.Replace("chassisdef", "mechdef");
     }
-
-    public static MechDef FindMechReplace(MechDef mech)
+    public static bool IsHaveChassis(this SimGameState simgame, string chassisId)
+    {
+        if (simgame.IsHaveActiveChassis(chassisId)) { return true; }
+        foreach(var chassis in simgame.GetAllInventoryMechDefs(false))
+        {
+            if (chassis == null) { continue; }
+            if (chassis.Description == null) { continue; }
+            if (chassis.Description.Id != chassisId) { continue; }
+            return true;
+        }
+        return false;
+    }
+    public static bool IsHaveActiveChassis(this SimGameState simgame, string chassisId)
+    {
+        foreach (var mech in simgame.ActiveMechs)
+        {
+            if (mech.Value == null) { continue; }
+            if (mech.Value.ChassisID != chassisId) { continue; }
+            return true;
+        }
+        foreach (var mech in simgame.ReadyingMechs)
+        {
+            if (mech.Value == null) { continue; }
+            if (mech.Value.ChassisID != chassisId) { continue; }
+            return true;
+        }
+        return false;
+    }
+    public static MechDef FindMechReplace(SimGameState simgame, ContractHelper contract, MechDef mech)
     {
         if (mech == null)
         {
@@ -1009,7 +1036,6 @@ public static partial class ChassisHandler
         }
 
         var result = mech;
-
         if (mech.Chassis.Is<LootableMech>(out var lm))
         {
             Log.Main.Debug?.Log($"--- Mech Replacing with {lm.ReplaceID}");
@@ -1029,6 +1055,27 @@ public static partial class ChassisHandler
             if (result == null)
             {
                 Log.Main.Error?.Log($"---unknown mech {lm.ReplaceID}, rollback");
+                result = mech;
+            }
+        }else if (mech.Chassis.Is<LootableUniqueMech>(out var ulm) && (simgame.IsHaveChassis(mech.ChassisID) || contract.IsChassisExistsFinalPotentialSalvage(mech.ChassisID)) )
+        {
+            Log.Main.Debug?.Log($"--- Mech is not unique, replacing with {ulm.ReplaceID}");
+            try
+            {
+                result = UnityGameInstance.BattleTechGame.Simulation.DataManager.MechDefs.Get(ulm.ReplaceID);
+                if (result == null)
+                {
+                    Log.Main.Error?.Log($"---unknown mech {ulm.ReplaceID}, rollback");
+                }
+            }
+            catch
+            {
+                result = null;
+            }
+
+            if (result == null)
+            {
+                Log.Main.Error?.Log($"---unknown mech {ulm.ReplaceID}, rollback");
                 result = mech;
             }
         }

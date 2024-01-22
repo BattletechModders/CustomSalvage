@@ -25,6 +25,7 @@
     <AssemblySearchPaths>
       $(ReferencePath);
       $(BattleTechGameDir)\Mods\.modtek\AssembliesInjected\;
+      $(BattleTechGameDir)\Mods\Core\;
       $(BattleTechGameDir)\BattleTech_Data\Managed\;
       {HintPathFromItem}
     </AssemblySearchPaths>
@@ -57,7 +58,6 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\Mods\.modtek\AssembliesInjected\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
       <Private>False</Private>
@@ -78,7 +78,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="IRBTModUtils">
-      <HintPath>..\..\..\Mods\Core\IRBTModUtils\IRBTModUtils.dll</HintPath>
+      <HintPath>$(BattleTechGameDir)\Mods\Core\IRBTModUtils\IRBTModUtils.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <Private>False</Private>
@@ -129,7 +129,7 @@
     </PackageReference>
   </ItemGroup>
   <Target Name="AfterBuild">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(RogueTechRepo)\Core\CustomSalvage" Condition="'$(RogueTechRepo)' != '' And Exists('$(RogueTechRepo)\Core\CustomSalvage')" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BattleTechGameDir)ModingProjects\RogueTechWorking\Core\CustomSalvage" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BattleTechGameDir)\Mods\Core\CustomSalvage" Condition="'$(BattleTechGameDir)' != '' And Exists('$(BattleTechGameDir)\Mods\Core\CustomSalvage')" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BattleTechGameDir)\Mods_CBDE\Core\CustomSalvage" Condition="'$(BattleTechGameDir)' != '' And Exists('$(BattleTechGameDir)\Mods_CBDE\Core\CustomSalvage')" />
   </Target>
