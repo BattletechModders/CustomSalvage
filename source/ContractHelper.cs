@@ -63,21 +63,21 @@ public class ContractHelper
             return def;
         }
 
-        if (!def.Is<LootableDefault>(out var lootable))
+        MechComponentDef lootableDef = null;
+        
+        if (def.Is<LootableRandom>(out var lootableR))
         {
-            return null;
+            string itemID = lootableR.GetChoice();
+            if(itemID != null) lootableDef = UnityGameInstance.BattleTechGame.DataManager.GetMechComponentDef(def.ComponentType, itemID);
         }
 
-        var lootableDef = UnityGameInstance.BattleTechGame.DataManager.GetMechComponentDef(def.ComponentType, lootable.ItemID);
-        if (lootableDef == null)
-        {
-            return null;
+        if (lootableDef == null && def.Is<LootableDefault>(out var lootable)) {
+            lootableDef = UnityGameInstance.BattleTechGame.DataManager.GetMechComponentDef(def.ComponentType, lootable.ItemID);
         }
 
-        if (lootableDef.CCFlags().NoSalvage)
-        {
-            return null;
-        }
+        // if (lootableDef == null) return null;
+        //if (lootableDef.CCFlags().NoSalvage) return null;
+        
         return lootableDef;
     }
 
