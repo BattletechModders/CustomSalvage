@@ -77,6 +77,7 @@ internal static class AAR_SalvageChosen_Init
         var custom = __instance.gameObject.GetComponent<AAR_SalvageChosenCustom>();
         if (custom == null) { custom = __instance.gameObject.AddComponent<AAR_SalvageChosenCustom>(); }
         custom.Init(__instance);
+        AAR_SalvageScreen_ReceiveButtonPress.ClearFlag();
     }
 }
 

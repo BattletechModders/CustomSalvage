@@ -144,7 +144,9 @@ namespace CustomSalvage
                 instance.popup.EndFader();
                 instance.popup.Visible = false;
                 GenericPopup.PopupVisible = false;
-            }catch(Exception e)
+                instance.salvageItem = null;
+            }
+            catch (Exception e)
             {
                 UIManager.logger.LogException(e);
             }
@@ -160,15 +162,17 @@ namespace CustomSalvage
                     instance.popup.Visible = false; 
                     GenericPopup.PopupVisible = false; 
                 }
+                var salvageItem = instance.salvageItem;
+                if (salvageItem == null) { return; }
+                instance.salvageItem = null;
                 try
                 {
-                    instance.salvageItem?.OnDisassemble();
+                    salvageItem?.OnDisassemble();
                 }
                 catch(Exception ex)
                 {
                     UIManager.logger.LogException(ex);
                 }
-                instance.salvageItem = null;
             }
             catch (Exception e)
             {
@@ -451,22 +455,44 @@ namespace CustomSalvage
                 List<SalvageDef> chosenSalvage = new List<SalvageDef>();
                 foreach (var salvage in PriorityInventory)
                 {
-                    chosenSalvage.Add(salvage.controller.salvageDef);
-                    parent.salvageChosen.OnRemoveItem(salvage, true);
-                    parent.AllSalvageControllers.Remove(salvage.controller);
-                    var controller = salvage.controller;
-                    controller.Pool();
+                    try
+                    {
+                        chosenSalvage.Add(salvage.controller.salvageDef);
+                        parent.salvageChosen.OnRemoveItem(salvage, true);
+                        parent.AllSalvageControllers.Remove(salvage.controller);
+                        var controller = salvage.controller;
+                        if (controller.ItemWidget != null) { controller.Pool(); }
+                    }
+                    catch (Exception lex)
+                    {
+                        UIManager.logger.LogException(lex);
+                    }
                 }
                 List<ListElementController_BASE_NotListView> notselectedSalvage = new List<ListElementController_BASE_NotListView>();
                 foreach (var pSalvage in parent.salvageSelection.GetSalvageInventory())
                 {
-                    notselectedSalvage.Add(pSalvage.controller);
+                    try
+                    {
+                        if (pSalvage == null) { continue; }
+                        if (pSalvage.controller == null) { continue; }
+                        notselectedSalvage.Add(pSalvage.controller);
+                    }
+                    catch (Exception lex)
+                    {
+                        UIManager.logger.LogException(lex);
+                    }
                 }
                 foreach (var salvage in notselectedSalvage)
                 {
-                    parent.RemoveFromInventoryList(salvage.ItemWidget);
-                    parent.AllSalvageControllers.Remove(salvage);
-                    salvage.Pool();
+                    try
+                    {
+                        if (salvage.ItemWidget != null) { parent.RemoveFromInventoryList(salvage.ItemWidget); }
+                        parent.AllSalvageControllers.Remove(salvage);
+                        if (salvage.ItemWidget != null) { salvage.Pool(); }
+                    }catch(Exception lex)
+                    {
+                        UIManager.logger.LogException(lex);
+                    }
                 }
                 //this.WriteSalvage(parent.contract.finalPotentialSalvage);
                 List<SalvageDef> toDisassemble = new List<SalvageDef>();

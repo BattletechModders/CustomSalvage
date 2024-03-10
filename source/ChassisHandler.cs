@@ -18,6 +18,7 @@ using Object = System.Object;
 using Newtonsoft.Json;
 using static BinkPlugin.Bink;
 using CustomUnits;
+using static BattleTech.SimGameBattleSimulator;
 
 namespace CustomSalvage;
 
@@ -1028,6 +1029,38 @@ public static partial class ChassisHandler
         }
         return false;
     }
+    public static MechDef FindMechReplace(this MechDef mech, LootableUniqueMech ulm, SimGameState simgame)
+    {
+        MechDef result = null;
+        Log.Main.Info?.Log($"--- searching for a replacement for unique {mech.ChassisID}");
+        if (string.IsNullOrEmpty(ulm.ReplaceID) == false)
+        {
+            result = UnityGameInstance.BattleTechGame.Simulation.DataManager.MechDefs.Get(ulm.ReplaceID);
+        }
+        if(result == null)
+        {
+            TagSet requiredTags = new TagSet(ulm.randomSearchTags.shouldHaveTags);
+            if (requiredTags.IsEmpty) {
+                requiredTags.AddRange(mech.MechTags);
+                requiredTags.RemoveRange(ulm.randomSearchTags.ExcludeSelfTags);
+                requiredTags.RemoveRange(ulm.randomSearchTags.shouldNotHaveTags);
+                requiredTags.RemoveRange(Control.Instance.Settings.UniqieReplaceSearchExcludeTags);
+            }
+            TagSet excludeTags = new TagSet(ulm.randomSearchTags.shouldNotHaveTags);
+            excludeTags.AddRange(Control.Instance.Settings.UniqieReplaceSearchExcludeTags);
+            var mechsList = MetadataDatabase.Instance.GetMatchingUnitDefs(requiredTags, excludeTags, true ,simgame.CurrentDate, simgame.CompanyTags);
+            Log.Main.Info?.Log($"---  candidates: {mechsList.Count}");
+            if (mechsList.Count != 0)
+            {
+                while (true)
+                {
+                    int index = UnityEngine.Random.Range(0, mechsList.Count);
+                    if (simgame.DataManager.MechDefs.TryGet(mechsList[index].UnitDefID, out result)) { break; }
+                }
+            }
+        }
+        return result;
+    }
     public static MechDef FindMechReplace(SimGameState simgame, ContractHelper contract, MechDef mech)
     {
         if (mech == null)
@@ -1059,13 +1092,13 @@ public static partial class ChassisHandler
             }
         }else if (mech.Chassis.Is<LootableUniqueMech>(out var ulm) && (simgame.IsHaveChassis(mech.ChassisID) || contract.IsChassisExistsFinalPotentialSalvage(mech.ChassisID)) )
         {
-            Log.Main.Debug?.Log($"--- Mech is not unique, replacing with {ulm.ReplaceID}");
             try
             {
-                result = UnityGameInstance.BattleTechGame.Simulation.DataManager.MechDefs.Get(ulm.ReplaceID);
+                result = mech.FindMechReplace(ulm, simgame);
+                Log.Main.Debug?.Log($"--- Mech is not unique, replacing with {(result == null?"null":result.Description.Id)}");
                 if (result == null)
                 {
-                    Log.Main.Error?.Log($"---unknown mech {ulm.ReplaceID}, rollback");
+                    Log.Main.Error?.Log($"--- unknown mech {ulm.ReplaceID}, rollback");
                 }
             }
             catch
@@ -1075,7 +1108,7 @@ public static partial class ChassisHandler
 
             if (result == null)
             {
-                Log.Main.Error?.Log($"---unknown mech {ulm.ReplaceID}, rollback");
+                Log.Main.Error?.Log($"--- unknown mech {ulm.ReplaceID}, rollback");
                 result = mech;
             }
         }

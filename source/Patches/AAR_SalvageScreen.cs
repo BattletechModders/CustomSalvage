@@ -58,6 +58,7 @@ internal static class AAR_SalvageScreen_SalvageConfirmed
         try
         {
             if (__runOriginal == false) { return; }
+            AAR_SalvageScreen_ReceiveButtonPress.SetFlag();
             Log.Main.Debug?.Log($"AAR_SalvageScreen.SalvageConfirmed");
             bool needDisassemble = false;
             var helper = __instance.gameObject.GetComponent<AAR_ScreenFullMechHelper>();
@@ -70,7 +71,9 @@ internal static class AAR_SalvageScreen_SalvageConfirmed
                 {
                     try
                     {
-                        delay.popup = null; delay.eventFired = true; __instance.SalvageConfirmed();
+                        if (delay.eventFired == false) {
+                            delay.popup = null; delay.eventFired = true; __instance.SalvageConfirmed();
+                        }
                     }catch(Exception ex)
                     {
                         UIManager.logger.LogException(ex);
@@ -93,6 +96,34 @@ internal static class AAR_SalvageScreen_SalvageConfirmed
         }
     }
 }
+
+[HarmonyPatch(typeof(AAR_SalvageChosen), "ReceiveButtonPress")]
+[HarmonyPriority(Priority.HigherThanNormal)]
+internal static class AAR_SalvageScreen_ReceiveButtonPress
+{
+    private static bool ReceiveButtonPress_flag = false;
+    public static void ClearFlag() { ReceiveButtonPress_flag = false; }
+    public static void SetFlag() { ReceiveButtonPress_flag = true; }
+    [HarmonyPrefix]
+    [HarmonyWrapSafe]
+    [HarmonyPriority(Priority.HigherThanNormal)]
+    public static void Prefix(ref bool __runOriginal, AAR_SalvageChosen __instance, string button)
+    {
+        try
+        {
+            if (__runOriginal == false) { return; }
+            if (button != "ConfirmSalvage") { return; }
+            Log.Main.Debug?.Log($"AAR_SalvageChosen.ReceiveButtonPress flag:{ReceiveButtonPress_flag}");
+            if (ReceiveButtonPress_flag) { __runOriginal = false; return; }
+            ReceiveButtonPress_flag = true;
+        }
+        catch (Exception e)
+        {
+            UIManager.logger.LogException(e);
+        }
+    }
+}
+
 
 [HarmonyPatch(typeof(AAR_SalvageScreen), "OnButtonDoubleClicked")]
 [HarmonyPriority(Priority.HigherThanNormal)]

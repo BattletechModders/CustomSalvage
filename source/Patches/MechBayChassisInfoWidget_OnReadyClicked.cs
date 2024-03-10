@@ -75,8 +75,13 @@ public static class MechBayChassisInfoWidget_OnReadyClicked
         int chassisQuantity = 0;
         if (__instance.selectedChassis.Is<LootableUniqueMech>(out var ulm) && __instance.mechBay.Sim.IsHaveActiveChassis(__instance.selectedChassis.Description.Id))
         {
-            if (__instance.mechBay.Sim.DataManager.ChassisDefs.TryGet(ulm.ReplaceID, out var replaceChassis))
+
+            string currentMechId = ChassisHandler.GetMDefFromCDef(__instance.selectedChassis.Description.Id);
+            var currentMechDef = __instance.mechBay.Sim.DataManager.MechDefs.Get(currentMechId);
+            var replacementMechDef = ChassisHandler.FindMechReplace(currentMechDef, ulm, __instance.mechBay.Sim);
+            if (replacementMechDef != null)
             {
+                var replaceChassis = replacementMechDef.Chassis;
                 chassisQuantity = __instance.mechBay.Sim.GetItemCount(__instance.selectedChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY);
                 __instance.mechBay.Sim.SetItemCount(__instance.selectedChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY, 0);
                 chassisQuantity += __instance.mechBay.Sim.GetItemCount(replaceChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY);
@@ -86,8 +91,7 @@ public static class MechBayChassisInfoWidget_OnReadyClicked
                 __instance.chassisElement.chassisDef = replaceChassis;
                 __instance.chassisElement.partsCount = replaceChassis.MechPartCount;
                 __instance.mechBay.Sim.SetItemCount(replaceChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY, chassisQuantity);
-                var replaceMechId = ChassisHandler.GetMDefFromCDef(replaceChassis.Description.Id);
-                var currentMechId = ChassisHandler.GetMDefFromCDef(__instance.selectedChassis.Description.Id);
+                var replaceMechId = replacementMechDef.Description.Id;
                 __instance.selectedChassis = replaceChassis;
                 if ((string.IsNullOrEmpty(replaceMechId) == false)&&(string.IsNullOrEmpty(currentMechId) == false)
                     &&(__instance.mechBay.Sim.DataManager.ChassisDefs.TryGet(replaceMechId, out var replacemech))

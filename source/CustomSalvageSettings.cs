@@ -190,7 +190,7 @@ public class Settings
     public float TorsoRecoveryPenalty = 0.1f;
     public float HeadRecoveryPenaly = 0;
     public float EjectRecoveryBonus = 0.25f;
-
+    public string[] UniqieReplaceSearchExcludeTags = new string[] { "unit_rarity_chassis_unique", "unit_unique" };
 
     public int CenterTorsoDestroyedParts = 1;
     public float SalvageArmWeight = 0.75f;
