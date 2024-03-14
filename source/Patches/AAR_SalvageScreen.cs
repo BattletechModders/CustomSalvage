@@ -78,7 +78,7 @@ internal static class AAR_SalvageScreen_SalvageConfirmed
                     {
                         UIManager.logger.LogException(ex);
                     }
-                }, true).SetAlwaysOnTop().CancelOnEscape().Render());
+                }, true).SetAlwaysOnTop().AddFader().CancelOnEscape().Render());
                 helper.OnClicked();
             }
             else
