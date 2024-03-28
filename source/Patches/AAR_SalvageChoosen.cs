@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using BattleTech.BinkMedia;
+using UnityEngine.EventSystems;
 
 namespace CustomSalvage;
 
@@ -66,7 +67,74 @@ internal static class AAR_SalvageChosen_HasAllPriority
         __result = true;
     }
 }
+public class AAR_SalvageChosen_Confirm : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+{
+    public bool hovered = false;
+    public bool clicked = false;
+    public AAR_SalvageChosen parent = null;
+    public AAR_SalvageChosenCustom parentCutom = null;
+    public void Init(AAR_SalvageChosen p, AAR_SalvageChosenCustom pc)
+    {
+        this.parent = p;
+        this.parentCutom = pc;
+        hovered = false;
+        clicked = false;
+    }
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        Log.Main.Debug?.Log($"AAR_SalvageChosen_Confirm.OnPointerClick");
+        if(this.parent == null)
+        {
+            Log.Main.Debug?.Log($" -- no parent. skipping");
+        }
+        if (hovered == false) {
+            Log.Main.Debug?.Log($" -- not hovered. skipping");
+        }
+        if(clicked == true)
+        {
+            Log.Main.Debug?.Log($" -- multiply clicks detected. skipping");
+        }
+        try
+        {
+            this.parentCutom.Refresh();
+            this.clicked = true;
+            if (this.parent.tempHoldingGridSpaces[0].activeSelf)
+            {
+                GenericPopupBuilder.Create(GenericPopupType.Warning, "You still not filled priority slots. They will be filled randomly. Are you sure to proceed?")
+                    .AddButton("OK", () =>
+                    {
+                        this.parent.parent.SalvageConfirmed();
+                    }, true).AddButton("Cancel", () =>
+                    {
+                        this.clicked = false;
+                    }, true).SetOnClose(() => { this.clicked = false; }).AddFader().SetAlwaysOnTop().Render();
+            }
+            else
+            {
+                this.parent.parent.SalvageConfirmed();
+            }
+        }
+        catch(Exception e)
+        {
+            UIManager.logger.LogException(e);
+        }
+        //throw new NotImplementedException();
+    }
 
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        Log.Main.Debug?.Log($"AAR_SalvageChosen_Confirm.OnPointerEnter");
+        hovered = true;
+        //throw new NotImplementedException();
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        Log.Main.Debug?.Log($"AAR_SalvageChosen_Confirm.OnPointerExit");
+        hovered = false;
+        //throw new NotImplementedException();
+    }
+}
 
 [HarmonyPatch(typeof(AAR_SalvageChosen), "Init")]
 [HarmonyPatch(new Type[] { typeof(AAR_SalvageScreen), typeof(SimGameState), typeof(Contract) })]
@@ -77,7 +145,40 @@ internal static class AAR_SalvageChosen_Init
         var custom = __instance.gameObject.GetComponent<AAR_SalvageChosenCustom>();
         if (custom == null) { custom = __instance.gameObject.AddComponent<AAR_SalvageChosenCustom>(); }
         custom.Init(__instance);
+        AAR_SalvageChosen_Confirm confirm = __instance.confirmButton.gameObject.GetComponent<AAR_SalvageChosen_Confirm>();
+        if (confirm == null) { confirm = __instance.confirmButton.gameObject.AddComponent<AAR_SalvageChosen_Confirm>(); }
+        confirm.Init(__instance, custom);
         AAR_SalvageScreen_ReceiveButtonPress.ClearFlag();
+    }
+}
+
+
+[HarmonyPatch(typeof(AAR_SalvageChosen), "ReceiveButtonPress")]
+[HarmonyPriority(Priority.HigherThanNormal)]
+internal static class AAR_SalvageScreen_ReceiveButtonPress
+{
+    private static bool ReceiveButtonPress_flag = false;
+    public static void ClearFlag() { ReceiveButtonPress_flag = false; }
+    public static void SetFlag() { ReceiveButtonPress_flag = true; }
+    [HarmonyPrefix]
+    [HarmonyWrapSafe]
+    [HarmonyPriority(Priority.HigherThanNormal)]
+    public static void Prefix(ref bool __runOriginal, AAR_SalvageChosen __instance, string button)
+    {
+        try
+        {            
+            if (__runOriginal == false) { return; }
+            if (button != "ConfirmSalvage") { return; }
+            __runOriginal = false;
+            return;
+            //Log.Main.Debug?.Log($"AAR_SalvageChosen.ReceiveButtonPress flag:{ReceiveButtonPress_flag}");
+            //if (ReceiveButtonPress_flag) { __runOriginal = false; return; }
+            //ReceiveButtonPress_flag = true;
+        }
+        catch (Exception e)
+        {
+            UIManager.logger.LogException(e);
+        }
     }
 }
 
