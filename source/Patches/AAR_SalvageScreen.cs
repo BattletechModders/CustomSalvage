@@ -109,12 +109,19 @@ internal static class AAR_SalvageScreen_OnButtonDoubleClicked
         try
         {
             if (__runOriginal == false) { return; }
-            Log.Main.Debug?.Log($"AAR_SalvageScreen.OnButtonDoubleClicked");
+            Log.Main.Debug?.Log($"AAR_SalvageScreen.OnButtonDoubleClicked dropTargetType:{item.DropParent.dropTargetType} canAdd:{__instance.salvageChosen.tempHoldingGridSpaces[0].activeSelf}");
             __runOriginal = false;
             if (item.DropParent.dropTargetType == MechLabDropTargetType.SalvageChose)
             {
-                __instance.OnItemGrab(item, (PointerEventData)null);
-                __instance.OnMechLabDrop((PointerEventData)null, MechLabDropTargetType.SalvageList);
+                if (item is InventoryItemElement_NotListView elementNotListView)
+                {
+                    if (__instance.salvageChosen.LeftoverInventory.Contains(elementNotListView)) {
+                        Log.Main.Debug?.Log($" in LeftoverInventory skipping");
+                        return; 
+                    }
+                    __instance.OnItemGrab(item, (PointerEventData)null);
+                    __instance.OnMechLabDrop((PointerEventData)null, MechLabDropTargetType.SalvageList);
+                }
             }
             else
             {
