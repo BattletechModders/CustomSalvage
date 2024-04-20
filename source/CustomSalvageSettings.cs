@@ -172,10 +172,17 @@ public class Settings
     public string FullUnitInfoIcon = "icons8-info";
     public float FullUnitRandomSalvageSlotUsingMod = 1f;
     public float FullUnitStructurePersentage = 0.5f;
+    public float FullMechStructurePersentage = 0.0f;
+    public float FullVehicleStructurePersentage = 0.0f;
+    public float AdditionalStructurePercentagePerPart = 0.0f;
+    public float FullUnitRecoveryChance = 0.9f;
+    public float FullMechRecoveryChance = 0.95f;
+    public float FullVehicleRecoveryChance = 0.3f;
     public bool FullUnitUsedAmountOfLootableComponents = true;
     public bool FullUnitUsedAllRandomSalvageSlots = false;
     public bool SquadDisassembleComponents = false;
     public bool VehicleDisassembleComponents = false;
+    public bool VehicleDisassembleEditableComponentsOnly = true;
     public bool VehicleAlwaysDisassembled = false;
     public bool VehicleAddSanitize = true;
 

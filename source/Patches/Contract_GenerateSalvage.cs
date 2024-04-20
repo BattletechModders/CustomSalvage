@@ -231,6 +231,35 @@ internal static class Contract_GenerateSalvage
         }
         return allStructure > 0.01f ? (availStructure / allStructure) : 0f;
     }
+    public static float GetStructureBorder(MechDef mech, SimGameState sim)
+    {
+        float result = Control.Instance.Settings.FullUnitStructurePersentage;
+        if (mech.IsVehicle() && (Control.Instance.Settings.FullVehicleStructurePersentage > 0f))
+        {
+            result = Control.Instance.Settings.FullVehicleStructurePersentage;
+        }else if((mech.IsSquad() == false)&&(Control.Instance.Settings.FullMechStructurePersentage > 0f))
+        {
+            result = Control.Instance.Settings.FullMechStructurePersentage;
+        }
+        if(result > 0f)
+        {
+            result += Control.Instance.Settings.AdditionalStructurePercentagePerPart * sim.Constants.Story.DefaultMechPartMax;
+        }
+        return result;
+    }
+    public static float GetFullRecoveryChance(MechDef mech)
+    {
+        float result = Control.Instance.Settings.FullUnitRecoveryChance;
+        if (mech.IsVehicle() && (Control.Instance.Settings.FullVehicleRecoveryChance > 0f))
+        {
+            result = Control.Instance.Settings.FullVehicleRecoveryChance;
+        }
+        else if ((mech.IsSquad() == false) && (Control.Instance.Settings.FullMechRecoveryChance > 0f))
+        {
+            result = Control.Instance.Settings.FullMechRecoveryChance;
+        }
+        return result > 0f ? result : 1f;
+    }
     public static void AddMechToSalvage(MechDef mech, ContractHelper contract, SimGameState simgame, SimGameConstants constants, bool can_upgrade, bool force_disassemble)
     {
         Log.Main.Debug?.Log($"--- Salvaging mech {mech.Description.Id}");
@@ -254,9 +283,19 @@ internal static class Contract_GenerateSalvage
             full_mech_salvage = false;
         }
         float structAvail = GetStructurePersantage(mech);
-        if (full_mech_salvage && (Control.Instance.Settings.FullUnitStructurePersentage > 0f) && (structAvail < Control.Instance.Settings.FullUnitStructurePersentage))
+        float structBorder = GetStructureBorder(mech, simgame);
+        Log.Main.Debug?.Log($" unit rest structure persentage {structAvail} border:{structBorder}");
+        if (full_mech_salvage && (structBorder > 0f) && (structAvail < structBorder))
         {
-            Log.Main.Debug?.Log($" unit rest structure persentage {structAvail}");
+            Log.Main.Debug?.Log($"  wasted");
+            full_mech_salvage = false;
+        }
+        float recoveryRoll = UnityEngine.Random.Range(0f, 1f);
+        float rollBorder = GetFullRecoveryChance(mech);
+        Log.Main.Debug?.Log($" unit full recovery roll {recoveryRoll} border:{rollBorder}");
+        if(full_mech_salvage && (recoveryRoll > rollBorder))
+        {
+            Log.Main.Debug?.Log($"  wasted");
             full_mech_salvage = false;
         }
         try
@@ -298,11 +337,24 @@ internal static class Contract_GenerateSalvage
             {
                 if (((mech.IsVehicle() == false) && (mech.IsSquad() == false))||(mech.IsVehicle() && Control.Instance.Settings.VehicleDisassembleComponents) || (mech.IsSquad() && Control.Instance.Settings.SquadDisassembleComponents))
                 {
+                    bool isVehcile = mech.IsVehicle();
+                    Log.Main.Debug?.Log($"--- Adding components isVehicle:{isVehcile} partedit:{CustomUnits.Core.Settings.VehcilesPartialEditable}");
                     foreach (var component in mech.Inventory.Where(item =>
                                  !mech.IsLocationDestroyed(item.MountedLocation) &&
                                  item.DamageLevel != ComponentDamageLevel.Destroyed))
                     {
-                        contract.AddComponentToPotentialSalvage(component.Def, ComponentDamageLevel.Functional, can_upgrade);
+                        if (CustomUnits.Core.Settings.VehcilesPartialEditable && isVehcile && Control.Instance.Settings.VehicleDisassembleEditableComponentsOnly)
+                        {
+                            Log.Main.Debug?.Log($"  {component.ComponentDefID}:{component.ComponentDefType}");
+                            if (component.isEditable())
+                            {
+                                contract.AddComponentToPotentialSalvage(component.Def, ComponentDamageLevel.Functional, can_upgrade);
+                            }
+                        }
+                        else
+                        {
+                            contract.AddComponentToPotentialSalvage(component.Def, ComponentDamageLevel.Functional, can_upgrade);
+                        }
                     }
                 }
             }
