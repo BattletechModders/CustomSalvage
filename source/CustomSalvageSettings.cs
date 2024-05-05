@@ -181,6 +181,7 @@ public class Settings
     public bool FullUnitUsedAmountOfLootableComponents = true;
     public bool FullUnitUsedAllRandomSalvageSlots = false;
     public bool SquadDisassembleComponents = false;
+    public float SquadAdditionalPartChance = 0f;
     public bool VehicleDisassembleComponents = false;
     public bool VehicleDisassembleEditableComponentsOnly = true;
     public bool VehicleAlwaysDisassembled = false;

@@ -19,6 +19,8 @@ using Newtonsoft.Json;
 using static BinkPlugin.Bink;
 using CustomUnits;
 using static BattleTech.SimGameBattleSimulator;
+using BattleTech.Save.SaveGameStructure;
+using System.Text;
 
 namespace CustomSalvage;
 
@@ -398,6 +400,7 @@ public static partial class ChassisHandler
             mechBay.Sim.AddMech(0, new_mech, true, false, true, null);
             Log.Main.Debug?.Log("-- Posting Message");
             mechBay.Sim.MessageCenter.PublishMessage(new SimGameMechAddedMessage(new_mech, chassis.MechPartMax, true));
+            SanitizeUniqueUnits(mechBay.Sim);
         }
         catch (Exception e)
         {
@@ -405,7 +408,127 @@ public static partial class ChassisHandler
         }
 
     }
+    public static void ReplaceWith(SimGameState sim, MechDef existingMech, MechDef replaceMech, out int parts, out int chassis)
+    {
+        parts = 0;
+        chassis = 0;
+        try
+        {
+            int parts_count = sim.GetItemCount(existingMech.Description.Id, "MECHPART", SimGameState.ItemCountType.UNDAMAGED_ONLY);
+            int chassis_count = sim.GetItemCount(existingMech.Chassis.Description.Id, BattleTechResourceType.MechDef.ToString(), SimGameState.ItemCountType.UNDAMAGED_ONLY);
+            parts = parts_count;
+            chassis = chassis_count;
+            Log.Main.Debug?.Log($" -- {existingMech.Chassis.Description.Id} unique. Parts:{parts_count} chassis:{chassis_count} replace:{replaceMech.Description.Id}");
+            if (parts_count > 0)
+            {
+                //sim.SetItemCount(unit.Value.Description.Id, "MECHPART", SimGameState.ItemCountType.UNDAMAGED_ONLY, 0);
+                for (int t = 0; t < parts_count; ++t) { sim.RemoveItemStat(existingMech.Description.Id, "MECHPART", false); }
+                if (replaceMech != null)
+                {
+                    //sim.SetItemCount(replaceMech.Description.Id, "MECHPART", SimGameState.ItemCountType.UNDAMAGED_ONLY, parts_count);
+                    for (int t = 0; t < parts_count; ++t) { sim.AddItemStat(replaceMech.Description.Id, "MECHPART", false); }
+                }
+            }
+            if (chassis_count > 0)
+            {
+                //sim.SetItemCount(existingMech.Description.Id, BattleTechResourceType.MechDef.ToString(), SimGameState.ItemCountType.UNDAMAGED_ONLY, 0);
+                for (int t = 0; t < chassis_count; ++t) { sim.RemoveItemStat(existingMech.Chassis.Description.Id, BattleTechResourceType.MechDef.ToString(), false); }
+                if (replaceMech != null)
+                {
+                    //sim.SetItemCount(replaceMech.Chassis.Description.Id, BattleTechResourceType.MechDef.ToString(), SimGameState.ItemCountType.UNDAMAGED_ONLY, chassis_count);
+                    for (int t = 0; t < chassis_count; ++t) { sim.AddItemStat(replaceMech.Chassis.Description.Id, BattleTechResourceType.MechDef.ToString(), false); }
+                }
+            }
+            parts_count = sim.GetItemCount(existingMech.Description.Id, "MECHPART", SimGameState.ItemCountType.UNDAMAGED_ONLY);
+            chassis_count = sim.GetItemCount(existingMech.Chassis.Description.Id, BattleTechResourceType.MechDef.ToString(), SimGameState.ItemCountType.UNDAMAGED_ONLY);
+            Log.Main.Debug?.Log($" -- updating Parts:{parts_count} chassis:{chassis_count}");
+            parts_count = sim.GetItemCount(replaceMech.Description.Id, "MECHPART", SimGameState.ItemCountType.UNDAMAGED_ONLY);
+            chassis_count = sim.GetItemCount(replaceMech.Chassis.Description.Id, BattleTechResourceType.MechDef.ToString(), SimGameState.ItemCountType.UNDAMAGED_ONLY);
+            Log.Main.Debug?.Log($" -- updating {replaceMech.Description.Id} Parts:{parts_count} chassis:{chassis_count}");
+        }
+        catch (Exception e)
+        {
+            Log.Main.Error?.Log(e);
+        }
+    }
+    public static void SanitizeUniqueUnits(SimGameState sim)
+    {
+        try
+        {
+            Log.Main.Debug?.Log("SanitizeUniqueUnits");
+            StringBuilder message = new StringBuilder();
+            message.AppendLine("__/CS.UNITS_REPLACED.HEADER/__");
+            foreach (var unit in sim.ActiveMechs)
+            {
+                if (unit.Value == null) { continue; }
+                if (unit.Value.Chassis.Is<LootableUniqueMech>(out var ulm))
+                {
+                    var replaceMech = unit.Value.FindMechReplace(ulm, sim);
+                    ReplaceWith(sim, unit.Value, replaceMech, out var parts, out var chassis);
+                    if (replaceMech == null)
+                    {
+                        if (parts != 0)
+                        {
+                            message.AppendLine(new Localize.Text("__/CS.UNITS_REPLACED.REMOVED.PARTS/__", parts, unit.Value.Chassis.VariantName).ToString());
+                        }
+                        if (chassis != 0)
+                        {
+                            message.AppendLine(new Localize.Text("__/CS.UNITS_REPLACED.REMOVED.CHASSIS/__", chassis, unit.Value.Chassis.VariantName).ToString());
+                        }
+                    }
+                    else
+                    {
+                        if (parts != 0)
+                        {
+                            message.AppendLine(new Localize.Text("__/CS.UNITS_REPLACED.REPLACED.PARTS/__", parts, unit.Value.Chassis.VariantName, replaceMech.Chassis.VariantName).ToString());
+                        }
+                        if (chassis != 0)
+                        {
+                            message.AppendLine(new Localize.Text("__/CS.UNITS_REPLACED.REPLACED.CHASSIS/__", chassis, unit.Value.Chassis.VariantName, replaceMech.Chassis.VariantName).ToString());
+                        }
+                    }
+                }
+            }
+            foreach (var unit in sim.ReadyingMechs)
+            {
+                if (unit.Value == null) { continue; }
+                if (unit.Value.Chassis.Is<LootableUniqueMech>(out var ulm))
+                {
+                    var replaceMech = unit.Value.FindMechReplace(ulm, sim);
+                    ReplaceWith(sim, unit.Value, replaceMech, out var parts, out var chassis);
+                    if (replaceMech == null)
+                    {
+                        if (parts != 0)
+                        {
+                            message.AppendLine(new Localize.Text("__/CS.UNITS_REPLACED.REMOVED.PARTS/__", parts, unit.Value.Chassis.VariantName).ToString());
+                        }
+                        if (chassis != 0)
+                        {
+                            message.AppendLine(new Localize.Text("__/CS.UNITS_REPLACED.REMOVED.CHASSIS/__", chassis, unit.Value.Chassis.VariantName).ToString());
+                        }
+                    }
+                    else
+                    {
+                        if (parts != 0)
+                        {
+                            message.AppendLine(new Localize.Text("__/CS.UNITS_REPLACED.REPLACED.PARTS/__", parts, unit.Value.Chassis.VariantName, replaceMech.Chassis.VariantName).ToString());
+                        }
+                        if (chassis != 0)
+                        {
+                            message.AppendLine(new Localize.Text("__/CS.UNITS_REPLACED.REPLACED.CHASSIS/__", chassis, unit.Value.Chassis.VariantName, replaceMech.Chassis.VariantName).ToString());
+                        }
+                    }
+                }
+            }
+            sim.interruptQueue.QueuePauseNotification("__/CS.UNITS_REPLACED.TITLE/__", message.ToString(),
+                sim.GetCrewPortrait(SimGameCrew.Crew_Yang), null, () => { });
 
+        }
+        catch (Exception e)
+        {
+            Log.Main.Error?.Log(e);
+        }
+    }
     private static void RemoveMechPart(string id, int count)
     {
         for (int i = 0; i < count; i++)

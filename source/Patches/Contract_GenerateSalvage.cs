@@ -234,10 +234,11 @@ internal static class Contract_GenerateSalvage
     public static float GetStructureBorder(MechDef mech, SimGameState sim)
     {
         float result = Control.Instance.Settings.FullUnitStructurePersentage;
-        if (mech.IsVehicle() && (Control.Instance.Settings.FullVehicleStructurePersentage > 0f))
+        if (Mathf.Abs(result) < 0.001f) { return 0f; }
+        if (mech.IsVehicle() && (Mathf.Abs(Control.Instance.Settings.FullVehicleStructurePersentage) > 0.001f))
         {
             result = Control.Instance.Settings.FullVehicleStructurePersentage;
-        }else if((mech.IsSquad() == false)&&(Control.Instance.Settings.FullMechStructurePersentage > 0f))
+        }else if((mech.IsSquad() == false)&&(Mathf.Abs(Control.Instance.Settings.FullMechStructurePersentage) > 0.001f))
         {
             result = Control.Instance.Settings.FullMechStructurePersentage;
         }
@@ -263,7 +264,7 @@ internal static class Contract_GenerateSalvage
     public static void AddMechToSalvage(MechDef mech, ContractHelper contract, SimGameState simgame, SimGameConstants constants, bool can_upgrade, bool force_disassemble)
     {
         Log.Main.Debug?.Log($"--- Salvaging mech {mech.Description.Id}");
-        int numparts = Control.Instance.GetNumParts(mech);
+        int numparts = mech.IsSquad() ? PartsNumCalculations.SquadPartsCount(mech) : Control.Instance.GetNumParts(mech);
         bool full_mech_salvage = Control.Instance.Settings.FullEnemyUnitSalvage;
         if (force_disassemble) { full_mech_salvage = false; }
         if ((full_mech_salvage) && (mech.IsVehicle() == false) && (mech.IsSquad() == false)) {

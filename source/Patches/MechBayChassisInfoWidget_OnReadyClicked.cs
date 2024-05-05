@@ -76,33 +76,38 @@ public static class MechBayChassisInfoWidget_OnReadyClicked
         if (__instance.selectedChassis.Is<LootableUniqueMech>(out var ulm) && __instance.mechBay.Sim.IsHaveActiveChassis(__instance.selectedChassis.Description.Id))
         {
 
-            string currentMechId = ChassisHandler.GetMDefFromCDef(__instance.selectedChassis.Description.Id);
-            var currentMechDef = __instance.mechBay.Sim.DataManager.MechDefs.Get(currentMechId);
-            var replacementMechDef = ChassisHandler.FindMechReplace(currentMechDef, ulm, __instance.mechBay.Sim);
-            if (replacementMechDef != null)
-            {
-                var replaceChassis = replacementMechDef.Chassis;
-                chassisQuantity = __instance.mechBay.Sim.GetItemCount(__instance.selectedChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY);
-                __instance.mechBay.Sim.SetItemCount(__instance.selectedChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY, 0);
-                chassisQuantity += __instance.mechBay.Sim.GetItemCount(replaceChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY);
-                __instance.mechBay.Sim.SetItemCount(replaceChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY, chassisQuantity);
-                replaceChassis.MechPartCount += __instance.selectedChassis.MechPartCount;
-                __instance.selectedChassis.MechPartCount = 0;
-                __instance.chassisElement.chassisDef = replaceChassis;
-                __instance.chassisElement.partsCount = replaceChassis.MechPartCount;
-                __instance.mechBay.Sim.SetItemCount(replaceChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY, chassisQuantity);
-                var replaceMechId = replacementMechDef.Description.Id;
-                __instance.selectedChassis = replaceChassis;
-                if ((string.IsNullOrEmpty(replaceMechId) == false)&&(string.IsNullOrEmpty(currentMechId) == false)
-                    &&(__instance.mechBay.Sim.DataManager.ChassisDefs.TryGet(replaceMechId, out var replacemech))
-                    && (__instance.mechBay.Sim.DataManager.ChassisDefs.TryGet(currentMechId, out var currentmech)))
-                {
-                    var mechPartsCount = __instance.mechBay.Sim.GetItemCount(currentMechId, "MECHPART", SimGameState.ItemCountType.UNDAMAGED_ONLY);
-                    mechPartsCount += __instance.mechBay.Sim.GetItemCount(replaceMechId, "MECHPART", SimGameState.ItemCountType.UNDAMAGED_ONLY);
-                    __instance.mechBay.Sim.SetItemCount(replaceMechId, "MECHPART", SimGameState.ItemCountType.UNDAMAGED_ONLY, mechPartsCount);
-                    __instance.mechBay.Sim.SetItemCount(currentMechId, "MECHPART", SimGameState.ItemCountType.UNDAMAGED_ONLY, 0);
-                }
-            }
+            //string currentMechId = ChassisHandler.GetMDefFromCDef(__instance.selectedChassis.Description.Id);
+            //var currentMechDef = __instance.mechBay.Sim.DataManager.MechDefs.Get(currentMechId);
+            //var replacementMechDef = ChassisHandler.FindMechReplace(currentMechDef, ulm, __instance.mechBay.Sim);
+            //if (replacementMechDef != null)
+            //{
+            //    var replaceChassis = replacementMechDef.Chassis;
+            //    chassisQuantity = __instance.mechBay.Sim.GetItemCount(__instance.selectedChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY);
+            //    __instance.mechBay.Sim.SetItemCount(__instance.selectedChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY, 0);
+            //    chassisQuantity += __instance.mechBay.Sim.GetItemCount(replaceChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY);
+            //    __instance.mechBay.Sim.SetItemCount(replaceChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY, chassisQuantity);
+            //    replaceChassis.MechPartCount += __instance.selectedChassis.MechPartCount;
+            //    __instance.selectedChassis.MechPartCount = 0;
+            //    __instance.chassisElement.chassisDef = replaceChassis;
+            //    __instance.chassisElement.partsCount = replaceChassis.MechPartCount;
+            //    __instance.mechBay.Sim.SetItemCount(replaceChassis.Description.Id, typeof(MechDef), SimGameState.ItemCountType.UNDAMAGED_ONLY, chassisQuantity);
+            //    var replaceMechId = replacementMechDef.Description.Id;
+            //    __instance.selectedChassis = replaceChassis;
+            //    if ((string.IsNullOrEmpty(replaceMechId) == false)&&(string.IsNullOrEmpty(currentMechId) == false)
+            //        &&(__instance.mechBay.Sim.DataManager.ChassisDefs.TryGet(replaceMechId, out var replacemech))
+            //        && (__instance.mechBay.Sim.DataManager.ChassisDefs.TryGet(currentMechId, out var currentmech)))
+            //    {
+            //        var mechPartsCount = __instance.mechBay.Sim.GetItemCount(currentMechId, "MECHPART", SimGameState.ItemCountType.UNDAMAGED_ONLY);
+            //        mechPartsCount += __instance.mechBay.Sim.GetItemCount(replaceMechId, "MECHPART", SimGameState.ItemCountType.UNDAMAGED_ONLY);
+            //        __instance.mechBay.Sim.SetItemCount(replaceMechId, "MECHPART", SimGameState.ItemCountType.UNDAMAGED_ONLY, mechPartsCount);
+            //        __instance.mechBay.Sim.SetItemCount(currentMechId, "MECHPART", SimGameState.ItemCountType.UNDAMAGED_ONLY, 0);
+            //    }
+            //}
+            Log.Main.Debug?.Log($"Detected unique chassis {__instance.selectedChassis.Description.Id} that is already in bays");
+            ChassisHandler.SanitizeUniqueUnits(__instance.mechBay.Sim);
+            __instance.mechBay.RefreshData(false);
+            __runOriginal = false;
+            return;
         }
         ChassisHandler.PreparePopup(__instance.selectedChassis, __instance.mechBay, __instance, __instance.chassisElement);
 

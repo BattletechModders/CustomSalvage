@@ -52,6 +52,8 @@ namespace CustomSalvage
             Log.Main.Debug?.Log($"SanitizeLootMagnetStacking");
             foreach (SalvageDef salvageDef in list)
             {
+                if (string.IsNullOrEmpty(salvageDef.Description.UIName)) { salvageDef.Description.UIName = salvageDef.Description.Name; }
+                if (string.IsNullOrEmpty(salvageDef.Description.UIName)) { salvageDef.Description.UIName = salvageDef.Description.Id; }
                 string displayName = salvageDef.Description.UIName;
                 int qty_pos = displayName.IndexOf(" <lowercase>[QTY:");
                 if (qty_pos >= 0)

@@ -6,6 +6,19 @@ public delegate int PartsNumDelegeate(MechDef mech);
 
 public static class PartsNumCalculations
 {
+    public static int SquadPartsCount(MechDef mech)
+    {
+        int n = UnityGameInstance.BattleTechGame.Simulation.Constants.Story.DefaultMechPartMax;
+        int result = 1;
+        for(int t = 0; t < (n-1); ++t)
+        {
+            if(UnityEngine.Random.Range(0f, 1f) < Control.Instance.Settings.SquadAdditionalPartChance)
+            {
+                ++result;
+            }
+        }
+        return result;
+    }
     internal static int VanilaAdjusted(MechDef mech)
     {
         int n =
