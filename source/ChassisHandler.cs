@@ -328,6 +328,7 @@ public static partial class ChassisHandler
     {
         mechBay.OnReadyMech(unitElement);
         infoWidget.SetData(mechBay, null);
+        ChassisHandler.LAST_MAKE_MECH_TIME = Time.time;
     }
 
     public static void PreparePopup(ChassisDef chassisDef, MechBayPanel mechbay, MechBayChassisInfoWidget widget, MechBayChassisUnitElement unitElement)
@@ -361,7 +362,7 @@ public static partial class ChassisHandler
             Log.Main.Error?.Log("Error in Complete Mech", e);
         }
     }
-
+    public static float LAST_MAKE_MECH_TIME = 0f;
     private static void MakeMech(SimGameState sim, int other_parts, int all_used_parts, int used_empty_parts)
     {
         Log.Main.Debug?.Log($"Mech Assembly started for {mech.Description.UIName}");
@@ -406,7 +407,7 @@ public static partial class ChassisHandler
         {
             Log.Main.Error?.Log($"ERROR in MakeMech", e);
         }
-
+        LAST_MAKE_MECH_TIME = Time.time;
     }
     public static void ReplaceWith(SimGameState sim, MechDef existingMech, MechDef replaceMech, out int parts, out int chassis)
     {
@@ -458,6 +459,7 @@ public static partial class ChassisHandler
             Log.Main.Debug?.Log("SanitizeUniqueUnits");
             StringBuilder message = new StringBuilder();
             message.AppendLine("__/CS.UNITS_REPLACED.HEADER/__");
+            bool needMessage = false;
             foreach (var unit in sim.ActiveMechs)
             {
                 if (unit.Value == null) { continue; }
@@ -470,10 +472,12 @@ public static partial class ChassisHandler
                         if (parts != 0)
                         {
                             message.AppendLine(new Localize.Text("__/CS.UNITS_REPLACED.REMOVED.PARTS/__", parts, unit.Value.Chassis.VariantName).ToString());
+                            needMessage = true;
                         }
                         if (chassis != 0)
                         {
                             message.AppendLine(new Localize.Text("__/CS.UNITS_REPLACED.REMOVED.CHASSIS/__", chassis, unit.Value.Chassis.VariantName).ToString());
+                            needMessage = true;
                         }
                     }
                     else
@@ -481,10 +485,12 @@ public static partial class ChassisHandler
                         if (parts != 0)
                         {
                             message.AppendLine(new Localize.Text("__/CS.UNITS_REPLACED.REPLACED.PARTS/__", parts, unit.Value.Chassis.VariantName, replaceMech.Chassis.VariantName).ToString());
+                            needMessage = true;
                         }
                         if (chassis != 0)
                         {
                             message.AppendLine(new Localize.Text("__/CS.UNITS_REPLACED.REPLACED.CHASSIS/__", chassis, unit.Value.Chassis.VariantName, replaceMech.Chassis.VariantName).ToString());
+                            needMessage = true;
                         }
                     }
                 }
@@ -501,10 +507,12 @@ public static partial class ChassisHandler
                         if (parts != 0)
                         {
                             message.AppendLine(new Localize.Text("__/CS.UNITS_REPLACED.REMOVED.PARTS/__", parts, unit.Value.Chassis.VariantName).ToString());
+                            needMessage = true;
                         }
                         if (chassis != 0)
                         {
                             message.AppendLine(new Localize.Text("__/CS.UNITS_REPLACED.REMOVED.CHASSIS/__", chassis, unit.Value.Chassis.VariantName).ToString());
+                            needMessage = true;
                         }
                     }
                     else
@@ -512,17 +520,21 @@ public static partial class ChassisHandler
                         if (parts != 0)
                         {
                             message.AppendLine(new Localize.Text("__/CS.UNITS_REPLACED.REPLACED.PARTS/__", parts, unit.Value.Chassis.VariantName, replaceMech.Chassis.VariantName).ToString());
+                            needMessage = true;
                         }
                         if (chassis != 0)
                         {
                             message.AppendLine(new Localize.Text("__/CS.UNITS_REPLACED.REPLACED.CHASSIS/__", chassis, unit.Value.Chassis.VariantName, replaceMech.Chassis.VariantName).ToString());
+                            needMessage = true;
                         }
                     }
                 }
             }
-            sim.interruptQueue.QueuePauseNotification("__/CS.UNITS_REPLACED.TITLE/__", message.ToString(),
-                sim.GetCrewPortrait(SimGameCrew.Crew_Yang), null, () => { });
-
+            if (needMessage)
+            {
+                sim.interruptQueue.QueuePauseNotification("__/CS.UNITS_REPLACED.TITLE/__", message.ToString(),
+                    sim.GetCrewPortrait(SimGameCrew.Crew_Yang), null, () => { });
+            }
         }
         catch (Exception e)
         {

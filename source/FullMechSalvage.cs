@@ -248,10 +248,15 @@ namespace CustomSalvage
         public ListElementController_SalvageFullMech_NotListView owner = null;
         public AAR_SalvageScreen salvageScreen = null;
         public bool allowDisassemble { get; set; } = true;
+        public RectTransform TYPE_ICON_TR = null;
+        public RectTransform TOOLTIP_TR = null;
+        public RectTransform TOOLTIP2_TR = null;
+        public RectTransform main_tr = null;
         public void Init(ListElementController_SalvageFullMech_NotListView owner, AAR_SalvageScreen salvageScreen)
         {
             this.owner = owner;
             this.salvageScreen = salvageScreen;
+            this.UpdateIcon();
         }
         public void Pool()
         {
@@ -265,6 +270,17 @@ namespace CustomSalvage
                 this.owner.ItemWidget.icon.vectorGraphics = icon;
             }
         }
+        public void UpdateIcon()
+        {
+            if (owner != null)
+            {
+                if (owner.ItemWidget != null)
+                {
+                    TOOLTIP2_TR.anchoredPosition = new Vector2(0f, 0f);
+                }
+            }
+        }
+
         public static FullMechSalvageInfo Instantine(InventoryItemElement_NotListView parent)
         {
             var TOOLTIP = parent.SalvageTooltip.gameObject;
@@ -280,11 +296,16 @@ namespace CustomSalvage
             TOOLTIP2_TR.sizeDelta = new Vector2(TYPE_ICON_TR.sizeDelta.x - main_tr.sizeDelta.x, 0f);
             TOOLTIP_TR.sizeDelta = new Vector2(-TYPE_ICON_TR.sizeDelta.x, 0f);
             TOOLTIP_TR.anchoredPosition = new Vector2(TYPE_ICON_TR.sizeDelta.x / 2f, 1);
+            TOOLTIP2_TR.anchoredPosition = new Vector2(0f, 1f);
             Log.Main.Debug?.Log($" TYPE_ICON_TR:{TYPE_ICON_TR.sizeDelta} main_tr:{main_tr.sizeDelta} TOOLTIP_TR:{TOOLTIP_TR.sizeDelta},{TOOLTIP_TR.anchoredPosition}");
             var tooltip2 = TOOLTIP2.GetComponent<HBSTooltip>();
             if (tooltip2 != null) { GameObject.Destroy(tooltip2); }
             parent.gameObject.name = ListElementController_BASE_NotListView.INVENTORY_ELEMENT_PREFAB_NotListView + FullMechSalvageInfo.FULL_MECH_SUFFIX + "(Clone)";
             var result = TOOLTIP2.AddComponent<FullMechSalvageInfo>();
+            result.TYPE_ICON_TR = TYPE_ICON_TR;
+            result.TOOLTIP2_TR = TOOLTIP2_TR;
+            result.TOOLTIP_TR = TOOLTIP_TR;
+            result.main_tr = main_tr;
             if (UIManager.Instance.dataManager.Exists(BattleTechResourceType.SVGAsset, Control.Instance.Settings.FullUnitInfoIcon))
             {
                 parent.icon.vectorGraphics = UIManager.Instance.dataManager.GetObjectOfType<SVGAsset>(Control.Instance.Settings.FullUnitInfoIcon, BattleTechResourceType.SVGAsset);
