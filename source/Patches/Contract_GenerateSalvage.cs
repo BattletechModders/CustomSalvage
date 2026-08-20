@@ -319,6 +319,12 @@ internal static class Contract_GenerateSalvage
                 Log.Main.Debug?.Log($"--- {Control.Instance.Settings.NoSalvageMechTag} mech, no parts");
                 full_mech_salvage = false;
             }
+            else if (mech_to_salvage.MechTags.Contains(Control.Instance.Settings.OnlySalvageComponentsTag) ||
+                     mech_to_salvage.Chassis.ChassisTags.Contains(Control.Instance.Settings.OnlySalvageComponentsTag))
+            {
+                Log.Main.Debug?.Log($"--- {Control.Instance.Settings.OnlySalvageComponentsTag} mech, no parts");
+                full_mech_salvage = false;
+            }
             else
             {
                 if (full_mech_salvage == false)
@@ -354,7 +360,7 @@ internal static class Contract_GenerateSalvage
                         if (CustomUnits.Core.Settings.VehcilesPartialEditable && isVehcile && Control.Instance.Settings.VehicleDisassembleEditableComponentsOnly)
                         {
                             Log.Main.Debug?.Log($"  {component.ComponentDefID}:{component.ComponentDefType}");
-                            if (component.isEditable())
+                            if (component.isEditable() || component.Def.ComponentTags.Any(tag => Control.Instance.Settings.VehicleDisassembleEditableComponentsOnlyOverrideTags.Contains(tag)))
                             {
                                 contract.AddComponentToPotentialSalvage(component.Def, ComponentDamageLevel.Functional, can_upgrade);
                             }

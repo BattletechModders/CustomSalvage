@@ -184,12 +184,14 @@ public class Settings
     public float SquadAdditionalPartChance = 0f;
     public bool VehicleDisassembleComponents = false;
     public bool VehicleDisassembleEditableComponentsOnly = true;
+    public string[] VehicleDisassembleEditableComponentsOnlyOverrideTags = {};
     public bool VehicleAlwaysDisassembled = false;
     public bool VehicleAddSanitize = true;
 
     public bool AllowDropBlackListed = false;
     public string NoSalvageMechTag = "NOSALVAGE";
     public string NoSalvageVehicleTag = "NOSALVAGE";
+    public string OnlySalvageComponentsTag = "NOUNITSALVAGE";
     public string UniqieUnitTag = "UNIQUE";
 
 

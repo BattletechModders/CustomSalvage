@@ -20,7 +20,9 @@ internal static class LostUnitActions
         int num_parts = Control.Instance.GetNumParts(unit.mech);
 
         if (!unit.mech.MechTags.Contains(Control.Instance.Settings.NoSalvageMechTag) &&
-            !unit.mech.Chassis.ChassisTags.Contains(Control.Instance.Settings.NoSalvageMechTag))
+            !unit.mech.Chassis.ChassisTags.Contains(Control.Instance.Settings.NoSalvageMechTag) &&
+            !unit.mech.MechTags.Contains(Control.Instance.Settings.OnlySalvageComponentsTag) &&
+            !unit.mech.Chassis.ChassisTags.Contains(Control.Instance.Settings.OnlySalvageComponentsTag))
         {
             contract.AddMechPartsToPotentialSalvage(UnityGameInstance.BattleTechGame.Simulation.Constants,
                 unit.mech, num_parts);

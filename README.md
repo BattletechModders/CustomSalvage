@@ -68,6 +68,8 @@ Defines what to do with your lost mech
 - `bool SalvageTurrets = true` - add turrets to salvage
 - `bool UpgradeSalvage = false` - salavaged items have chance to upgrade to "+" variants(not span into player lost mech items if they go to salvage)
 - `float SalvageTurretsComponentChance = 0.33f` - in vanila game turret components dont broke, and usually turret have a lot of weapon. so this modifier give less salvage for balance
+- `NoSalvageMechTag` - Units with this tag will not be added to salvage pool, nor will their components.
+- `OnlySalvageComponentsTag` - Units with this tag will not be added to salvage pool. Their components will however not be removed from the pool.
 
 #### full units salvage
 - `bool FullEnemyUnitSalvage = true` - allow to salvage units without dissassemling to part and components. If enabled units apears in salvage in state they been killed. If you killed mech by destroying legs it appers in salvage with destroyed legs. Same rule for its components destroyed in battle. For mechs there is special rule - if center torso is destroyed it will be dissasembled to parts anyway
@@ -77,6 +79,8 @@ Defines what to do with your lost mech
 - `bool FullUnitUsedAllRandomSalvageSlots = true` - if enabled any full unit added to priority salvage reduce random salvage amount to 0. Eg. you will only able to get priority salvage. 
 - `bool SquadDisassembleComponents = false` - by current rules BA squads are always dissassembled to parts in salvage. If this option enabled its components goes to possible salvage. Option working regardless FullEnemyUnitSalvage state.
 - `bool VehicleDisassembleComponents = false` - If this option enabled vehicle components goes to possible salvage if dissasembled to parts. If disabled only vehicle parts will be result of dissassemling. Option working regardless FullEnemyUnitSalvage state.
+- `bool VehicleDisassembleEditableComponentsOnly = true` - If this option is enabled while `VehicleDisassembleComponents` is also enabled, only components that can be used to refit vehicles will be available as salvage.
+- `string[] VehicleDisassembleEditableComponentsOnlyOverrideTags = {}` - If `VehicleDisassembleEditableComponentsOnly` is enabled, any component with a tag found in the `VehicleDisassembleEditableComponentsOnlyOverrideTags` array will still be made available as salvage, even if it can't be used to refit a vehicle.
 - `bool VehicleAlwaysDisassembled = false` - If this option enabled vehicles goes to salvage in dissasembled state, otherwise they always go in full state (vehciles have no CT).
 - `bool FullUnitUsedAmountOfLootableComponents = true` - If true amount of not destroyed salvagable componetns will be added to required random salvage slots to be able to get full unit as salvage. Needed random salvage slots formula will be (DefaultMechPartMax + <amount of components>) \* FullUnitRandomSalvageSlotUsingMod - 1
 - `float FullUnitStructurePersentage = 0.5f` - if above 0f (and FullEnemyUnitSalvage is true) additional rule to detect if unit goes to salvage in disassembled state will be used (regardless type) - percentage of rest structure - if unit have less than FullUnitStructurePersentage of overall structure it goes in disassembled state.
