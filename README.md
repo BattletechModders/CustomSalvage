@@ -67,6 +67,11 @@ Defines what to do with your lost mech
 - `public bool AllowDropBlackListed = false` - allow to drop BLACKLISTED tag items
 - `bool SalvageTurrets = true` - add turrets to salvage
 - `bool UpgradeSalvage = false` - salavaged items have chance to upgrade to "+" variants(not span into player lost mech items if they go to salvage)
+- `bool RewardRareItemByValue = false` - reward popups (events, flashpoints, lootboxes) show the most valuable item (by C-bill cost) as the rare item at the top instead of the first generatd one. The other items are listed as `RewardSortOrder` says. For mech parts it will be the mech's part cost (SimGameMechPartCost).
+- `RewardSortOrder = Rarity` - requires `RewardRareItemByValue`, how the other reward items are listed:
+  - `Rarity` (legacy) - the game's default order: rarity, then c-bill cost 
+  - `Value` - by c-bill cost, highest first 
+  - `CategoryThenValue` - the same sorting the salvage and MechLab lists use: units first, then items by the CustomComponents InventorySorter key. C-bill cost decides within each group.
 - `float SalvageTurretsComponentChance = 0.33f` - in vanila game turret components dont broke, and usually turret have a lot of weapon. so this modifier give less salvage for balance
 - `NoSalvageMechTag` - Units with this tag will not be added to salvage pool, nor will their components.
 - `OnlySalvageComponentsTag` - Units with this tag will not be added to salvage pool. Their components will however not be removed from the pool.
