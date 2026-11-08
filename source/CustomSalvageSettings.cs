@@ -40,6 +40,13 @@ public enum BrokeType
     Normalized
 }
 
+public enum RewardSortType
+{
+    Rarity,
+    Value,
+    CategoryThenValue
+}
+
 public class Strings
 {
     public string FrankenPenaltyCaption = "FrankenMech";
@@ -184,12 +191,14 @@ public class Settings
     public float SquadAdditionalPartChance = 0f;
     public bool VehicleDisassembleComponents = false;
     public bool VehicleDisassembleEditableComponentsOnly = true;
+    public string[] VehicleDisassembleEditableComponentsOnlyOverrideTags = {};
     public bool VehicleAlwaysDisassembled = false;
     public bool VehicleAddSanitize = true;
 
     public bool AllowDropBlackListed = false;
     public string NoSalvageMechTag = "NOSALVAGE";
     public string NoSalvageVehicleTag = "NOSALVAGE";
+    public string OnlySalvageComponentsTag = "NOUNITSALVAGE";
     public string UniqieUnitTag = "UNIQUE";
 
 
@@ -215,6 +224,8 @@ public class Settings
     public bool SalvageTurrets = true;
     public float SalvageTurretsComponentChance = 0.33f;
     public bool UpgradeSalvage = false;
+    public bool RewardRareItemByValue = false;
+    public RewardSortType RewardSortOrder = RewardSortType.Rarity;
 
     public colordef[] BGColors =
     {
