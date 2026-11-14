@@ -57,11 +57,36 @@ public class ContractHelper
         }
     }
 
-    private MechComponentDef CheckDefaults(MechComponentDef def)
+    private MechComponentDef CheckDefaults(MechComponentDef def, bool rollChanceForSalvage)
     {
+        SalvageChanceCustom salvageChance = null;
+        if (rollChanceForSalvage)
+        {
+            def.Is(out salvageChance);
+        }
+
         if (!def.CCFlags().NoSalvage)
         {
-            return def;
+            if (salvageChance == null || RollSalvageChance(def, salvageChance))
+            {
+                return def;
+            }
+
+            if (!salvageChance.DropLootableDefault)
+            {
+                return null;
+            }
+        }
+        else if (salvageChance != null)
+        {
+            if (!salvageChance.DropLootableDefault)
+            {
+                Log.Main.Warning?.Log($"{def.Description.Id}: illegal combination of no_salvage and SalvageChance with DropLootableDefault false, SalvageChance ignored");
+            }
+            else if (!RollSalvageChance(def, salvageChance))
+            {
+                return null;
+            }
         }
 
         if (!def.Is<LootableDefault>(out var lootable))
@@ -81,6 +106,14 @@ public class ContractHelper
         }
         return lootableDef;
     }
+
+    private bool RollSalvageChance(MechComponentDef def, SalvageChanceCustom salvageChance)
+    {
+        float roll = Contract.BattleTechGame.Simulation.NetworkRandom.Float();
+        bool success = roll < salvageChance.Chance;
+        Log.Main.Debug?.Log($"--- {def.Description.Id} salvage chance roll {roll:0.000} vs {salvageChance.Chance:0.00}: {(success ? "passed" : "failed")}");
+        return success;
+    }    
 
     public static bool isSalvagable(MechComponentDef def)
     {
@@ -102,7 +135,7 @@ public class ContractHelper
                 return;
             }
 
-            def = CheckDefaults(def);
+            def = CheckDefaults(def, false);
             if (def == null)
             {
                 return;
@@ -135,7 +168,7 @@ public class ContractHelper
 
             var sc = Contract.BattleTechGame.Simulation.Constants;
 
-            var replace = CheckDefaults(def);
+            var replace = CheckDefaults(def, true);
 
             if (replace == null)
             {

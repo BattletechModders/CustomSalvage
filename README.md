@@ -229,6 +229,19 @@ if BlockAssembly is false and player have unit with this chassis it will try to 
 	
 BlockAssembly as true blocks assembly from parts or readying of fully stored mech. It automatically splits any full salvage mech, event results or lootback rewards to mech parts instead.
 
+## SalvageChance
+```
+    "SalvageChance": {
+      "Chance": 0.5,
+      "DropLootableDefault": false
+    }
+```
+
+Chance (0-1) that a component is salvaged from a defeated enemy unit. Rolled each time the component is added to the potential salvage.
+- If the roll fails nothing drops.
+- `DropLootableDefault` - if `true` a failed roll drops the component's `LootableDefault` instead (if it has one), like `no_salvage` does. `false` by default.
+- if the component has the flag `no_salvage` and `DropLootableDefault` is set to `true`, the roll is the chance that the `LootableDefault` drops
+
 ## Assemble without armor
 If flag `RemoveArmorOnAssembly` is set to true, any mechs assembled from parts or readied from storage will have no armor.
 
